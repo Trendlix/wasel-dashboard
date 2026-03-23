@@ -166,3 +166,15 @@ Then update values as required by your API/backend setup.
 ## License
 
 Internal project. Add your organization license policy here.
+
+## Deploy on Vercel
+
+1. Push repository to GitHub.
+2. Import project in Vercel.
+3. Confirm:
+   - Framework Preset: `Vite`
+   - Build Command: `npm run build`
+   - Output Directory: `dist`
+4. Deploy.
+
+`vercel.json` already includes SPA fallback so direct links like `/users`, `/trips`, `/settings` work.
