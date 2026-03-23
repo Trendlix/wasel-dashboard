@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+:root {
+  --main-primary: #004aad;
+  --main-secondary: #ffb703;
+  --main-remove: #ff4c4c;
+  --main-red: #d62828;
+  --main-white: #fff;
+  --main-black: #000;
+  --main-gunmetalBlue: #393E48;
+  --main-vividMint: #14C38E;
+  --main-ladyBlue: #8158DF;
+  --main-mustardGold: #F4AE00;
+  --main-titaniumWhite: #f3f4f6;
+  --main-sharkGray: #6A7282;
+  --main-whiteMarble: #E5E7EB;
+  --main-luxuryWhite: #F9FAFB;
+  --main-mirage: #101828;
+  --main-silverSteel: #99A1AF;
+  --main-hydrocarbon: #4A5565;
+  --main-trueBlack: #0A0A0A;
+}
+
+@theme inline {
+  --color-main-primary: var(--main-primary);
+  --color-main-secondary: var(--main-secondary);
+  --color-main-remove: var(--main-remove);
+  --color-main-red: var(--main-red);
+  --color-main-white: var(--main-white);
+  --color-main-black: var(--main-black);
+  --color-main-gunmetalBlue: var(--main-gunmetalBlue);
+  --color-main-vividMint: var(--main-vividMint);
+  --color-main-ladyBlue: var(--main-ladyBlue);
+  --color-main-mustardGold: var(--main-mustardGold);
+  --color-main-titaniumWhite: var(--main-titaniumWhite);
+  --color-main-sharkGray: var(--main-sharkGray);
+  --color-main-whiteMarble: var(--main-whiteMarble);
+  --color-main-mirage: var(--main-mirage);
+  --color-main-luxuryWhite: var(--main-luxuryWhite);
+  --color-main-silverSteel: var(--main-silverSteel);
+  --color-main-hydrocarbon: var(--main-hydrocarbon);
+  --color-main-trueBlack: var(--main-trueBlack);
+}
+
+/* common */
+.common-rounded {
+  border-radius: 10px !important;
+}

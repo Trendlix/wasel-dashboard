@@ -1,78 +1,168 @@
-# React + TypeScript + Vite
+# Wasel Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Admin dashboard for managing the Wasel logistics platform (users, drivers, trips, storage owners, finance, verification, notifications, analytics, and settings).
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Overview
 
-## React Compiler
+Wasel Dashboard is a React + TypeScript admin panel focused on operational workflows:
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+- User management
+- Driver management
+- Storage owner management
+- Trip monitoring
+- Wallet & finance tracking
+- Verification center
+- Notifications center
+- Analytics (with Recharts)
+- Platform settings
 
-Note: This will impact Vite dev & build performances.
+The UI follows a reusable component architecture with shared table/search/pagination patterns.
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Tech Stack
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- **React**
+- **TypeScript**
+- **Vite**
+- **Tailwind CSS**
+- **shadcn/ui**
+- **Recharts** (charts)
+- **Framer Motion** (page transitions)
+- **Lucide React** (icons)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+---
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Project Structure
+
+```text
+src/
+  pages/
+    analytics/
+    drivers/
+    notifications/
+    settings/
+    storage-owners/
+    trips/
+    users/
+    verification/
+    wallet-and-finance/
+  shared/
+    components/
+      common/
+      pages/
+    core/
+      pages/
+    hooks/
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Getting Started
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 1) Install dependencies
+
+```bash
+npm install
 ```
-# wasel-dashboard
-# wasel-dashboard
-# wasel-dashboard
+
+### 2) Run development server
+
+```bash
+npm run dev
+```
+
+### 3) Build for production
+
+```bash
+npm run build
+```
+
+### 4) Preview production build
+
+```bash
+npm run preview
+```
+
+---
+
+## Available Scripts
+
+Depending on your `package.json`, commonly used scripts are:
+
+- `npm run dev` — start local development server
+- `npm run build` — production build
+- `npm run preview` — preview built app
+- `npm run lint` — run lint checks (if configured)
+
+---
+
+## Core UI Patterns
+
+### Tables
+All major modules use a consistent table system:
+- reusable row styles
+- status badges
+- shared pagination
+- searchable datasets
+
+### Search
+Search is implemented with reusable behavior (`useTableSearch`) and supports module-specific keys.
+
+### Pagination
+Tables use shared pagination controls and reset to page 1 when search query changes.
+
+### Animation
+Page content is wrapped with `PageTransition` and rendered through animated outlet transitions.
+
+---
+
+## Main Pages
+
+- `/users`
+- `/drivers`
+- `/storage-owners`
+- `/trips`
+- `/wallet-and-finance`
+- `/verification`
+- `/analytics`
+- `/notifications`
+- `/settings`
+
+---
+
+## Design Notes
+
+- Consistent card layout and spacing
+- Unified typography scale across tables/forms
+- Status color system for badges and indicators
+- Form and settings sections built from reusable field/header/input components
+
+---
+
+## Environment
+
+If environment variables are needed, create:
+
+```bash
+cp .env.example .env
+```
+
+Then update values as required by your API/backend setup.
+
+---
+
+## Contributing
+
+1. Create a feature branch
+2. Keep components reusable
+3. Reuse existing shared styles/components before adding new ones
+4. Run lint/build before opening PR
+
+---
+
+## License
+
+Internal project. Add your organization license policy here.
