@@ -24,7 +24,7 @@ const AnalyticsCard: React.FC<IAnalyticsCard> = ({ title, value, description, ic
             </div>
         </div>
         {description &&
-            <div>{description}</div>
+            <div className={clsx(notColorfull && "text-main-sharkGray")}>{description}</div>
         }
     </div>)
 }

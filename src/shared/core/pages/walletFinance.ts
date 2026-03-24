@@ -24,3 +24,18 @@ export const transactionStatusStyles: Record<TTransactionStatus, { bg: string; t
     pending: { bg: "bg-main-mustardGold/10", text: "text-main-mustardGold", label: "Pending" },
     approved: { bg: "bg-main-primary/10", text: "text-main-primary", label: "Approved" },
 };
+
+// ─── Pending withdrawals ──────────────────────────────────────────────────────
+
+export interface IWithdrawalRequest {
+    id: number;
+    name: string;
+    requestedDate: string;
+    amount: number;
+}
+
+export const pendingWithdrawals: IWithdrawalRequest[] = [
+    { id: 1, name: "Ahmed Hassan",  requestedDate: "Mar 18, 2024", amount: 5200 },
+    { id: 2, name: "Sami Abdullah", requestedDate: "Mar 18, 2024", amount: 2450 },
+    { id: 3, name: "Tariq Khalid",  requestedDate: "Mar 17, 2024", amount: 3100 },
+];

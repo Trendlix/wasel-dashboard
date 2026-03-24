@@ -1,4 +1,4 @@
-import { Bell, ChartColumn, CircleCheckBig, LayoutDashboard, MapPin, Settings, Truck, Users, Wallet, Warehouse, type LucideIcon } from "lucide-react";
+import { Bell, ChartColumn, CircleCheckBig, Container, LayoutDashboard, MapPin, Percent, PenTool, Settings, Shield, Tag, Truck, Users, Wallet, Warehouse, type LucideIcon } from "lucide-react";
 
 export interface ISidebarItem {
     id: number;
@@ -67,5 +67,35 @@ export const sidebarItems: ISidebarItem[] = [
         name: "settings",
         icon: Settings,
         to: "/settings"
+    },
+    {
+        id: 11,
+        name: "blogs & seo",
+        icon: PenTool,
+        to: "/blogs"
+    },
+    {
+        id: 12,
+        name: "roles & permissions",
+        icon: Shield,
+        to: "/roles-and-permissions"
+    },
+    {
+        id: 13,
+        name: "commission & pricing",
+        icon: Percent,
+        to: "/commission-and-pricing"
+    },
+    {
+        id: 14,
+        name: "voucher & promo",
+        icon: Tag,
+        to: "/voucher-and-promo"
+    },
+    {
+        id: 15,
+        name: "trucks & storages",
+        icon: Container,
+        to: "/trucks-storages-data"
     }
 ]

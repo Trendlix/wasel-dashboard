@@ -1,180 +1,84 @@
 # Wasel Dashboard
 
-Admin dashboard for managing the Wasel logistics platform (users, drivers, trips, storage owners, finance, verification, notifications, analytics, and settings).
-
----
-
-## Overview
-
-Wasel Dashboard is a React + TypeScript admin panel focused on operational workflows:
-
-- User management
-- Driver management
-- Storage owner management
-- Trip monitoring
-- Wallet & finance tracking
-- Verification center
-- Notifications center
-- Analytics (with Recharts)
-- Platform settings
-
-The UI follows a reusable component architecture with shared table/search/pagination patterns.
-
----
+Admin management panel for the Wasel Fleet platform — managing users, drivers, trips, storage owners, finance, verification, blogs, analytics, and settings.
 
 ## Tech Stack
 
-- **React**
-- **TypeScript**
-- **Vite**
-- **Tailwind CSS**
-- **shadcn/ui**
-- **Recharts** (charts)
-- **Framer Motion** (page transitions)
-- **Lucide React** (icons)
-
----
-
-## Project Structure
-
-```text
-src/
-  pages/
-    analytics/
-    drivers/
-    notifications/
-    settings/
-    storage-owners/
-    trips/
-    users/
-    verification/
-    wallet-and-finance/
-  shared/
-    components/
-      common/
-      pages/
-    core/
-      pages/
-    hooks/
-```
-
----
+| Technology | Version | Purpose |
+|---|---|---|
+| React | 19.2.4 | UI framework |
+| TypeScript | 5.9.3 | Type safety |
+| Vite | 8.0.1 | Build tool & dev server |
+| React Router | 7.13.1 | Client-side routing |
+| TailwindCSS | 4.2.2 | Utility-first styling |
+| React Hook Form | 7.72.0 | Form state management |
+| Zod | 4.3.6 | Schema validation |
+| Framer Motion | 12.38.0 | Page transition animations |
+| Recharts | 3.8.0 | Data visualization |
+| TipTap | 3.20.4 | Rich text editing |
+| Monaco Editor | 0.55.1 | Code editing |
+| Lucide React | 0.577.0 | Icon library |
 
 ## Getting Started
 
-### 1) Install dependencies
-
 ```bash
 npm install
+npm run dev       # development server
+npm run build     # production build
+npm run preview   # preview production build
 ```
 
-### 2) Run development server
+## Documentation
 
-```bash
-npm run dev
+- [docs/PAGE_ANATOMY.md](docs/PAGE_ANATOMY.md) — Deep dive: how every page is built (styles, icons, data layer, table & form patterns)
+- [src/pages/README.md](src/pages/README.md) — Pages structure, routing, and page-level patterns
+- [src/shared/README.md](src/shared/README.md) — Shared components, hooks, data layer, and conventions
+
+## Project Structure
+
 ```
-
-### 3) Build for production
-
-```bash
-npm run build
+src/
+├── app/
+│   └── router.tsx              # createBrowserRouter — all route definitions
+├── components/
+│   └── ui/                     # Shadcn base UI components (Button, Input, Badge, etc.)
+├── pages/                      # Route-level page components (one folder per feature)
+│   ├── dashboard/
+│   ├── users/
+│   ├── drivers/
+│   ├── storage-owners/
+│   ├── verification/
+│   ├── trips/
+│   ├── wallet-and-finance/
+│   ├── analytics/
+│   ├── notifications/
+│   ├── blogs/                  # Has nested child routes (add / edit / drafts)
+│   ├── roles-and-permissions/
+│   ├── settings/
+│   └── not-found/
+├── shared/
+│   ├── components/
+│   │   ├── common/             # App-wide reusable components (PageHeader, Searchbar, etc.)
+│   │   ├── layout/             # Layout and Sidebar
+│   │   └── pages/              # Feature-specific sub-components (tables, forms, analytics)
+│   ├── core/
+│   │   ├── layout/
+│   │   │   └── sidebar.ts      # Sidebar nav items config
+│   │   └── pages/              # Per-feature TypeScript interfaces, mock data, analytics config
+│   ├── data/                   # Static/mock datasets
+│   └── hooks/
+│       └── useTableSearch.ts   # Generic table search & filter hook
+├── data/                       # Additional static data
+├── lib/
+│   └── utils.ts
+├── App.tsx                     # Root component — wraps <Layout />
+└── main.tsx                    # ReactDOM entry point
 ```
-
-### 4) Preview production build
-
-```bash
-npm run preview
-```
-
----
-
-## Available Scripts
-
-Depending on your `package.json`, commonly used scripts are:
-
-- `npm run dev` — start local development server
-- `npm run build` — production build
-- `npm run preview` — preview built app
-- `npm run lint` — run lint checks (if configured)
-
----
-
-## Core UI Patterns
-
-### Tables
-All major modules use a consistent table system:
-- reusable row styles
-- status badges
-- shared pagination
-- searchable datasets
-
-### Search
-Search is implemented with reusable behavior (`useTableSearch`) and supports module-specific keys.
-
-### Pagination
-Tables use shared pagination controls and reset to page 1 when search query changes.
-
-### Animation
-Page content is wrapped with `PageTransition` and rendered through animated outlet transitions.
-
----
-
-## Main Pages
-
-- `/users`
-- `/drivers`
-- `/storage-owners`
-- `/trips`
-- `/wallet-and-finance`
-- `/verification`
-- `/analytics`
-- `/notifications`
-- `/settings`
-
----
-
-## Design Notes
-
-- Consistent card layout and spacing
-- Unified typography scale across tables/forms
-- Status color system for badges and indicators
-- Form and settings sections built from reusable field/header/input components
-
----
-
-## Environment
-
-If environment variables are needed, create:
-
-```bash
-cp .env.example .env
-```
-
-Then update values as required by your API/backend setup.
-
----
-
-## Contributing
-
-1. Create a feature branch
-2. Keep components reusable
-3. Reuse existing shared styles/components before adding new ones
-4. Run lint/build before opening PR
-
----
-
-## License
-
-Internal project. Add your organization license policy here.
 
 ## Deploy on Vercel
 
 1. Push repository to GitHub.
-2. Import project in Vercel.
-3. Confirm:
-   - Framework Preset: `Vite`
-   - Build Command: `npm run build`
-   - Output Directory: `dist`
-4. Deploy.
+2. Import project in Vercel — Framework Preset: `Vite`, Output Directory: `dist`.
+3. Deploy.
 
-`vercel.json` already includes SPA fallback so direct links like `/users`, `/trips`, `/settings` work.
+`vercel.json` includes a SPA fallback so direct URLs like `/users`, `/trips`, `/settings` work correctly.
