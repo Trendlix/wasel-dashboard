@@ -6,7 +6,7 @@ import VerificationList from "@/shared/components/pages/verification/Verificatio
 const VerificationPage = () => {
     return (
         <PageTransition>
-            <PageHeader title="Verification Center" description="Review and approve driver and storage owner verification" />
+            <PageHeader title="Verification Center" description="Review and approve driver and storage owner verifications" />
             <Analytics />
             <VerificationList />
         </PageTransition>

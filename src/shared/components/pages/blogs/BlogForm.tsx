@@ -13,6 +13,7 @@ import * as z from "zod";
 import {
     CommonInput,
     CommonFileInput,
+    CreatableTagCombobox,
     TagsInput,
     RichEditorField,
 } from "@/shared/components/common/FormItems";
@@ -89,6 +90,18 @@ function BlogFormItem({ item, field }: { item: IGridItem; field: any }) {
             />
         );
     }
+    if (item.name === "category") {
+        return (
+            <CreatableTagCombobox
+                label={item.label}
+                value={typeof field.value === "string" ? field.value : ""}
+                onChange={field.onChange}
+                options={item.options ?? []}
+                placeholder="Select or type to add…"
+            />
+        );
+    }
+
     return (
         <CommonInput
             label={item.label}

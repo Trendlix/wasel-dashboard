@@ -3,19 +3,39 @@ import { Send, Bell } from "lucide-react";
 import clsx from "clsx";
 import AudienceSelector from "./AudienceSelector";
 import type { TNotificationAudience } from "@/shared/core/pages/notifications";
+import axiosNormalApiClient from "@/shared/utils/axios";
+import useDashboardNotificationsStore from "@/shared/hooks/store/useDashboardNotificationsStore";
 
 const NotificationForm = () => {
     const [audience, setAudience] = useState<TNotificationAudience>("all");
     const [title, setTitle] = useState("");
     const [message, setMessage] = useState("");
+    const [submitting, setSubmitting] = useState(false);
+    const { fetchNotificationsCount, fetchNotifications } = useDashboardNotificationsStore();
 
     const isValid = title.trim().length > 0 && message.trim().length > 0;
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!isValid) return;
-        // TODO: wire to API
-        console.log({ audience, title, message });
+        if (!isValid || submitting) return;
+
+        setSubmitting(true);
+        try {
+            await axiosNormalApiClient.post(
+                "/dashboard/notifications/campaign",
+                {
+                    audience,
+                    title: title.trim(),
+                    message: message.trim(),
+                },
+                { meta: { showToast: true, toastType: "success" } },
+            );
+            setTitle("");
+            setMessage("");
+            await Promise.all([fetchNotificationsCount(), fetchNotifications()]);
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
@@ -61,16 +81,16 @@ const NotificationForm = () => {
                 {/* Submit */}
                 <button
                     type="submit"
-                    disabled={!isValid}
+                    disabled={!isValid || submitting}
                     className={clsx(
                         "h-11 w-full common-rounded flex items-center justify-center gap-2 text-sm font-semibold transition-all",
-                        isValid
+                        isValid && !submitting
                             ? "bg-main-primary text-main-white hover:bg-main-primary/90"
                             : "bg-main-silverSteel/30 text-main-silverSteel cursor-not-allowed"
                     )}
                 >
                     <Send size={16} />
-                    Send Notification
+                    {submitting ? "Sending..." : "Send Notification"}
                 </button>
             </form>
         </div>

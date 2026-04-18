@@ -31,7 +31,7 @@ const Item = ({ item }: { item: IPendingVerification }) => {
         </div>
         <div className="gap-y-1 flex items-end justify-end flex-col">
             <p className="text-[12px] leading-[16px] text-main-silverSteel">{item.createdAt.toLocaleString()}</p>
-            <Link to="/dashboard/verifications" className="text-main-primary font-medium text-sm leading-[20px] capitalize ">Review</Link>
+            <Link to="/verification" className="text-main-primary font-medium text-sm leading-[20px] capitalize ">Review</Link>
         </div>
     </div>)
 }

@@ -1,5 +1,13 @@
-import { commissionAnalytics } from "@/shared/core/pages/commissionAndPricing";
-import AnalyticsCard from "../../common/AnalyticsCard";
+import { useEffect } from "react";
+import { DollarSign, Percent } from "lucide-react";
+import AnalyticsCard, { AnalyticsCardSkeleton } from "../../common/AnalyticsCard";
+import useCommissionStore from "@/shared/hooks/store/useCommissionStore";
+
+const categoryLabels: Record<string, string> = {
+    trip: "Trip Commission",
+    storage: "Storage Commission",
+    advertising: "Ad Commission",
+};
 
 const iconClasses = [
     "bg-main-primary/10! text-main-primary!",
@@ -7,17 +15,43 @@ const iconClasses = [
     "bg-main-mustardGold/10! text-main-mustardGold!",
 ];
 
-const CommissionAnalytics = () => (
-    <div className="flex items-stretch *:flex-1 gap-6">
-        {commissionAnalytics.map((card) => (
-            <AnalyticsCard
-                key={card.id}
-                {...card}
-                iconClass={iconClasses[card.id - 1]}
-                notColorfull={true}
-            />
-        ))}
-    </div>
-);
+const CommissionAnalytics = () => {
+    const { analytics, analyticsLoading, fetchAnalytics } = useCommissionStore();
+
+    useEffect(() => {
+        fetchAnalytics();
+    }, [fetchAnalytics]);
+
+    if (analyticsLoading) {
+        return (
+            <div className="flex items-stretch *:flex-1 gap-6">
+                {Array.from({ length: 3 }).map((_, i) => (
+                    <AnalyticsCardSkeleton key={i} notColorfull={true} />
+                ))}
+            </div>
+        );
+    }
+
+    const cards = analytics.map((item, index) => ({
+        id: index + 1,
+        title: categoryLabels[item.category] ?? item.category,
+        value: item.rate,
+        icon: item.type === "fixed" ? DollarSign : Percent,
+        classname: "bg-main-white border border-main-whiteMarble",
+    }));
+
+    return (
+        <div className="flex items-stretch *:flex-1 gap-6">
+            {cards.map((card) => (
+                <AnalyticsCard
+                    key={card.id}
+                    {...card}
+                    iconClass={iconClasses[card.id - 1]}
+                    notColorfull={true}
+                />
+            ))}
+        </div>
+    );
+};
 
 export default CommissionAnalytics;

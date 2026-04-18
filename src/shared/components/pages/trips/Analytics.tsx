@@ -1,29 +1,55 @@
-import clsx from "clsx";
-import { MapPin } from "lucide-react";
+import { useEffect } from "react";
+import AnalyticsCard, { AnalyticsCardSkeleton } from "../../common/AnalyticsCard";
+import useTripsStore from "@/shared/hooks/store/useTripsStore";
+import { tripsAnalyticsConfig } from "@/shared/core/pages/trips";
 
-const cards = [
-    { id: 1, label: "Total Trips", value: "9,120", iconBg: "bg-main-primary/10", iconColor: "text-main-primary" },
-    { id: 2, label: "Active Trips", value: "156", iconBg: "bg-main-vividMint/10", iconColor: "text-main-vividMint" },
-    { id: 3, label: "Completed Today", value: "87", iconBg: "bg-main-ladyBlue/10", iconColor: "text-main-ladyBlue" },
-    { id: 4, label: "Cancelled", value: "12", iconBg: "bg-main-mustardGold/10", iconColor: "text-main-mustardGold" },
+const iconClasses = [
+  "bg-main-primary/10! text-main-primary!",
+  "bg-main-ladyBlue/10! text-main-ladyBlue!",
+  "bg-main-vividMint/10! text-main-vividMint!",
+  "bg-main-remove/10! text-main-remove!",
 ];
 
+const toSafeNumber = (value: unknown, fallback = 0) =>
+  typeof value === "number" && Number.isFinite(value) ? value : fallback;
+
 const Analytics = () => {
+  const { analytics, analyticsLoading, fetchTripsAnalytics } = useTripsStore();
+
+  useEffect(() => {
+    fetchTripsAnalytics();
+  }, []);
+
+  const values = [
+    String(toSafeNumber(analytics?.total?.totalTrips)),
+    String(toSafeNumber(analytics?.total?.activeTrips)),
+    String(toSafeNumber(analytics?.total?.completedTrips)),
+    String(toSafeNumber(analytics?.total?.canclledTrips)),
+  ];
+
+  if (analyticsLoading && !analytics) {
     return (
-        <div className="grid grid-cols-4 gap-4">
-            {cards.map((card) => (
-                <div key={card.id} className="bg-main-white border border-main-whiteMarble common-rounded p-6 flex items-center justify-between">
-                    <div className="flex flex-col gap-1">
-                        <span className="text-main-sharkGray text-sm">{card.label}</span>
-                        <span className="text-main-mirage text-4xl font-bold">{card.value}</span>
-                    </div>
-                    <div className={clsx("w-11 h-11 rounded-xl flex items-center justify-center", card.iconBg, card.iconColor)}>
-                        <MapPin size={20} />
-                    </div>
-                </div>
-            ))}
-        </div>
+      <div className="grid grid-cols-4 gap-4">
+        {tripsAnalyticsConfig.map((card) => (
+          <AnalyticsCardSkeleton key={card.id} notColorfull />
+        ))}
+      </div>
     );
+  }
+
+  return (
+    <div className="grid grid-cols-4 gap-4">
+      {tripsAnalyticsConfig.map((card, i) => (
+        <AnalyticsCard
+          key={card.id}
+          {...card}
+          value={values[i]}
+          iconClass={iconClasses[i]}
+          notColorfull
+        />
+      ))}
+    </div>
+  );
 };
 
 export default Analytics;

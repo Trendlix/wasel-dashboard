@@ -30,13 +30,19 @@ export const TwoFABadge = ({ enabled }: { enabled: boolean }) => (
 
 // ─── Status badge ─────────────────────────────────────────────────────────────
 
-export const StatusBadge = ({ status }: { status: IAdminUser["status"] }) => (
+export const StatusBadge = ({
+    status,
+    title,
+}: {
+    status: IAdminUser["status"] | "blocked";
+    title?: string;
+}) => (
     <span className={clsx(
         "px-3 py-1 rounded-full text-xs font-medium",
         status === "active"
             ? "bg-main-vividMint/10 text-main-vividMint"
             : "bg-main-sharkGray/10 text-main-sharkGray"
     )}>
-        {status === "active" ? "Active" : "Inactive"}
+        {title ? title : status === "active" ? "Active" : "Blocked"}
     </span>
 );

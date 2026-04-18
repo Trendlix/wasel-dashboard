@@ -58,24 +58,24 @@ export default function EditBlogPage() {
                         key={blog.id}
                         type="button"
                         onClick={() => handleCardClick(blog)}
-                        className="overflow-hidden rounded-[12px] bg-white text-left shadow-sm transition hover:shadow-md"
+                        className="overflow-hidden rounded-[26px] border border-main-whiteMarble bg-white text-left shadow-[0_14px_40px_rgba(17,24,39,0.08)] transition hover:shadow-[0_18px_46px_rgba(17,24,39,0.12)]"
                     >
                         <img
                             src={blog.coverImage}
                             alt={blog.title}
-                            className="h-[180px] w-full object-cover"
+                            className="aspect-[16/9] w-full object-cover"
                         />
 
-                        <div className="p-4">
-                            <div className="mb-2 text-xs font-semibold text-main-primary">
+                        <div className="space-y-3 px-6 py-5">
+                            <div className="inline-flex rounded-full bg-main-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-main-primary">
                                 {blog.category}
                             </div>
 
-                            <h3 className="mb-2 text-base font-bold text-main-mirage">
+                            <h3 className="line-clamp-2 text-[30px] font-bold leading-[1.15] text-main-mirage">
                                 {blog.title}
                             </h3>
 
-                            <p className="text-sm text-main-sharkGray">
+                            <p className="line-clamp-2 text-[17px] leading-[1.5] text-main-sharkGray">
                                 {blog.excerpt}
                             </p>
                         </div>

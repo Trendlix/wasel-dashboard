@@ -3,13 +3,16 @@
 :root {
   --main-primary: #004aad;
   --main-secondary: #ffb703;
+  --main-voucherDeepPurple: #4C1B92;
   --main-remove: #ff4c4c;
   --main-red: #d62828;
   --main-white: #fff;
   --main-black: #000;
   --main-gunmetalBlue: #393E48;
   --main-vividMint: #14C38E;
+  --main-vividSubmarine: #009E96;
   --main-ladyBlue: #8158DF;
+  --main-primaryPurple: #813EDE;
   --main-mustardGold: #F4AE00;
   --main-titaniumWhite: #f3f4f6;
   --main-sharkGray: #6A7282;
@@ -19,18 +22,22 @@
   --main-silverSteel: #99A1AF;
   --main-hydrocarbon: #4A5565;
   --main-trueBlack: #0A0A0A;
+  --main-sharkGray: #6A7282;
 }
 
 @theme inline {
   --color-main-primary: var(--main-primary);
   --color-main-secondary: var(--main-secondary);
+  --color-main-voucherDeepPurple: var(--main-voucherDeepPurple);
   --color-main-remove: var(--main-remove);
   --color-main-red: var(--main-red);
   --color-main-white: var(--main-white);
   --color-main-black: var(--main-black);
   --color-main-gunmetalBlue: var(--main-gunmetalBlue);
   --color-main-vividMint: var(--main-vividMint);
+  --color-main-vividSubmarine: var(--main-vividSubmarine);
   --color-main-ladyBlue: var(--main-ladyBlue);
+  --color-main-primaryPurple: var(--main-primaryPurple);
   --color-main-mustardGold: var(--main-mustardGold);
   --color-main-titaniumWhite: var(--main-titaniumWhite);
   --color-main-sharkGray: var(--main-sharkGray);
@@ -40,9 +47,149 @@
   --color-main-silverSteel: var(--main-silverSteel);
   --color-main-hydrocarbon: var(--main-hydrocarbon);
   --color-main-trueBlack: var(--main-trueBlack);
+  --color-main-sharkGray: var(--main-sharkGray);
 }
 
 /* common */
 .common-rounded {
   border-radius: 10px !important;
+}
+
+/* ─── reactjs-tiptap-editor theme override ────────────────────────────────── */
+/* Map --richtext-* variables to the wasel design system (HSL format)         */
+:root {
+  --richtext-background:           0 0% 100%;          /* white — editor content bg */
+  --richtext-foreground:           217 43% 11%;        /* #101828 mirage */
+  --richtext-muted:                220 14% 96%;        /* #f3f4f6 titaniumWhite */
+  --richtext-muted-foreground:     220 10% 46%;        /* #6A7282 sharkGray */
+  --richtext-popover:              0 0% 100%;          /* white */
+  --richtext-popover-foreground:   217 43% 11%;        /* #101828 mirage */
+  --richtext-card:                 210 20% 98%;        /* #F9FAFB luxuryWhite */
+  --richtext-card-foreground:      217 43% 11%;        /* #101828 mirage */
+  --richtext-border:               220 13% 91%;        /* #E5E7EB whiteMarble */
+  --richtext-input:                220 13% 91%;        /* #E5E7EB whiteMarble */
+  --richtext-primary:              214 100% 34%;       /* #004aad main-primary */
+  --richtext-primary-foreground:   0 0% 100%;          /* white */
+  --richtext-secondary:            220 14% 96%;        /* #f3f4f6 titaniumWhite */
+  --richtext-secondary-foreground: 215 16% 34%;        /* #4A5565 hydrocarbon */
+  --richtext-accent:               220 14% 96%;        /* #f3f4f6 titaniumWhite */
+  --richtext-accent-foreground:    215 16% 34%;        /* #4A5565 hydrocarbon */
+  --richtext-destructive:          0 100% 65%;         /* #ff4c4c main-remove */
+  --richtext-destructive-foreground: 0 0% 100%;        /* white */
+  --richtext-radius:               10px;               /* common-rounded */
+}
+
+/* ─── wasel-richtext wrapper — scoped structural overrides ──────────────────── */
+
+/* Outer container: solid border, wasel radius, no extra shadows             */
+.wasel-richtext > div {
+  border: 1px solid #E5E7EB !important;
+  border-radius: 10px !important;
+  overflow: hidden;
+  box-shadow: none !important;
+  font-family: inherit !important;
+}
+
+/* Toolbar: luxuryWhite bg, bottom border separator                          */
+.wasel-richtext [class*="richtext-bg-background"]:first-child,
+.wasel-richtext .richtext-flex.richtext-flex-wrap {
+  background-color: #F9FAFB !important;
+  border-bottom: 1px solid #E5E7EB !important;
+}
+
+/* Toolbar buttons: match wasel hydrocarbon text, proper hover               */
+.wasel-richtext button[class*="richtext"] {
+  color: #4A5565;
+  border-radius: 6px !important;
+  transition: background-color 0.15s, color 0.15s;
+}
+.wasel-richtext button[class*="richtext"]:hover {
+  background-color: #E5E7EB !important;
+  color: #101828 !important;
+}
+.wasel-richtext button[class*="richtext"][data-state="on"],
+.wasel-richtext button[class*="richtext"][aria-pressed="true"] {
+  background-color: #004aad1a !important;
+  color: #004aad !important;
+}
+
+/* Editor content area: white bg, proper padding, wasel font size            */
+.wasel-richtext .ProseMirror {
+  min-height: 270px;
+  padding: 14px 16px !important;
+  font-size: 0.875rem !important;
+  line-height: 1.6 !important;
+  color: #101828 !important;
+  background: #fff !important;
+  font-family: inherit !important;
+  outline: none !important;
+}
+.wasel-richtext .ProseMirror p.is-editor-empty::before {
+  color: #99A1AF !important;
+  font-style: normal !important;
+}
+
+/* Dropdowns / popovers: white bg, wasel border, tight radius                */
+.wasel-richtext [role="dialog"],
+.wasel-richtext [role="menu"],
+.wasel-richtext [data-radix-popper-content-wrapper] > div,
+.wasel-richtext .richtext-bg-popover {
+  background-color: #fff !important;
+  border: 1px solid #E5E7EB !important;
+  border-radius: 10px !important;
+  box-shadow: 0 8px 24px rgba(16, 24, 40, 0.08) !important;
+  font-family: inherit !important;
+}
+
+/* Dropdown items hover                                                       */
+.wasel-richtext [role="menuitem"]:hover,
+.wasel-richtext [role="option"]:hover,
+.wasel-richtext [role="option"][aria-selected="true"] {
+  background-color: #f3f4f6 !important;
+  color: #101828 !important;
+}
+
+/* Character count footer                                                     */
+.wasel-richtext [class*="character"] {
+  font-size: 0.7rem !important;
+  color: #99A1AF !important;
+  border-top: 1px solid #E5E7EB !important;
+  padding: 6px 16px !important;
+  background: #F9FAFB !important;
+  letter-spacing: 0.03em;
+}
+
+/* Video / iframe dashed box: replace with solid wasel border                */
+.wasel-richtext [class*="_wrap_"][class*="_5y04w_"],
+.wasel-richtext [class*="_renderWrap_"] {
+  border: 1px solid #E5E7EB !important;
+  border-radius: 10px !important;
+}
+
+/* Separator dividers inside toolbar                                         */
+.wasel-richtext [role="separator"],
+.wasel-richtext .richtext-bg-border {
+  background-color: #E5E7EB !important;
+}
+
+/* Input fields inside modals/popovers                                       */
+.wasel-richtext input[type="text"],
+.wasel-richtext input[type="url"],
+.wasel-richtext input[type="number"] {
+  border: 1px solid #E5E7EB !important;
+  border-radius: 8px !important;
+  background: #fff !important;
+  color: #101828 !important;
+  font-size: 0.875rem !important;
+  font-family: inherit !important;
+  padding: 6px 10px !important;
+}
+.wasel-richtext input:focus {
+  outline: none !important;
+  border-color: #004aad !important;
+  box-shadow: 0 0 0 3px rgba(0, 74, 173, 0.15) !important;
+}
+
+[data-slot="button"]:not([data-size^="icon"]) {
+  min-height: 2.75rem;
 }

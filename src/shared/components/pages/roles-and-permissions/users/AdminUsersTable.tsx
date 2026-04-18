@@ -1,54 +1,86 @@
-import { UserPlus } from "lucide-react";
-import { adminUsers } from "@/shared/core/pages/rolesAndPermissions";
+import { useEffect, useState } from "react";
+import useUserManagementStore, { type AdminUser } from "@/shared/hooks/store/useUserManagementStore";
+import useAuthStore from "@/shared/hooks/store/useAuthStore";
+import NoDataFound from "@/shared/components/common/NoDataFound";
+import SkeletonRow from "./SkeletonRow";
+import TH from "./TH";
 import UserRow from "./UserRow";
+import AdminUsersHeader from "./AdminUsersHeader";
+import InviteModal from "./InviteModal";
+import EditModal from "./EditModal";
+import RemoveModal from "./RemoveModal";
 
-// ─── Table header cell ────────────────────────────────────────────────────────
+const AdminUsersTable = () => {
+    const { fetchMe, userProfile } = useAuthStore();
+    const { users, loading, fetchUsers } = useUserManagementStore();
 
-const TH = ({ children }: { children: React.ReactNode }) => (
-    <th className="text-main-hydrocarbon font-semibold text-sm py-4 px-6 text-left">{children}</th>
-);
+    const [inviteOpen, setInviteOpen] = useState(false);
+    const [editOpen, setEditOpen] = useState(false);
+    const [removeOpen, setRemoveOpen] = useState(false);
+    const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
 
-// ─── Section header ───────────────────────────────────────────────────────────
+    useEffect(() => {
+        fetchMe();
+        fetchUsers();
+    }, []);
 
-const AdminUsersHeader = () => (
-    <div className="flex items-start justify-between gap-4">
-        <div>
-            <h2 className="text-main-mirage font-bold text-xl">Admin Users</h2>
-            <p className="text-main-sharkGray text-sm mt-1">Manage admin panel users and their roles</p>
+    const handleEdit = (user: AdminUser) => {
+        setSelectedUser(user);
+        setEditOpen(true);
+    };
+
+    const handleRemove = (user: AdminUser) => {
+        setSelectedUser(user);
+        setRemoveOpen(true);
+    };
+
+    return (
+        <div className="space-y-6">
+            <AdminUsersHeader onInvite={() => setInviteOpen(true)} />
+
+            <div className="bg-main-white border border-main-whiteMarble common-rounded overflow-hidden">
+                <table className="w-full">
+                    <thead className="bg-main-luxuryWhite border-b border-main-whiteMarble">
+                        <tr>
+                            <TH>User</TH>
+                            <TH>Role</TH>
+                            <TH>Last Login</TH>
+                            <TH>2FA</TH>
+                            <TH>Status</TH>
+                            <TH>Actions</TH>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {loading
+                            ? Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)
+                            : users.map((user) => (
+                                <UserRow
+                                    key={user.id}
+                                    user={user}
+                                    currentUser={userProfile}
+                                    onEdit={handleEdit}
+                                    onRemove={handleRemove}
+                                />
+                            ))}
+                        {!loading && users.length === 0 && (
+                            <tr>
+                                <td colSpan={6}>
+                                    <NoDataFound
+                                        title="No users found"
+                                        description="We couldn't find any users."
+                                    />
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
+
+            <InviteModal open={inviteOpen} onOpenChange={setInviteOpen} />
+            <EditModal open={editOpen} onOpenChange={setEditOpen} user={selectedUser} />
+            <RemoveModal open={removeOpen} onOpenChange={setRemoveOpen} user={selectedUser} />
         </div>
-        <button className="flex items-center gap-2 bg-main-vividMint text-main-white font-bold text-sm px-5 h-10 rounded-lg hover:bg-main-vividMint/90 transition-colors shrink-0">
-            <UserPlus className="w-4 h-4" />
-            Invite User
-        </button>
-    </div>
-);
-
-// ─── Users table ──────────────────────────────────────────────────────────────
-
-const AdminUsersTable = () => (
-    <div className="space-y-6">
-        <AdminUsersHeader />
-
-        <div className="bg-main-white border border-main-whiteMarble common-rounded overflow-hidden">
-            <table className="w-full">
-                <thead>
-                    <tr className="bg-main-luxuryWhite border-b border-main-whiteMarble">
-                        <TH>User</TH>
-                        <TH>Role</TH>
-                        <TH>Last Login</TH>
-                        <TH>2FA Status</TH>
-                        <TH>Status</TH>
-                        <TH>Actions</TH>
-                    </tr>
-                </thead>
-                <tbody>
-                    {adminUsers.map((user) => (
-                        <UserRow key={user.id} user={user} />
-                    ))}
-                </tbody>
-            </table>
-        </div>
-    </div>
-);
+    );
+};
 
 export default AdminUsersTable;

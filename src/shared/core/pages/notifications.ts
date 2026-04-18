@@ -1,18 +1,26 @@
 export type TNotificationAudience = "all" | "users" | "drivers";
+export type TNotificationsFilterTab = "user" | "driver" | "trip";
+export type TNotificationManagementTab = "driver-admin" | "user-admin" | "trip-admin" | "offers-updates";
+export type TNotificationDeliveryStatus = "sent" | "scheduled" | "failed";
 
-export interface IRecentNotification {
-    id: number;
-    title: string;
-    sentTo: string;
-    sentAt: string;
-}
+export const notificationsFilterTabs: { value: TNotificationsFilterTab; label: string }[] = [
+    { value: "user", label: "Users" },
+    { value: "driver", label: "Drivers" },
+    { value: "trip", label: "Trips" },
+];
 
-export const recentNotifications: IRecentNotification[] = [
-    { id: 1, title: "New Feature: Express Delivery", sentTo: "All Users", sentAt: "2 hours ago" },
-    { id: 2, title: "System Maintenance Alert", sentTo: "All Users & Drivers", sentAt: "1 day ago" },
-    { id: 3, title: "Driver Earnings Update", sentTo: "Drivers", sentAt: "2 days ago" },
-    { id: 4, title: "Holiday Bonus Announcement", sentTo: "All Drivers", sentAt: "3 days ago" },
-    { id: 5, title: "App Update Available", sentTo: "All Users", sentAt: "5 days ago" },
+export const notificationManagementTabs: { value: TNotificationManagementTab; label: string }[] = [
+    { value: "driver-admin", label: "Driver" },
+    { value: "user-admin", label: "User" },
+    { value: "trip-admin", label: "Trip" },
+    { value: "offers-updates", label: "Offers & Updates" },
+];
+
+export const notificationDeliveryStatuses: { value: TNotificationDeliveryStatus | "all"; label: string }[] = [
+    { value: "all", label: "All statuses" },
+    { value: "sent", label: "Sent" },
+    { value: "scheduled", label: "Scheduled" },
+    { value: "failed", label: "Failed" },
 ];
 
 export const audienceOptions: { value: TNotificationAudience; label: string; icon: string }[] = [

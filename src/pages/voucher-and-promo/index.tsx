@@ -4,14 +4,14 @@ import VoucherAnalytics from "@/shared/components/pages/voucher-and-promo/Vouche
 import VoucherTable from "@/shared/components/pages/voucher-and-promo/VoucherTable";
 
 const VoucherAndPromoPage = () => (
-    <PageTransition>
-        <PageHeader
-            title="Voucher & Promo Code System"
-            description="Create and manage promotional vouchers for different user groups"
-        />
-        <VoucherAnalytics />
-        <VoucherTable />
-    </PageTransition>
+  <PageTransition>
+    <PageHeader
+      title="Voucher & Promo Code System"
+      description="Create, edit, disable, and export promotional vouchers"
+    />
+    <VoucherAnalytics />
+    <VoucherTable />
+  </PageTransition>
 );
 
 export default VoucherAndPromoPage;

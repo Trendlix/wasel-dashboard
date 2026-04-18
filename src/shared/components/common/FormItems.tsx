@@ -2,24 +2,58 @@
 
 import * as React from "react";
 import { useFormContext } from "react-hook-form";
-import { EditorContent, useEditor } from "@tiptap/react";
 import MonacoEditor from "@monaco-editor/react";
-import type { Editor } from "@tiptap/core";
-import StarterKit from "@tiptap/starter-kit";
-import Placeholder from "@tiptap/extension-placeholder";
-import UnderlineExtension from "@tiptap/extension-underline";
-import TextAlign from "@tiptap/extension-text-align";
+import RichTextEditorLib from "reactjs-tiptap-editor";
+import { BaseKit } from "reactjs-tiptap-editor";
+import { Bold } from "reactjs-tiptap-editor/bold";
+import { Italic } from "reactjs-tiptap-editor/italic";
+import { TextUnderline } from "reactjs-tiptap-editor/textunderline";
+import { Color } from "reactjs-tiptap-editor/color";
+import { Highlight } from "reactjs-tiptap-editor/highlight";
+import { FontSize } from "reactjs-tiptap-editor/fontsize";
+import { FontFamily } from "reactjs-tiptap-editor/fontfamily";
+import { FormatPainter } from "reactjs-tiptap-editor/formatpainter";
+import { TextAlign } from "reactjs-tiptap-editor/textalign";
+import { LineHeight } from "reactjs-tiptap-editor/lineheight";
+import { Indent } from "reactjs-tiptap-editor/indent";
+import { Heading } from "reactjs-tiptap-editor/heading";
+import { Blockquote } from "reactjs-tiptap-editor/blockquote";
+import { HorizontalRule } from "reactjs-tiptap-editor/horizontalrule";
+import { ListItem } from "reactjs-tiptap-editor/listitem";
+import { BulletList } from "reactjs-tiptap-editor/bulletlist";
+import { OrderedList } from "reactjs-tiptap-editor/orderedlist";
+import { TableOfContents } from "reactjs-tiptap-editor/tableofcontent";
+import { Clear } from "reactjs-tiptap-editor/clear";
+import { Image } from "reactjs-tiptap-editor/image";
+import { Video } from "reactjs-tiptap-editor/video";
+import { Iframe } from "reactjs-tiptap-editor/iframe";
+import { Link } from "reactjs-tiptap-editor/link";
+import { Code } from "reactjs-tiptap-editor/code";
+import { CodeBlock } from "reactjs-tiptap-editor/codeblock";
+import { ImportWord } from "reactjs-tiptap-editor/importword";
+import { ExportWord } from "reactjs-tiptap-editor/exportword";
+import { ExportPdf } from "reactjs-tiptap-editor/exportpdf";
+import { Emoji } from "reactjs-tiptap-editor/emoji";
+import { SearchAndReplace } from "reactjs-tiptap-editor/searchandreplace";
+import { History } from "reactjs-tiptap-editor/history";
+import { Document } from "reactjs-tiptap-editor/document";
+import "react-image-crop/dist/ReactCrop.css";
+import "prism-code-editor-lightweight/layout.css";
+import "prism-code-editor-lightweight/themes/github-dark.css";
+import "reactjs-tiptap-editor/style.css";
+import { ImagePlus } from "lucide-react";
 import {
-    AlignLeft, AlignCenter, AlignRight,
-    Bold, Italic, List, ListOrdered,
-    Type, ChevronDown, Underline as UnderlineIcon,
-    Code, ImagePlus,
-} from "lucide-react";
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 // ─── Shared styles ────────────────────────────────────────────────────────────
 
 const inputClass =
-    "w-full bg-main-titaniumWhite h-[52px] rounded-lg px-3 py-2 text-sm text-main-mirage placeholder:text-main-silverSteel focus:outline-none focus:ring-2 focus:ring-main-primary/20 focus:bg-white transition-colors border-0";
+    "w-full bg-main-titaniumWhite h-[48px] common-rounded px-3 py-2 text-sm text-main-mirage placeholder:text-main-silverSteel focus:outline-none focus:ring-2 focus:ring-main-primary/20 focus:bg-white transition-colors border-0";
 
 // ─── CommonLabel ──────────────────────────────────────────────────────────────
 
@@ -63,20 +97,18 @@ export function CommonInput({
         return (
             <div className="space-y-2">
                 <CommonLabel label={label} />
-                <select
-                    {...field}
-                    value={field.value ?? ""}
-                    className={`${inputClass} cursor-pointer`}
-                >
-                    <option value="" disabled>
-                        {ph}
-                    </option>
-                    {options.map((o) => (
-                        <option key={o} value={o}>
-                            {o}
-                        </option>
-                    ))}
-                </select>
+                <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                    <SelectTrigger className={inputClass}>
+                        <SelectValue placeholder={ph} />
+                    </SelectTrigger>
+                    <SelectContent position="popper">
+                        {options.map((o) => (
+                            <SelectItem key={o} value={o}>
+                                {o}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
             </div>
         );
     }
@@ -223,7 +255,7 @@ export function TagsInput({
     return (
         <div className="space-y-2">
             <CommonLabel label={label} />
-            <div className="flex min-h-[52px] flex-wrap gap-2 rounded-lg bg-main-titaniumWhite px-3 py-2 focus-within:bg-white focus-within:ring-2 focus-within:ring-main-primary/20 transition-colors">
+            <div className="flex min-h-[52px] flex-wrap gap-2 common-rounded bg-main-titaniumWhite px-3 py-2 focus-within:bg-white focus-within:ring-2 focus-within:ring-main-primary/20 transition-colors">
                 {value.map((tag) => (
                     <span
                         key={tag}
@@ -247,6 +279,179 @@ export function TagsInput({
                     placeholder={value.length === 0 ? (placeholder || "Type and press Enter") : ""}
                     className="flex-1 min-w-[120px] bg-transparent outline-none text-sm text-main-mirage placeholder:text-main-silverSteel"
                 />
+            </div>
+        </div>
+    );
+}
+
+
+// ─── CreatableTagCombobox (single value as tag) ─────────────────────────────
+
+export function CreatableTagCombobox({
+    label,
+    value,
+    onChange,
+    options,
+    placeholder = "Select or type to add…",
+    disabled = false,
+}: {
+    label?: string;
+    value: string;
+    onChange: (next: string) => void;
+    options: string[];
+    placeholder?: string;
+    disabled?: boolean;
+}) {
+    const wrapperRef = React.useRef<HTMLDivElement | null>(null);
+    const inputRef = React.useRef<HTMLInputElement | null>(null);
+
+    const [query, setQuery] = React.useState("");
+    const [open, setOpen] = React.useState(false);
+
+    const normalized = React.useMemo(() => {
+        const seen = new Set<string>();
+        const out: string[] = [];
+        for (const raw of options) {
+            const v = String(raw ?? "").trim();
+            if (!v) continue;
+            const key = v.toLowerCase();
+            if (seen.has(key)) continue;
+            seen.add(key);
+            out.push(v);
+        }
+        return out;
+    }, [options]);
+
+    const filtered = React.useMemo(() => {
+        const q = query.trim().toLowerCase();
+        if (!q) return normalized;
+        return normalized.filter((o) => o.toLowerCase().includes(q));
+    }, [normalized, query]);
+
+    const canCreate = React.useMemo(() => {
+        const q = query.trim();
+        if (!q) return false;
+        const qLower = q.toLowerCase();
+        return !normalized.some((o) => o.toLowerCase() === qLower);
+    }, [normalized, query]);
+
+    const commit = (raw: string) => {
+        const next = raw.trim();
+        if (!next) return;
+        onChange(next);
+        setQuery("");
+        setOpen(false);
+        inputRef.current?.blur();
+    };
+
+    React.useEffect(() => {
+        if (!open) return;
+        const onMouseDown = (e: MouseEvent) => {
+            if (!wrapperRef.current) return;
+            if (wrapperRef.current.contains(e.target as Node)) return;
+            setOpen(false);
+            setQuery("");
+        };
+        document.addEventListener("mousedown", onMouseDown);
+        return () => document.removeEventListener("mousedown", onMouseDown);
+    }, [open]);
+
+    return (
+        <div className="space-y-2">
+            {label ? <CommonLabel label={label} /> : null}
+
+            <div ref={wrapperRef} className="relative">
+                <div
+                    className="flex flex-wrap items-center gap-1.5 min-h-11 w-full common-rounded border border-main-whiteMarble bg-main-white px-3 py-2 text-sm cursor-text focus-within:border-main-primary focus-within:ring-2 focus-within:ring-main-primary/40"
+                    onClick={() => {
+                        if (disabled) return;
+                        inputRef.current?.focus();
+                        setOpen(true);
+                    }}
+                >
+                    {value?.trim() ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-main-primary/10 px-2.5 py-0.5 text-xs font-medium text-main-primary">
+                            {value}
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onChange("");
+                                    setQuery("");
+                                    setOpen(false);
+                                }}
+                                className="hover:text-main-primary/60 leading-none"
+                                aria-label="Remove"
+                                disabled={disabled}
+                            >
+                                ×
+                            </button>
+                        </span>
+                    ) : null}
+
+                    <input
+                        ref={inputRef}
+                        value={query}
+                        disabled={disabled}
+                        onFocus={() => {
+                            if (disabled) return;
+                            setOpen(true);
+                        }}
+                        onChange={(e) => {
+                            setQuery(e.target.value);
+                            setOpen(true);
+                        }}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                                e.preventDefault();
+                                if (query.trim()) commit(query);
+                                return;
+                            }
+                            if (e.key === "Escape") {
+                                setOpen(false);
+                                setQuery("");
+                                (e.target as HTMLInputElement).blur();
+                                return;
+                            }
+                            if (e.key === "Backspace" && !query && value) {
+                                onChange("");
+                            }
+                        }}
+                        placeholder={value?.trim() ? "" : placeholder}
+                        className="flex-1 min-w-[120px] bg-transparent outline-none text-sm text-main-hydrocarbon placeholder:text-main-trueBlack/50"
+                    />
+                </div>
+
+                {open && !disabled ? (
+                    <div className="absolute z-50 mt-2 w-full overflow-hidden common-rounded border border-main-whiteMarble bg-main-white shadow-xl">
+                        <div className="max-h-56 overflow-auto p-1">
+                            {canCreate ? (
+                                <button
+                                    type="button"
+                                    className="w-full text-left common-rounded px-3 py-2 text-sm outline-none transition-colors hover:bg-main-titaniumWhite"
+                                    onClick={() => commit(query)}
+                                >
+                                    Add “{query.trim()}”
+                                </button>
+                            ) : null}
+
+                            {filtered.length > 0 ? (
+                                filtered.map((opt) => (
+                                    <button
+                                        key={opt}
+                                        type="button"
+                                        className="w-full text-left common-rounded px-3 py-2 text-sm outline-none transition-colors hover:bg-main-titaniumWhite"
+                                        onClick={() => commit(opt)}
+                                    >
+                                        {opt}
+                                    </button>
+                                ))
+                            ) : (
+                                <p className="px-3 py-2 text-sm text-main-sharkGray">No results</p>
+                            )}
+                        </div>
+                    </div>
+                ) : null}
             </div>
         </div>
     );
@@ -287,253 +492,150 @@ type RichTextEditorProps = {
     value?: string;
     placeholder?: string;
     onChange?: (value: string) => void;
+    onUploadFile?: (file: File, type: "image" | "video") => Promise<string | null>;
 };
 
-const HEADING_OPTIONS = [
-    { label: "Paragraph", level: 0 as const },
-    { label: "Heading 1", level: 1 as const },
-    { label: "Heading 2", level: 2 as const },
-    { label: "Heading 3", level: 3 as const },
-];
+export function RichTextEditor({
+    label,
+    value = "",
+    onChange,
+    onUploadFile,
+}: RichTextEditorProps) {
+    const [isCode, setIsCode] = React.useState(false);
 
-function ToolbarBtn({
-    onClick,
-    active = false,
-    title,
-    children,
-}: {
-    onClick: () => void;
-    active?: boolean;
-    title?: string;
-    children: React.ReactNode;
-}) {
-    return (
-        <button
-            type="button"
-            title={title}
-            onClick={onClick}
-            className={`p-1.5 rounded transition-colors ${active
-                ? "bg-main-primary/10 text-main-primary"
-                : "text-main-hydrocarbon hover:bg-main-titaniumWhite"
-                }`}
-        >
-            {children}
-        </button>
-    );
-}
-
-export function RichTextEditor({ label, value = "", placeholder = "Write here...", onChange }: RichTextEditorProps) {
-    const [viewMode, setViewMode] = React.useState<"visual" | "code">("visual");
-    const [showHeadingMenu, setShowHeadingMenu] = React.useState(false);
-    const [htmlSource, setHtmlSource] = React.useState(value);
-    const headingMenuRef = React.useRef<HTMLDivElement>(null);
-
-    const monacoBg = "#F5F7FA";
-
-    const handleMonacoBeforeMount = (monaco: any) => {
-        monaco.editor.defineTheme("wasel-editor", {
-            base: "vs",
-            inherit: true,
-            rules: [],
-            colors: {
-                "editor.background": monacoBg,
-                "editorGutter.background": monacoBg,
-                "editorLineNumber.foreground": "#8A94A6",
-                "editor.lineHighlightBackground": monacoBg,
-                "minimap.background": monacoBg,
-            },
-        });
-    };
-
-    const editor = useEditor({
-        extensions: [
-            StarterKit,
-            UnderlineExtension,
+    const extensions = React.useMemo(
+        () => [
+            BaseKit.configure({
+                placeholder: { showOnlyCurrent: true },
+                characterCount: { limit: 100_000 },
+            }),
+            Bold, Italic, TextUnderline, Color, Highlight, FontSize, FontFamily,
+            FormatPainter,
             TextAlign.configure({ types: ["heading", "paragraph"] }),
-            Placeholder.configure({ placeholder }),
+            LineHeight, Indent,
+            Heading, Blockquote, HorizontalRule, ListItem, BulletList, OrderedList, TableOfContents, Clear,
+            Image.configure({
+                upload: async (file: File): Promise<string> => {
+                    if (!onUploadFile) return "";
+                    const url = await onUploadFile(file, "image");
+                    return url ?? "";
+                },
+            }),
+            Video.configure({
+                upload: async (file: File): Promise<string> => {
+                    if (!onUploadFile) return "";
+                    const url = await onUploadFile(file, "video");
+                    return url ?? "";
+                },
+            }),
+            Iframe,
+            Link.extend({
+                renderHTML({ HTMLAttributes }: { HTMLAttributes: Record<string, any> }) {
+                    const attrs = Object.fromEntries(
+                        Object.entries(HTMLAttributes).filter(([key]) => key !== "rel"),
+                    );
+                    return ["a", attrs, 0];
+                },
+            }).configure({
+                HTMLAttributes: { target: "_blank", class: "link" },
+            }),
+            Code, CodeBlock,
+            ImportWord, ExportWord, ExportPdf,
+            Emoji, SearchAndReplace, History, Document,
         ],
-        content: value || "",
-        editorProps: {
-            attributes: {
-                class:
-                    "ProseMirror min-h-[280px] w-full bg-main-titaniumWhite px-4 py-3 text-sm text-main-mirage outline-none",
-            },
-        },
-        onUpdate: ({ editor }: { editor: Editor }) => {
-            const html = editor.getHTML();
-            setHtmlSource(html);
-            onChange?.(html);
-        },
-        immediatelyRender: false,
-    });
-
-    React.useEffect(() => {
-        if (!editor) return;
-        const next = value || "";
-        if (next !== editor.getHTML()) {
-            editor.commands.setContent(next);
-            setHtmlSource(next);
-        }
-    }, [value, editor]);
-
-    React.useEffect(() => {
-        const handleOutside = (e: MouseEvent) => {
-            if (headingMenuRef.current && !headingMenuRef.current.contains(e.target as Node)) {
-                setShowHeadingMenu(false);
-            }
-        };
-        document.addEventListener("mousedown", handleOutside);
-        return () => document.removeEventListener("mousedown", handleOutside);
-    }, []);
-
-    const getCurrentHeadingLabel = () => {
-        if (!editor) return "Paragraph";
-        for (const o of HEADING_OPTIONS) {
-            if (o.level > 0 && editor.isActive("heading", { level: o.level })) return o.label;
-        }
-        return "Paragraph";
-    };
-
-    const handleCodeChange = (html: string) => {
-        setHtmlSource(html);
-        editor?.commands.setContent(html);
-        onChange?.(html);
-    };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [onUploadFile],
+    );
 
     return (
         <div className="space-y-2">
             {label && <CommonLabel label={label} />}
-
-            <div className="overflow-hidden rounded-lg bg-main-titaniumWhite">
-                <div className="flex items-center flex-wrap gap-0.5 px-2 py-1.5 bg-main-luxuryWhite">
-                    <ToolbarBtn onClick={() => editor?.chain().focus().setTextAlign("left").run()} active={editor?.isActive({ textAlign: "left" }) ?? false} title="Align left">
-                        <AlignLeft className="h-3.5 w-3.5" />
-                    </ToolbarBtn>
-                    <ToolbarBtn onClick={() => editor?.chain().focus().setTextAlign("center").run()} active={editor?.isActive({ textAlign: "center" }) ?? false} title="Align center">
-                        <AlignCenter className="h-3.5 w-3.5" />
-                    </ToolbarBtn>
-                    <ToolbarBtn onClick={() => editor?.chain().focus().setTextAlign("right").run()} active={editor?.isActive({ textAlign: "right" }) ?? false} title="Align right">
-                        <AlignRight className="h-3.5 w-3.5" />
-                    </ToolbarBtn>
-
-                    <div className="mx-1 h-4 w-px bg-main-whiteMarble" />
-
-                    <ToolbarBtn onClick={() => editor?.chain().focus().toggleBold().run()} active={editor?.isActive("bold") ?? false} title="Bold">
-                        <Bold className="h-3.5 w-3.5" />
-                    </ToolbarBtn>
-                    <ToolbarBtn onClick={() => editor?.chain().focus().toggleItalic().run()} active={editor?.isActive("italic") ?? false} title="Italic">
-                        <Italic className="h-3.5 w-3.5" />
-                    </ToolbarBtn>
-
-                    <div className="mx-1 h-4 w-px bg-main-whiteMarble" />
-
-                    <ToolbarBtn onClick={() => editor?.chain().focus().toggleBulletList().run()} active={editor?.isActive("bulletList") ?? false} title="Bullet list">
-                        <List className="h-3.5 w-3.5" />
-                    </ToolbarBtn>
-                    <ToolbarBtn onClick={() => editor?.chain().focus().toggleOrderedList().run()} active={editor?.isActive("orderedList") ?? false} title="Ordered list">
-                        <ListOrdered className="h-3.5 w-3.5" />
-                    </ToolbarBtn>
-
-                    <div className="mx-1 h-4 w-px bg-main-whiteMarble" />
-
-                    <div className="relative" ref={headingMenuRef}>
-                        <button
-                            type="button"
-                            onClick={() => setShowHeadingMenu((v) => !v)}
-                            className="flex items-center gap-1 rounded border border-main-whiteMarble px-2 py-1 text-xs font-medium text-main-hydrocarbon transition-colors hover:bg-main-titaniumWhite"
-                        >
-                            <Type className="h-3.5 w-3.5" />
-                            <span className="min-w-[58px]">{getCurrentHeadingLabel()}</span>
-                            <ChevronDown className="h-3 w-3" />
-                        </button>
-
-                        {showHeadingMenu && (
-                            <div className="absolute left-0 top-full z-20 mt-1 min-w-[140px] rounded-lg border border-main-whiteMarble bg-white py-1 shadow-lg">
-                                {HEADING_OPTIONS.map((opt) => {
-                                    const active =
-                                        opt.level === 0
-                                            ? editor?.isActive("paragraph")
-                                            : editor?.isActive("heading", { level: opt.level });
-
-                                    return (
-                                        <button
-                                            key={opt.label}
-                                            type="button"
-                                            onClick={() => {
-                                                if (opt.level === 0) editor?.chain().focus().setParagraph().run();
-                                                else editor?.chain().focus().toggleHeading({ level: opt.level }).run();
-                                                setShowHeadingMenu(false);
-                                            }}
-                                            className={`w-full px-3 py-1.5 text-left text-sm transition-colors hover:bg-main-luxuryWhite ${active ? "font-medium text-main-primary" : "text-main-hydrocarbon"
-                                                }`}
-                                        >
-                                            {opt.label}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="mx-1 h-4 w-px bg-main-whiteMarble" />
-
-                    <ToolbarBtn onClick={() => editor?.chain().focus().toggleUnderline().run()} active={editor?.isActive("underline") ?? false} title="Underline">
-                        <UnderlineIcon className="h-3.5 w-3.5" />
-                    </ToolbarBtn>
-                    <ToolbarBtn onClick={() => editor?.chain().focus().toggleCodeBlock().run()} active={editor?.isActive("codeBlock") ?? false} title="Code block">
-                        <Code className="h-3.5 w-3.5" />
-                    </ToolbarBtn>
-
-                    <div className="ml-auto flex overflow-hidden rounded border border-main-whiteMarble">
-                        <button
-                            type="button"
-                            onClick={() => setViewMode("visual")}
-                            className={`px-3 py-1 text-xs font-medium transition-colors ${viewMode === "visual" ? "bg-main-primary text-white" : "text-main-hydrocarbon hover:bg-main-titaniumWhite"
-                                }`}
-                        >
-                            Visual
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setViewMode("code")}
-                            className={`px-3 py-1 text-xs font-medium transition-colors ${viewMode === "code" ? "bg-main-primary text-white" : "text-main-hydrocarbon hover:bg-main-titaniumWhite"
-                                }`}
-                        >
-                            Code
-                        </button>
-                    </div>
-                </div>
-
-                {viewMode === "visual" ? (
-                    <div className="bg-main-titaniumWhite">
-                        <EditorContent editor={editor} />
-                    </div>
-                ) : (
-                    <div className="bg-main-titaniumWhite">
-                        <MonacoEditor
-                            beforeMount={handleMonacoBeforeMount}
-                            height="400px"
-                            defaultLanguage="html"
-                            value={htmlSource}
-                            onChange={(val) => handleCodeChange(val ?? "")}
-                            theme="wasel-editor"
-                            options={{
-                                minimap: { enabled: false },
-                                wordWrap: "on",
-                                fontSize: 13,
-                                lineNumbers: "on",
-                                scrollBeyondLastLine: false,
-                                automaticLayout: true,
-                                overviewRulerBorder: false,
-                                hideCursorInOverviewRuler: true,
-                                scrollbar: {
-                                    verticalScrollbarSize: 8,
-                                    horizontalScrollbarSize: 8,
+            <div className="relative">
+                {isCode ? (
+                    <MonacoEditor
+                        height="400px"
+                        defaultLanguage="html"
+                        value={value}
+                        onChange={(val) => onChange?.(val ?? "")}
+                        beforeMount={(monaco) => {
+                            monaco.editor.defineTheme("wasel-code", {
+                                base: "vs",
+                                inherit: true,
+                                rules: [
+                                    { token: "tag", foreground: "004aad", fontStyle: "bold" },
+                                    { token: "attribute.name", foreground: "0969da" },
+                                    { token: "attribute.value", foreground: "0a7a30" },
+                                    { token: "comment", foreground: "99A1AF", fontStyle: "italic" },
+                                    { token: "string", foreground: "0a7a30" },
+                                    { token: "delimiter", foreground: "4A5565" },
+                                ],
+                                colors: {
+                                    "editor.background": "#F9FAFB",
+                                    "editor.foreground": "#101828",
+                                    "editorLineNumber.foreground": "#99A1AF",
+                                    "editorLineNumber.activeForeground": "#4A5565",
+                                    "editor.lineHighlightBackground": "#F3F4F6",
+                                    "editor.selectionBackground": "#004aad26",
+                                    "editorCursor.foreground": "#004aad",
+                                    "editorGutter.background": "#F9FAFB",
+                                    "editorIndentGuide.background1": "#E5E7EB",
+                                    "editorIndentGuide.activeBackground1": "#004aad44",
+                                    "editor.findMatchBackground": "#004aad26",
+                                    "editor.findMatchHighlightBackground": "#004aad14",
+                                    "scrollbar.shadow": "#00000008",
+                                    "scrollbarSlider.background": "#E5E7EB99",
+                                    "scrollbarSlider.hoverBackground": "#99A1AF88",
+                                    "minimap.background": "#F9FAFB",
                                 },
-                            }}
+                            });
+                        }}
+                        options={{
+                            theme: "wasel-code",
+                            minimap: { enabled: false },
+                            wordWrap: "on",
+                            fontSize: 13,
+                            lineHeight: 22,
+                            fontFamily: "'Geist Mono', 'Fira Code', 'Cascadia Code', monospace",
+                            fontLigatures: true,
+                            lineNumbers: "on",
+                            scrollBeyondLastLine: false,
+                            automaticLayout: true,
+                            tabSize: 2,
+                            padding: { top: 16, bottom: 16 },
+                            overviewRulerBorder: false,
+                            hideCursorInOverviewRuler: true,
+                            renderLineHighlight: "line",
+                            bracketPairColorization: { enabled: true },
+                            guides: { bracketPairs: true, indentation: true },
+                            scrollbar: {
+                                verticalScrollbarSize: 6,
+                                horizontalScrollbarSize: 6,
+                                useShadows: true,
+                            },
+                        }}
+                        className="overflow-hidden rounded-xl border border-main-whiteMarble"
+                    />
+                ) : (
+                    <div className="wasel-richtext">
+                        <RichTextEditorLib
+                            output="html"
+                            contentClass="min-h-[270px]"
+                            content={value}
+                            onChangeContent={(val) => onChange?.(val)}
+                            extensions={extensions}
+                            dark={false}
                         />
                     </div>
                 )}
+                <div className="absolute -top-7 right-5 rtl:left-5 rtl:right-auto">
+                    <button
+                        type="button"
+                        onClick={() => setIsCode((v) => !v)}
+                        className="bg-main-primary/10 text-main-primary py-[0.36rem] px-5 rounded-md rounded-b-none text-xs cursor-pointer hover:bg-main-primary/20 duration-300 transition-colors"
+                    >
+                        {isCode ? "Switch to editor" : "Switch to code"}
+                    </button>
+                </div>
             </div>
         </div>
     );

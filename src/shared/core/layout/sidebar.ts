@@ -1,4 +1,4 @@
-import { Bell, ChartColumn, CircleCheckBig, Container, LayoutDashboard, MapPin, Percent, PenTool, Settings, Shield, Tag, Truck, Users, Wallet, Warehouse, type LucideIcon } from "lucide-react";
+import { Bell, ChartColumn, CircleCheckBig, Database, LayoutDashboard, MapPin, Percent, PenTool, Settings, Shield, Tag, Ticket, Truck, Users, type LucideIcon } from "lucide-react";
 
 export interface ISidebarItem {
     id: number;
@@ -26,12 +26,12 @@ export const sidebarItems: ISidebarItem[] = [
         icon: Truck,
         to: "/drivers"
     },
-    {
-        id: 4,
-        name: "storage owners",
-        icon: Warehouse,
-        to: "/storage-owners"
-    },
+    /*    {
+            id: 4,
+            name: "storage owners",
+            icon: Warehouse,
+            to: "/storage-owners"
+        },*/
     {
         id: 5,
         name: "Verfication",
@@ -44,12 +44,12 @@ export const sidebarItems: ISidebarItem[] = [
         icon: MapPin,
         to: "/trips"
     },
-    {
-        id: 7,
-        name: "wallet/finance",
-        icon: Wallet,
-        to: "/wallet-and-finance"
-    },
+    // {
+    //     id: 7,
+    //     name: "wallet/finance",
+    //     icon: Wallet,
+    //     to: "/wallet-and-finance"
+    // },
     {
         id: 8,
         name: "analytics",
@@ -70,9 +70,9 @@ export const sidebarItems: ISidebarItem[] = [
     },
     {
         id: 11,
-        name: "blogs & seo",
+        name: "cms",
         icon: PenTool,
-        to: "/blogs"
+        to: "/cms"
     },
     {
         id: 12,
@@ -94,8 +94,14 @@ export const sidebarItems: ISidebarItem[] = [
     },
     {
         id: 15,
-        name: "trucks & storages",
-        icon: Container,
-        to: "/trucks-storages-data"
-    }
+        name: "Data Management",
+        icon: Database,
+        to: "/data-management"
+    },
+    {
+        id: 16,
+        name: "Support Tickets",
+        icon: Ticket,
+        to: "/support-tickets"
+    },
 ]
