@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { driversAnalyticsConfig } from "../../../core/pages/drivers";
 import AnalyticsCard, { AnalyticsCardSkeleton } from "../../common/AnalyticsCard";
 import useDriverStore from "@/shared/hooks/store/useDriverStore";
@@ -10,6 +11,7 @@ const iconClasses = [
 ];
 
 const Analytics = () => {
+    const { t } = useTranslation("drivers");
     const { meta, loading, analytics, analyticsLoading, fetchDriversAnalytics } = useDriverStore();
 
     useEffect(() => {
@@ -37,8 +39,11 @@ const Analytics = () => {
             {driversAnalyticsConfig.map((card, i) => (
                 <AnalyticsCard
                     key={card.id}
-                    {...card}
+                    id={card.id}
+                    title={t(`analytics.${card.titleKey}`)}
                     value={values[i]}
+                    icon={card.icon}
+                    classname={card.classname}
                     iconClass={iconClasses[i]}
                     notColorfull
                 />

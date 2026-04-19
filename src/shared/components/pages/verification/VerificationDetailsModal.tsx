@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ExternalLink, FileText, IdCard, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,27 +9,17 @@ import {
   CommonModalFooter,
   CommonModalHeader,
 } from "@/shared/components/common/CommonModal";
-import { verificationStatusStyles } from "@/shared/core/pages/verification";
+import { verificationStatusStyles, type TVerificationStatus } from "@/shared/core/pages/verification";
 import useVerificationStore, {
   type IAppVerificationItem,
 } from "@/shared/hooks/store/useVerificationStore";
+import { formatAppDateShort } from "@/lib/formatLocaleDate";
 
 interface VerificationDetailsModalProps {
   open: boolean;
   verification: IAppVerificationItem | null;
   onOpenChange: (value: boolean) => void;
 }
-
-const formatDate = (value?: string | null) => {
-  if (!value) return "-";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-};
 
 const isImageDocument = (url: string) => /\.(png|jpe?g|webp|gif|avif|svg)$/i.test(url);
 
@@ -37,6 +28,7 @@ const VerificationDetailsModal = ({
   verification,
   onOpenChange,
 }: VerificationDetailsModalProps) => {
+  const { t, i18n } = useTranslation(["verification", "common"]);
   const {
     details,
     detailsLoading,
@@ -50,36 +42,44 @@ const VerificationDetailsModal = ({
   const [verificationNotes, setVerificationNotes] = useState("");
   const [reasonError, setReasonError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (open && verification) {
-      fetchVerificationDetails(verification.id);
-    }
-    if (!open) {
+  const handleModalOpenChange = (next: boolean) => {
+    if (!next) {
       clearVerificationDetails();
       setRejectReason("");
       setVerificationNotes("");
       setReasonError(null);
     }
-  }, [open, verification?.id]);
+    onOpenChange(next);
+  };
+
+  useEffect(() => {
+    if (open && verification) {
+      fetchVerificationDetails(verification.id);
+    }
+    // Intentionally depend on id only: `verification` object identity may change without a new fetch.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetch when modal opens for this id
+  }, [open, verification?.id, fetchVerificationDetails]);
 
   useEffect(() => {
     if (!details) return;
-    setRejectReason(details.verification.rejected_reason ?? "");
-    setVerificationNotes(details.verification.notes ?? "");
+    queueMicrotask(() => {
+      setRejectReason(details.verification.rejected_reason ?? "");
+      setVerificationNotes(details.verification.notes ?? "");
+    });
   }, [details]);
 
   const documents = useMemo(() => {
     if (!details) return [];
     const docs = details.documents;
     return [
-      { key: "profile_image", label: "Profile Image", value: docs.profile_image, icon: ShieldCheck },
-      { key: "national_id_front", label: "National ID (Front)", value: docs.national_id_front, icon: IdCard },
-      { key: "national_id_back", label: "National ID (Back)", value: docs.national_id_back, icon: IdCard },
-      { key: "license_front", label: "License (Front)", value: docs.license_front, icon: IdCard },
-      { key: "license_back", label: "License (Back)", value: docs.license_back, icon: IdCard },
-      { key: "criminal_record", label: "Criminal Record", value: docs.criminal_record, icon: FileText },
+      { key: "profile_image", label: t("verification:documents.profileImage"), value: docs.profile_image, icon: ShieldCheck },
+      { key: "national_id_front", label: t("verification:documents.nationalIdFront"), value: docs.national_id_front, icon: IdCard },
+      { key: "national_id_back", label: t("verification:documents.nationalIdBack"), value: docs.national_id_back, icon: IdCard },
+      { key: "license_front", label: t("verification:documents.licenseFront"), value: docs.license_front, icon: IdCard },
+      { key: "license_back", label: t("verification:documents.licenseBack"), value: docs.license_back, icon: IdCard },
+      { key: "criminal_record", label: t("verification:documents.criminalRecord"), value: docs.criminal_record, icon: FileText },
     ].filter((doc) => doc.value);
-  }, [details]);
+  }, [details, t]);
 
   const handleApprove = async () => {
     if (!verification) return;
@@ -87,12 +87,12 @@ const VerificationDetailsModal = ({
       status: "approved",
       verification_notes: verificationNotes.trim() || undefined,
     });
-    onOpenChange(false);
+    handleModalOpenChange(false);
   };
 
   const handleReject = async () => {
     if (!verification) return;
-    const reason = rejectReason.trim() || "Rejected by admin";
+    const reason = rejectReason.trim() || t("verification:rejectReasonDefault");
     try {
       setReasonError(null);
       await updateVerificationStatus(verification.id, {
@@ -100,28 +100,34 @@ const VerificationDetailsModal = ({
         reason_for_rejection: reason,
         verification_notes: verificationNotes.trim() || undefined,
       });
-      onOpenChange(false);
-    } catch (error) {
-      setReasonError("Failed to reject verification. Please try again.");
+      handleModalOpenChange(false);
+    } catch {
+      setReasonError(t("verification:rejectError"));
     }
   };
 
   if (!verification) return null;
 
   const displayStatus = details?.verification.status ?? verification.status;
-  const statusStyle = verificationStatusStyles[displayStatus];
-  const name = details?.driver.name ?? verification.name ?? "Driver";
+  const statusKey = (["pending", "approved", "rejected"] as const).includes(displayStatus as TVerificationStatus)
+    ? (displayStatus as TVerificationStatus)
+    : "pending";
+  const statusStyle = verificationStatusStyles[statusKey];
+  const name = details?.driver.name ?? verification.name ?? t("verification:list.driverLabel");
+
+  const fmt = (v?: string | null) => formatAppDateShort(v, i18n.language, "—");
 
   return (
     <CommonModal
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={handleModalOpenChange}
       loading={updating}
       maxWidth="sm:max-w-[980px]"
+      variant="success"
     >
       <CommonModalHeader
-        title="Verification Documents"
-        description="Review uploaded documents and decide whether to approve or reject this verification request."
+        title={t("verification:details.title")}
+        description={t("verification:details.description")}
       />
 
       <CommonModalBody className="space-y-6">
@@ -133,14 +139,14 @@ const VerificationDetailsModal = ({
               <div>
                 <p className="text-main-mirage text-lg font-bold">{name}</p>
                 <p className="text-main-sharkGray text-sm">
-                  {details.driver.email ?? "No email"} • {details.driver.phone}
+                  {details.driver.email ?? t("verification:details.noEmail")} • {details.driver.phone}
                 </p>
                 <p className="text-main-sharkGray text-xs mt-1">
-                  Submitted: {formatDate(details.driver.created_at)}
+                  {t("verification:details.submittedAt", { date: fmt(details.driver.created_at) })}
                 </p>
               </div>
               <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyle.bg} ${statusStyle.text}`}>
-                {statusStyle.label}
+                {t(`verification:statuses.${statusKey}`)}
               </span>
             </div>
 
@@ -151,18 +157,18 @@ const VerificationDetailsModal = ({
                   const value = doc.value as string;
                   return (
                     <div key={doc.key} className="rounded-2xl border border-main-whiteMarble p-4 bg-main-white">
-                      <div className="flex items-center justify-between mb-3">
-                        <p className="text-main-mirage font-semibold flex items-center gap-2">
-                          <Icon size={15} />
-                          {doc.label}
+                      <div className="flex items-center justify-between mb-3 gap-2">
+                        <p className="text-main-mirage font-semibold flex items-center gap-2 min-w-0">
+                          <Icon size={15} className="shrink-0" />
+                          <span className="truncate">{doc.label}</span>
                         </p>
                         <a
                           href={value}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-main-primary text-xs font-semibold inline-flex items-center gap-1 hover:underline"
+                          className="text-main-primary text-xs font-semibold inline-flex items-center gap-1 hover:underline shrink-0"
                         >
-                          Open
+                          {t("verification:details.open")}
                           <ExternalLink size={13} />
                         </a>
                       </div>
@@ -174,7 +180,7 @@ const VerificationDetailsModal = ({
                         />
                       ) : (
                         <div className="h-48 rounded-xl border border-dashed border-main-whiteMarble bg-main-luxuryWhite flex items-center justify-center text-main-sharkGray text-sm">
-                          Preview unavailable
+                          {t("verification:details.previewUnavailable")}
                         </div>
                       )}
                     </div>
@@ -182,57 +188,57 @@ const VerificationDetailsModal = ({
                 })
               ) : (
                 <div className="col-span-full rounded-2xl border border-main-whiteMarble bg-main-luxuryWhite p-6 text-center text-main-sharkGray">
-                  No uploaded documents found.
+                  {t("verification:details.noDocuments")}
                 </div>
               )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="rounded-2xl border border-main-whiteMarble p-4 space-y-2">
-                <p className="text-main-sharkGray text-xs">National ID Expiry</p>
-                <p className="text-main-mirage font-semibold">{formatDate(details.documents.national_id_expiry)}</p>
-                <p className="text-main-sharkGray text-xs mt-3">License Expiry</p>
-                <p className="text-main-mirage font-semibold">{formatDate(details.documents.license_expiry)}</p>
+                <p className="text-main-sharkGray text-xs">{t("verification:details.nationalIdExpiry")}</p>
+                <p className="text-main-mirage font-semibold">{fmt(details.documents.national_id_expiry)}</p>
+                <p className="text-main-sharkGray text-xs mt-3">{t("verification:details.licenseExpiry")}</p>
+                <p className="text-main-mirage font-semibold">{fmt(details.documents.license_expiry)}</p>
               </div>
               <div className="rounded-2xl border border-main-whiteMarble p-4 space-y-2">
-                <p className="text-main-sharkGray text-xs">Address</p>
-                <p className="text-main-mirage font-semibold">{details.documents.address ?? "-"}</p>
-                <p className="text-main-sharkGray text-xs mt-3">Additional Phone</p>
-                <p className="text-main-mirage font-semibold">{details.documents.additional_phone ?? "-"}</p>
+                <p className="text-main-sharkGray text-xs">{t("verification:details.address")}</p>
+                <p className="text-main-mirage font-semibold">{details.documents.address ?? "—"}</p>
+                <p className="text-main-sharkGray text-xs mt-3">{t("verification:details.additionalPhone")}</p>
+                <p className="text-main-mirage font-semibold">{details.documents.additional_phone ?? "—"}</p>
               </div>
             </div>
 
             <div className="space-y-2">
-              <p className="text-main-mirage text-sm font-semibold">Verification Notes</p>
+              <p className="text-main-mirage text-sm font-semibold">{t("verification:details.notesLabel")}</p>
               <Textarea
                 value={verificationNotes}
                 onChange={(e) => setVerificationNotes(e.target.value)}
-                placeholder="Add internal notes for this verification..."
+                placeholder={t("verification:details.notesPlaceholder")}
                 className="min-h-[90px]"
                 disabled={updating}
               />
             </div>
 
             <div className="space-y-2">
-              <p className="text-main-mirage text-sm font-semibold">Rejection Reason</p>
+              <p className="text-main-mirage text-sm font-semibold">{t("verification:details.rejectionLabel")}</p>
               <Textarea
                 value={rejectReason}
                 onChange={(e) => {
                   setRejectReason(e.target.value);
                   if (reasonError) setReasonError(null);
                 }}
-                placeholder="Required when rejecting verification..."
+                placeholder={t("verification:details.rejectionPlaceholder")}
                 className="min-h-[90px]"
                 disabled={updating}
               />
               {reasonError ? (
-                <p className="text-main-remove text-xs font-medium">{reasonError}</p>
+                <p className="text-xs font-medium text-main-red mt-1">{reasonError}</p>
               ) : null}
             </div>
           </>
         ) : (
           <div className="rounded-2xl border border-main-whiteMarble bg-main-luxuryWhite p-6 text-center text-main-sharkGray">
-            Unable to load verification details.
+            {t("verification:details.loadError")}
           </div>
         )}
       </CommonModalBody>
@@ -242,12 +248,12 @@ const VerificationDetailsModal = ({
           type="button"
           variant="ghost"
           className="h-11 px-7 text-main-sharkGray hover:bg-main-titaniumWhite"
-          onClick={() => onOpenChange(false)}
+          onClick={() => handleModalOpenChange(false)}
           disabled={updating}
         >
-          Cancel
+          {t("common:cancel")}
         </Button>
-        <div className="ml-auto flex items-center gap-3">
+        <div className="ms-auto flex items-center gap-3">
           <Button
             type="button"
             variant="outline"
@@ -255,7 +261,7 @@ const VerificationDetailsModal = ({
             onClick={handleReject}
             disabled={updating || detailsLoading}
           >
-            {updating ? "Rejecting..." : "Reject"}
+            {updating ? t("verification:details.rejecting") : t("verification:details.reject")}
           </Button>
           <Button
             type="button"
@@ -263,7 +269,7 @@ const VerificationDetailsModal = ({
             onClick={handleApprove}
             disabled={updating || detailsLoading}
           >
-            {updating ? "Approving..." : "Approve"}
+            {updating ? t("verification:details.approving") : t("verification:details.approve")}
           </Button>
         </div>
       </CommonModalFooter>

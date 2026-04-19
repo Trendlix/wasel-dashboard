@@ -1,0 +1,136 @@
+{
+  "pageTitle": "Data Management",
+  "pageDescription": "Manage truck types, goods and weights used across the platform",
+  "tabs": {
+    "trucks": "Truck types",
+    "goods": "Goods types"
+  },
+  "analytics": {
+    "truckTypes": "Truck types",
+    "activeGoodsTypes": "Active goods types"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "currencySuffix": "EGP",
+  "trucks": {
+    "sectionTitle": "Truck types",
+    "sectionSubtitle": "Used in dropdowns across driver and user apps",
+    "addButton": "Add truck type",
+    "table": {
+      "nameEn": "Name (English)",
+      "nameAr": "Name (Arabic)",
+      "capacity": "Capacity",
+      "pricePerKm": "Price / km",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "empty": {
+      "title": "No truck types found",
+      "description": "Add a new truck type to get started."
+    },
+    "editAria": "Edit truck type",
+    "deleteAria": "Delete truck type"
+  },
+  "goods": {
+    "sectionTitle": "Goods types",
+    "sectionSubtitle": "Used in dropdowns across driver and user apps",
+    "addButton": "Add goods type",
+    "table": {
+      "nameEn": "Name (English)",
+      "nameAr": "Name (Arabic)",
+      "description": "Description",
+      "allowedTrucks": "Allowed trucks",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "empty": {
+      "title": "No goods types found",
+      "description": "Add a new goods type to get started."
+    },
+    "editAria": "Edit goods type",
+    "deleteAria": "Delete goods type"
+  },
+  "storage": {
+    "sectionTitle": "Storage types",
+    "sectionSubtitle": "Used in storage booking across the platform",
+    "addButton": "Add storage type",
+    "table": {
+      "nameEn": "Name (English)",
+      "nameAr": "Name (Arabic)",
+      "size": "Size",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "editAria": "Edit storage type",
+    "deleteAria": "Delete storage type"
+  },
+  "delete": {
+    "confirmTitle": "Are you sure?",
+    "confirmBody": "You are about to delete {{name}}. This action cannot be undone and may fail if there are associated records.",
+    "deleting": "Deleting…",
+    "delete": "Delete"
+  },
+  "truckModal": {
+    "addTitle": "Add truck type",
+    "editTitle": "Edit truck type",
+    "addDescription": "Create a new truck type for the platform.",
+    "editDescription": "Update the details of this truck type.",
+    "activeLabel": "Active status",
+    "activeHint": "Toggle to enable or disable this truck type.",
+    "nameEn": "Name (English)",
+    "nameEnPlaceholder": "e.g. Pickup",
+    "nameAr": "Name (Arabic)",
+    "nameArPlaceholder": "e.g. بيك آب",
+    "capacity": "Capacity",
+    "capacityPlaceholder": "e.g. 5000",
+    "unit": "Unit",
+    "unitPlaceholder": "e.g. kg",
+    "pricePerKm": "Price per km",
+    "pricePerKmPlaceholder": "e.g. 150",
+    "description": "Description",
+    "descriptionPlaceholder": "Details about this truck type",
+    "lengthCm": "Length (cm)",
+    "widthCm": "Width (cm)",
+    "heightCm": "Height (cm)",
+    "lengthPlaceholder": "600",
+    "widthPlaceholder": "250",
+    "heightPlaceholder": "300",
+    "saving": "Saving…",
+    "saveAdd": "Add",
+    "saveUpdate": "Update"
+  },
+  "goodsModal": {
+    "addTitle": "Add goods type",
+    "editTitle": "Edit goods type",
+    "addDescription": "Create a new goods type for the platform.",
+    "editDescription": "Update the details of this goods type.",
+    "activeLabel": "Active status",
+    "activeHint": "Toggle to enable or disable this goods type.",
+    "nameEn": "Name (English)",
+    "nameEnPlaceholder": "e.g. Electronics",
+    "nameAr": "Name (Arabic)",
+    "nameArPlaceholder": "e.g. إلكترونيات",
+    "value": "Identifier / value",
+    "valuePlaceholder": "e.g. electronics",
+    "description": "Description",
+    "descriptionPlaceholder": "Provide more details about this goods type",
+    "allowedTrucks": "Allowed truck types",
+    "selectedCount": "{{count}} selected",
+    "noTruckTypes": "No truck types found. Please add a truck type first.",
+    "saving": "Saving…",
+    "saveAdd": "Add",
+    "saveUpdate": "Update"
+  },
+  "validation": {
+    "nameRequired": "Name is required",
+    "nameArRequired": "Arabic name is required",
+    "descriptionRequired": "Description is required",
+    "capacityRequired": "Capacity must be at least 1",
+    "unitRequired": "Unit is required",
+    "priceRequired": "Price must be at least 1",
+    "valueRequired": "Value is required",
+    "truckTypesMin": "Select at least one truck type"
+  }
+}

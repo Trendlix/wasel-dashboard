@@ -1,0 +1,70 @@
+{
+  "pageTitle": "Commission & pricing control",
+  "pageDescription": "Set and manage commission percentages for trips, storage, and advertising",
+  "categories": {
+    "trip": "Trips",
+    "storage": "Storage",
+    "advertising": "Advertising"
+  },
+  "analytics": {
+    "trip": "Trip commission",
+    "storage": "Storage commission",
+    "advertising": "Advertising commission"
+  },
+  "types": {
+    "percentage": "Percentage",
+    "fixed": "Fixed amount"
+  },
+  "statusActive": "Active",
+  "statusInactive": "Inactive",
+  "table": {
+    "category": "Category",
+    "description": "Description",
+    "type": "Type",
+    "rate": "Rate",
+    "status": "Status",
+    "actions": "Actions",
+    "editAria": "Edit commission rate",
+    "deleteAria": "Delete commission rate",
+    "noDescription": "—"
+  },
+  "header": {
+    "title": "Commission rates",
+    "subtitle": "Manage platform commission structure",
+    "addRate": "Add rate"
+  },
+  "empty": "No commission rates found. Use “Add rate” to get started.",
+  "delete": {
+    "title": "Delete commission rate?",
+    "cannotDelete": "Cannot delete — this is the only active commission rate for the \"{{category}}\" category. Deactivate it first or add another active rate.",
+    "confirmBody": "This will permanently delete the {{category}} commission rate. This action cannot be undone.",
+    "cancel": "Cancel",
+    "confirm": "Delete",
+    "deleting": "Deleting…"
+  },
+  "modal": {
+    "addTitle": "Add commission rate",
+    "editTitle": "Edit commission rate",
+    "addDescription": "Create a new commission rate for the platform.",
+    "editDescription": "Update this commission rule.",
+    "activeLabel": "Active status",
+    "activeHint": "Toggle to enable or disable this commission rate.",
+    "category": "Category",
+    "categoryPlaceholder": "Select category",
+    "type": "Type",
+    "typePlaceholder": "Select type",
+    "typePercentage": "Percentage (%)",
+    "typeFixed": "Fixed amount",
+    "rate": "Rate",
+    "ratePlaceholder": "e.g. 15",
+    "description": "Description (optional)",
+    "descriptionPlaceholder": "e.g. Standard trip commission",
+    "saveAdd": "Add",
+    "saveUpdate": "Update",
+    "saving": "Saving…",
+    "lastActiveError": "At least one active commission must remain for the \"{{category}}\" category."
+  },
+  "validation": {
+    "rateMin": "Rate must be at least 0"
+  }
+}

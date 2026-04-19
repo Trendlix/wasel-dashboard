@@ -16,7 +16,7 @@ const NotificationItem = ({ item, tab, sentAt, onMarkAsRead, actionLoadingId }: 
         <div className="py-4 flex items-start justify-between gap-4 bg-main-luxuryWhite common-rounded p-3.5">
             <div className="flex flex-col gap-1.5 min-w-0">
                 <span className="text-main-mirage font-semibold text-sm">{item.title}</span>
-                <span className="text-main-sharkGray text-xs line-clamp-2 pr-1">{item.description}</span>
+                <span className="text-main-sharkGray text-xs line-clamp-2 pe-1">{item.description}</span>
                 {!isRead ? (
                     <button
                         type="button"

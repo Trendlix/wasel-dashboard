@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import clsx from "clsx";
+import { useTranslation } from "react-i18next";
+import { formatAppDateLong } from "@/lib/formatLocaleDate";
 import { Button } from "@/components/ui/button";
 import {
     Select,
@@ -26,12 +28,15 @@ interface UserDetailsModalProps {
 const STATUS_OPTIONS: TUserStatus[] = ["active", "inactive", "blocked", "deleted"];
 
 const UserDetailsModal = ({ user, open, onOpenChange }: UserDetailsModalProps) => {
+    const { t, i18n } = useTranslation(["users", "common"]);
     const { updateStatus, updating } = useUserStore();
     const [selected, setSelected] = useState<TUserStatus>(user?.status ?? "active");
 
-    // Sync selection when a different user is opened
+    useEffect(() => {
+        if (user) setSelected(user.status);
+    }, [user?.id, user?.status]);
+
     const handleOpenChange = (v: boolean) => {
-        if (v && user) setSelected(user.status);
         onOpenChange(v);
     };
 
@@ -50,17 +55,13 @@ const UserDetailsModal = ({ user, open, onOpenChange }: UserDetailsModalProps) =
         .slice(0, 2)
         .toUpperCase();
 
-    const joinDate = new Date(user.created_at).toLocaleDateString("en-US", {
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-    });
+    const joinDate = formatAppDateLong(user.created_at, i18n.language);
 
     return (
         <CommonModal open={open} onOpenChange={handleOpenChange} loading={updating}>
             <CommonModalHeader
-                title="User Details"
-                description="View user information and update their account status."
+                title={t("users:modal.title")}
+                description={t("users:modal.description")}
             />
 
             <CommonModalBody className="space-y-6">
@@ -77,24 +78,24 @@ const UserDetailsModal = ({ user, open, onOpenChange }: UserDetailsModalProps) =
 
                 {/* Info grid */}
                 <div className="grid grid-cols-2 gap-4 py-4 border-t border-b border-main-whiteMarble">
-                    <InfoItem label="Phone" value={user.phone} />
-                    <InfoItem label="Joined" value={joinDate} />
+                    <InfoItem label={t("users:modal.phone")} value={user.phone} />
+                    <InfoItem label={t("users:modal.joined")} value={joinDate} />
                     <InfoItem
-                        label="Email verified"
-                        value={user.email_verified ? "Yes" : "No"}
+                        label={t("users:modal.emailVerified")}
+                        value={user.email_verified ? t("users:yes") : t("users:no")}
                         valueClass={user.email_verified ? "text-main-vividMint" : "text-main-remove"}
                     />
                     <InfoItem
-                        label="Phone verified"
-                        value={user.phone_verified ? "Yes" : "No"}
+                        label={t("users:modal.phoneVerified")}
+                        value={user.phone_verified ? t("users:yes") : t("users:no")}
                         valueClass={user.phone_verified ? "text-main-vividMint" : "text-main-remove"}
                     />
-                    <InfoItem label="Voucher usage" value={String(user.total_voucher_usage)} />
+                    <InfoItem label={t("users:modal.voucherUsage")} value={String(user.total_voucher_usage)} />
                 </div>
 
                 {/* Status selector */}
                 <div className="space-y-2">
-                    <p className="text-sm font-semibold text-main-mirage">Account Status</p>
+                    <p className="text-sm font-semibold text-main-mirage">{t("users:modal.accountStatus")}</p>
                     <Select value={selected} onValueChange={(v) => setSelected(v as TUserStatus)}>
                         <SelectTrigger className="w-full h-10 border border-main-whiteMarble common-rounded px-3 text-sm">
                             <SelectValue />
@@ -105,7 +106,7 @@ const UserDetailsModal = ({ user, open, onOpenChange }: UserDetailsModalProps) =
                                 return (
                                     <SelectItem key={s} value={s}>
                                         <span className={clsx("px-2 py-0.5 rounded-full text-xs font-medium", style.bg, style.text)}>
-                                            {style.label}
+                                            {t(`users:statuses.${s}`)}
                                         </span>
                                     </SelectItem>
                                 );
@@ -123,14 +124,14 @@ const UserDetailsModal = ({ user, open, onOpenChange }: UserDetailsModalProps) =
                     onClick={() => onOpenChange(false)}
                     disabled={updating}
                 >
-                    Cancel
+                    {t("common:cancel")}
                 </Button>
                 <Button
                     onClick={handleSave}
                     disabled={updating || selected === user.status}
                     className="bg-main-primary hover:bg-main-primary/90 text-white font-bold h-11 px-10 common-rounded"
                 >
-                    {updating ? "Saving…" : "Save Changes"}
+                    {updating ? t("users:modal.saving") : t("users:modal.saveChanges")}
                 </Button>
             </CommonModalFooter>
         </CommonModal>

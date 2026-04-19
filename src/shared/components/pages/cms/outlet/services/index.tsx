@@ -2,18 +2,20 @@ import type { ComponentType } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import clsx from "clsx";
 import { Sparkles, Warehouse, Megaphone } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
-const sectionTabs: { key: string; label: string; icon: ComponentType<{ size?: number }> }[] = [
-    { key: "hero",        label: "Hero",        icon: Sparkles   },
-    { key: "warehouse",   label: "Warehouse",   icon: Warehouse  },
-    { key: "advertising", label: "Advertising", icon: Megaphone  },
+const sectionTabs: { key: string; tabKey: "hero" | "warehouse" | "advertising"; icon: ComponentType<{ size?: number }> }[] = [
+    { key: "hero", tabKey: "hero", icon: Sparkles },
+    { key: "warehouse", tabKey: "warehouse", icon: Warehouse },
+    { key: "advertising", tabKey: "advertising", icon: Megaphone },
 ];
 
 const ServicesPage = () => {
+    const { t } = useTranslation("cms");
     return (
         <div className="space-y-5">
             <p className="text-sm text-main-coolGray">
-                Hero, warehouse, and advertising sections each have bilingual titles, descriptions, and rich cards with shared images.
+                {t("services.intro")}
             </p>
             <div className="rounded-2xl border border-main-whiteMarble bg-main-white p-2 shadow-[0_12px_30px_rgba(17,24,39,0.04)]">
                 <div className="flex flex-wrap items-center gap-2">
@@ -31,7 +33,7 @@ const ServicesPage = () => {
                             }
                         >
                             <tab.icon size={14} />
-                            {tab.label}
+                            {t(`services.tabs.${tab.tabKey}`)}
                         </NavLink>
                     ))}
                 </div>

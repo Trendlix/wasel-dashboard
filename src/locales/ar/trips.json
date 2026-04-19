@@ -1,0 +1,86 @@
+{
+  "pageTitle": "إدارة الرحلات",
+  "pageDescription": "مراقبة وإدارة كل رحلات المنصة",
+  "searchPlaceholder": "ابحث في الرحلات…",
+  "filters": {
+    "allStatuses": "كل الحالات",
+    "pending": "قيد الانتظار",
+    "accepted": "مقبولة",
+    "scheduled": "مجدولة",
+    "on_the_way": "في الطريق",
+    "arrived": "وصلت",
+    "picked_up": "تم الاستلام",
+    "delivered": "تم التسليم",
+    "completed": "مكتملة",
+    "cancelled": "ملغاة"
+  },
+  "table": {
+    "bookingNumber": "رقم الحجز",
+    "user": "المستخدم",
+    "driver": "السائق",
+    "route": "المسار",
+    "price": "السعر",
+    "status": "الحالة",
+    "actions": "إجراءات"
+  },
+  "row": {
+    "total": "الإجمالي: {{currency}} {{amount}}",
+    "waselShare": "حصة واصل % ({{currency}} {{amount}})",
+    "driverShare": "حصة السائق % ({{currency}} {{amount}})"
+  },
+  "viewDetails": "عرض التفاصيل",
+  "emptyTitle": "لا توجد رحلات",
+  "emptyDescription": "جرّب تعديل البحث أو عوامل التصفية.",
+  "analytics": {
+    "totalTrips": "إجمالي الرحلات",
+    "activeTrips": "الرحلات النشطة",
+    "completedTrips": "الرحلات المكتملة",
+    "cancelledTrips": "الرحلات الملغاة"
+  },
+  "export": {
+    "title": "تصدير الرحلات",
+    "description": "اختر نطاق تاريخ لتصدير الرحلات خلاله، أو اترك الحقول فارغة للكل.",
+    "dateHint": "اترك الحقلين فارغين لتصدير كل الرحلات."
+  },
+  "statuses": {
+    "pending": "قيد الانتظار",
+    "accepted": "مقبولة",
+    "scheduled": "مجدولة",
+    "on_the_way": "في الطريق",
+    "arrived": "وصلت",
+    "picked_up": "تم الاستلام",
+    "delivered": "تم التسليم",
+    "completed": "مكتملة",
+    "cancelled": "ملغاة"
+  },
+  "details": {
+    "title": "تفاصيل الرحلة",
+    "bookingLine": "#{{number}} — {{date}}",
+    "user": "المستخدم",
+    "userSubtitle": "بيانات العميل",
+    "driver": "السائق",
+    "driverSubtitle": "بيانات السائق",
+    "routeSection": "معلومات المسار",
+    "pickup": "نقطة الاستلام",
+    "dropoff": "نقطة التسليم",
+    "timeLabel": "الوقت",
+    "distance": "المسافة",
+    "duration": "المدة",
+    "km": "كم",
+    "mins": "دقيقة",
+    "vehicleGoods": "المركبة والبضائع",
+    "payment": "تفاصيل الدفع",
+    "notes": "ملاحظات",
+    "truckType": "نوع الشاحنة",
+    "goodsType": "نوع البضاعة",
+    "weight": "الوزن",
+    "tons": "{{value}} طن",
+    "totalPrice": "السعر الإجمالي",
+    "commission": "العمولة (١٠٪)",
+    "paymentMethod": "طريقة الدفع",
+    "close": "إغلاق",
+    "cancelTrip": "إلغاء الرحلة",
+    "cancelling": "جاري الإلغاء…",
+    "trackTrip": "تتبع الرحلة"
+  }
+}

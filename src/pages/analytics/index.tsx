@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import PageHeader from "@/shared/components/common/PageHeader";
 import PageTransition from "@/shared/components/common/PageTransition";
 import AnalyticsCards from "@/shared/components/pages/analytics/AnalyticsCards";
@@ -6,9 +7,10 @@ import VehicleTypeChart from "@/shared/components/pages/analytics/VehicleTypeCha
 import TopDriversTable from "@/shared/components/pages/analytics/TopDriversTable";
 
 const AnalyticsPage = () => {
+    const { t } = useTranslation("analytics");
     return (
         <PageTransition>
-            <PageHeader title="Analytics" description="Platform performance insights and reports" />
+            <PageHeader title={t("pageTitle")} description={t("pageDescription")} />
             <AnalyticsCards />
             <div className="grid grid-cols-2 gap-4">
                 <TripsRevenueChart />

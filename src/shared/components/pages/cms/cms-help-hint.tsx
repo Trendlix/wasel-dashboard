@@ -17,7 +17,7 @@ const CmsHelpHint = ({ text }: CmsHelpHintProps) => (
             className={[
                 "pointer-events-none absolute top-7 z-[200] w-64 max-w-[min(16rem,calc(100vw-1.5rem))]",
                 "rounded-lg border border-main-whiteMarble bg-main-white p-2",
-                "text-start text-xs font-medium leading-relaxed text-main-sharkGray break-words",
+                "text-start text-xs font-medium leading-relaxed text-main-sharkGray wrap-break-word",
                 "opacity-0 shadow-[0_10px_26px_rgba(17,24,39,0.12)] transition-opacity",
                 "group-hover:opacity-100 group-focus-within:opacity-100",
                 /* LTR: anchor left edge to icon, extend right (away from page margin). */

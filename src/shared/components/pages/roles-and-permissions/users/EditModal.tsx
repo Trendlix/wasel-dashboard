@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
     Form,
     FormControl,
@@ -13,7 +14,7 @@ import useUserManagementStore, { type AdminUser } from "@/shared/hooks/store/use
 import useRolesStore from "@/shared/hooks/store/useRolesStore";
 import RoleSelect from "./RoleSelect";
 import StatusSelect from "./StatusSelect";
-import { editSchema, type EditFormValues } from "./schemas";
+import { createEditSchema, type EditFormValues } from "./schemas";
 import {
     CommonModal,
     CommonModalHeader,
@@ -28,8 +29,12 @@ interface EditModalProps {
 }
 
 const EditModal = ({ open, onOpenChange, user }: EditModalProps) => {
+    const { t } = useTranslation(["roles", "common"]);
     const { updateUser, loading } = useUserManagementStore();
     const { roles, fetchRoles } = useRolesStore();
+    const isSuperAdmin = user?.role?.slug === "super-admin";
+
+    const editSchema = useMemo(() => createEditSchema((key) => t(key)), [t]);
 
     const form = useForm<EditFormValues>({
         resolver: zodResolver(editSchema),
@@ -44,55 +49,59 @@ const EditModal = ({ open, onOpenChange, user }: EditModalProps) => {
                 status: user.status,
             });
         }
-    }, [open, user]);
+    }, [open, user, fetchRoles, form]);
 
     const onSubmit = async (values: EditFormValues) => {
         if (!user) return;
-        await updateUser(user.id, {
-            role_id: Number(values.role_id),
-            status: values.status as any,
-        }, { showToast: true, toastType: "success" });
+        await updateUser(
+            user.id,
+            {
+                role_id: Number(values.role_id),
+                status: values.status as "active" | "blocked" | "twofa",
+            },
+            { showToast: true, toastType: "success" },
+        );
         onOpenChange(false);
     };
 
     return (
         <CommonModal open={open} onOpenChange={onOpenChange} loading={loading}>
             <CommonModalHeader
-                title="Edit User"
-                description={
-                    <>
-                        Update <span className="font-semibold text-main-mirage">{user?.name ?? "this user"}</span>'s role and access status.
-                    </>
-                }
+                title={t("users.editTitle")}
+                description={t("users.editDescription", {
+                    name: user?.name ?? t("users.editFallbackName"),
+                })}
             />
 
             <CommonModalBody>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} id="edit-user-form" className="space-y-6">
-                        <FormField
-                            control={form.control}
-                            name="role_id"
-                            render={({ field }) => (
-                                <FormItem className="space-y-0">
-                                    <p className="text-sm font-semibold text-main-mirage mb-2">Assign Role</p>
-                                    <FormControl>
-                                        <RoleSelect
-                                            value={field.value}
-                                            onChange={field.onChange}
-                                            roles={roles.filter((r) => r.slug !== "super-admin")}
-                                        />
-                                    </FormControl>
-                                    <FormMessage className="mt-1.5" />
-                                </FormItem>
-                            )}
-                        />
+                        {!isSuperAdmin && (
+                            <FormField
+                                control={form.control}
+                                name="role_id"
+                                render={({ field }) => (
+                                    <FormItem className="space-y-0">
+                                        <p className="text-sm font-semibold text-main-mirage mb-2">{t("users.assignRole")}</p>
+                                        <FormControl>
+                                            <RoleSelect
+                                                value={field.value}
+                                                onChange={field.onChange}
+                                                roles={roles.filter((r) => r.slug !== "super-admin")}
+                                            />
+                                        </FormControl>
+                                        <FormMessage className="mt-1.5" />
+                                    </FormItem>
+                                )}
+                            />
+                        )}
 
                         <FormField
                             control={form.control}
                             name="status"
                             render={({ field }) => (
                                 <FormItem className="space-y-0">
-                                    <p className="text-sm font-semibold text-main-mirage mb-2">Account Status</p>
+                                    <p className="text-sm font-semibold text-main-mirage mb-2">{t("users.accountStatus")}</p>
                                     <FormControl>
                                         <StatusSelect value={field.value} onChange={field.onChange} />
                                     </FormControl>
@@ -112,7 +121,7 @@ const EditModal = ({ open, onOpenChange, user }: EditModalProps) => {
                     onClick={() => onOpenChange(false)}
                     disabled={loading}
                 >
-                    Cancel
+                    {t("common:cancel")}
                 </Button>
                 <Button
                     form="edit-user-form"
@@ -120,7 +129,7 @@ const EditModal = ({ open, onOpenChange, user }: EditModalProps) => {
                     disabled={loading}
                     className="bg-main-primary hover:bg-main-primary/90 text-white font-bold h-11 px-8 common-rounded shadow-lg shadow-main-primary/20"
                 >
-                    {loading ? "Saving..." : "Save Changes"}
+                    {loading ? t("users.saving") : t("users.saveChanges")}
                 </Button>
             </CommonModalFooter>
         </CommonModal>

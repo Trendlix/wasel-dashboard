@@ -2,19 +2,21 @@ import { NavLink, Outlet } from "react-router-dom";
 import clsx from "clsx";
 import { FileText, DollarSign, ShieldCheck, WandSparkles } from "lucide-react";
 import type { ComponentType } from "react";
+import { useTranslation } from "react-i18next";
 
-const sectionTabs: { key: string; label: string; icon: ComponentType<{ size?: number }> }[] = [
-    { key: "hero",      label: "Hero",       icon: FileText      },
-    { key: "founded",   label: "Founded",    icon: DollarSign    },
-    { key: "stand-for", label: "Stand For",  icon: ShieldCheck   },
-    { key: "future",    label: "Future",     icon: WandSparkles  },
+const sectionTabs: { key: string; tabKey: "hero" | "founded" | "standFor" | "future"; icon: ComponentType<{ size?: number }> }[] = [
+    { key: "hero", tabKey: "hero", icon: FileText },
+    { key: "founded", tabKey: "founded", icon: DollarSign },
+    { key: "stand-for", tabKey: "standFor", icon: ShieldCheck },
+    { key: "future", tabKey: "future", icon: WandSparkles },
 ];
 
 const AboutPage = () => {
+    const { t } = useTranslation("cms");
     return (
         <div className="space-y-5">
             <p className="text-sm text-main-coolGray">
-                Edit the public About page by tab. Each subsection has its own save action and optional hide toggle.
+                {t("about.intro")}
             </p>
             <div className="rounded-2xl border border-main-whiteMarble bg-main-white p-2 shadow-[0_12px_30px_rgba(17,24,39,0.04)]">
                 <div className="flex flex-wrap items-center gap-2">
@@ -32,7 +34,7 @@ const AboutPage = () => {
                             }
                         >
                             <tab.icon size={14} />
-                            {tab.label}
+                            {t(`about.tabs.${tab.tabKey}`)}
                         </NavLink>
                     ))}
                 </div>

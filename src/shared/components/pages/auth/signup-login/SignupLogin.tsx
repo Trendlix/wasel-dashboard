@@ -145,7 +145,7 @@ const SignupLogin = () => {
                         </p>
 
                         {/* Toggle tabs */}
-                        <div className="flex rounded-xl border border-main-whiteMarble overflow-hidden mb-8">
+                        <div dir="ltr" className="flex rounded-xl border border-main-whiteMarble overflow-hidden mb-8">
                             {(["login", "signup"] as const).map((tab) => (
                                 <button
                                     key={tab}
@@ -197,7 +197,7 @@ const SignupLogin = () => {
                                         />
                                     </div>
                                     {loginForm.formState.errors.password && (
-                                        <p className="text-xs text-main-remove mt-1">{loginForm.formState.errors.password.message}</p>
+                                        <p className="text-xs font-medium text-main-red mt-1">{loginForm.formState.errors.password.message}</p>
                                     )}
                                 </div>
 
@@ -324,7 +324,7 @@ const InputField = ({
             <span className="absolute left-3 top-1/2 -translate-y-1/2">{icon}</span>
             {children}
         </div>
-        {error && <p className="text-xs text-main-remove mt-1">{error}</p>}
+        {error && <p className="text-xs font-medium text-main-red mt-1">{error}</p>}
     </div>
 );
 

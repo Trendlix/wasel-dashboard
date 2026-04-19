@@ -1,0 +1,70 @@
+{
+  "pageTitle": "التحكم في العمولة والتسعير",
+  "pageDescription": "ضبط وإدارة نسب العمولة للرحلات والتخزين والإعلانات",
+  "categories": {
+    "trip": "الرحلات",
+    "storage": "التخزين",
+    "advertising": "الإعلانات"
+  },
+  "analytics": {
+    "trip": "عمولة الرحلات",
+    "storage": "عمولة التخزين",
+    "advertising": "عمولة الإعلانات"
+  },
+  "types": {
+    "percentage": "نسبة مئوية",
+    "fixed": "مبلغ ثابت"
+  },
+  "statusActive": "نشط",
+  "statusInactive": "غير نشط",
+  "table": {
+    "category": "التصنيف",
+    "description": "الوصف",
+    "type": "النوع",
+    "rate": "النسبة",
+    "status": "الحالة",
+    "actions": "إجراءات",
+    "editAria": "تعديل نسبة العمولة",
+    "deleteAria": "حذف نسبة العمولة",
+    "noDescription": "—"
+  },
+  "header": {
+    "title": "نسب العمولة",
+    "subtitle": "إدارة هيكل عمولة المنصة",
+    "addRate": "إضافة نسبة"
+  },
+  "empty": "لا توجد نسب عمولة. استخدم «إضافة نسبة» للبدء.",
+  "delete": {
+    "title": "حذف نسبة العمولة؟",
+    "cannotDelete": "لا يمكن الحذف — هذه آخر نسبة عمولة نشطة لتصنيف \"{{category}}\". عطّلها أولاً أو أضف نسبة نشطة أخرى.",
+    "confirmBody": "سيتم حذف نسبة عمولة {{category}} نهائياً. لا يمكن التراجع عن هذا الإجراء.",
+    "cancel": "إلغاء",
+    "confirm": "حذف",
+    "deleting": "جاري الحذف…"
+  },
+  "modal": {
+    "addTitle": "إضافة نسبة عمولة",
+    "editTitle": "تعديل نسبة العمولة",
+    "addDescription": "إنشاء نسبة عمولة جديدة للمنصة.",
+    "editDescription": "تحديث قاعدة العمولة هذه.",
+    "activeLabel": "حالة التفعيل",
+    "activeHint": "فعّل أو عطّل نسبة العمولة هذه.",
+    "category": "التصنيف",
+    "categoryPlaceholder": "اختر التصنيف",
+    "type": "النوع",
+    "typePlaceholder": "اختر النوع",
+    "typePercentage": "نسبة مئوية (٪)",
+    "typeFixed": "مبلغ ثابت",
+    "rate": "النسبة / المبلغ",
+    "ratePlaceholder": "مثال: 15",
+    "description": "الوصف (اختياري)",
+    "descriptionPlaceholder": "مثال: عمولة الرحلات القياسية",
+    "saveAdd": "إضافة",
+    "saveUpdate": "تحديث",
+    "saving": "جاري الحفظ…",
+    "lastActiveError": "يجب أن تبقى نسبة عمولة نشطة واحدة على الأقل لتصنيف \"{{category}}\"."
+  },
+  "validation": {
+    "rateMin": "يجب أن تكون القيمة 0 على الأقل"
+  }
+}

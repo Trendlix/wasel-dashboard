@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Trash2 } from "lucide-react";
 import clsx from "clsx";
+import { useTranslation } from "react-i18next";
 import useCmsAboutStore from "@/shared/hooks/store/useCmsAboutStore";
 import {
     PageShell,
@@ -17,6 +18,7 @@ import {
 } from "./_shared";
 
 const AboutStandForPage = () => {
+    const { t } = useTranslation("cms");
     const {
         standFor,
         loading,
@@ -50,10 +52,10 @@ const AboutStandForPage = () => {
 
     return (
         <PageShell
-            title="About / Stand For"
-            subtitle="About Section"
-            description="Value cards: one shared image per card with bilingual title and description."
-            hint="Cards are paired by index across EN/AR. Removing a card deletes it for both languages."
+            title={t("aboutEditor.standFor.pageTitle")}
+            subtitle={t("aboutEditor.standFor.subtitle")}
+            description={t("aboutEditor.standFor.description")}
+            hint={t("aboutEditor.standFor.hint")}
             onSave={() => savePart("stand_for")}
             saving={savingPart === "stand_for"}
             loading={loading}
@@ -63,8 +65,8 @@ const AboutStandForPage = () => {
                 <div className={clsx(sectionCardClass, "space-y-4")}>
                     <div className="space-y-2">
                         <CmsFieldLabel
-                            label="Section visibility"
-                            hint="Hides the entire Stand For region on the public About page when enabled."
+                            label={t("aboutEditor.standFor.visibility")}
+                            hint={t("aboutEditor.standFor.visibilityHint")}
                         />
                         <SectionVisibilityToggle
                             checked={standFor.en.hide}
@@ -76,11 +78,11 @@ const AboutStandForPage = () => {
                     </div>
 
                     <BilingualStringArrayEditor
-                        label="Stand For Titles"
-                        hint="Intro lines above the value cards. Keep length similar across locales for layout balance."
+                        label={t("aboutEditor.standFor.titles")}
+                        hint={t("aboutEditor.standFor.titlesHint")}
                         enValues={standFor.en.titles}
                         arValues={standFor.ar.titles}
-                        placeholder="Stand For title"
+                        placeholder={t("aboutEditor.standFor.cardTitlePlaceholderEn")}
                         onEnChange={(titles) => setStandFor("en", { titles })}
                         onArChange={(titles) => setStandFor("ar", { titles })}
                         enTopError={getEnError("titles")}
@@ -95,7 +97,7 @@ const AboutStandForPage = () => {
                     <div key={`stand-card-${index}`} className={clsx(sectionCardClass, "space-y-4")}>
                         <div className="flex items-center justify-between">
                             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-main-lightSlate">
-                                Card #{index + 1}
+                                {t("aboutEditor.standFor.cardLabel", { n: index + 1 })}
                             </p>
                             <Button
                                 type="button"
@@ -104,29 +106,29 @@ const AboutStandForPage = () => {
                                 onClick={() => removeStandForCard(index)}
                             >
                                 <Trash2 size={14} />
-                                Remove Card
+                                {t("aboutEditor.standFor.removeCard")}
                             </Button>
                         </div>
 
                         {/* Shared image */}
                         <div className="space-y-2">
                             <CmsFieldLabel
-                                label="Card Image (shared)"
-                                hint="Illustration for this card only. The same file is shown for English and Arabic visitors."
+                                label={t("aboutEditor.standFor.cardImage")}
+                                hint={t("aboutEditor.standFor.cardImageHint")}
                             />
                             <div className="h-[280px] w-[280px] max-w-full overflow-hidden rounded-xl border border-main-whiteMarble bg-main-titaniumWhite/30">
                                 {standForDraftPreviews[index] ? (
-                                    <img src={standForDraftPreviews[index]} alt={`Card ${index + 1} preview`} className="h-full w-full object-contain" />
+                                    <img src={standForDraftPreviews[index]} alt={t("aboutEditor.standFor.cardImage")} className="h-full w-full object-contain" />
                                 ) : standFor.en.cards[index]?.img ? (
-                                    <img src={cmsImageUrl(standFor.en.cards[index].img)} alt={`Card ${index + 1}`} className="h-full w-full object-contain" />
+                                    <img src={cmsImageUrl(standFor.en.cards[index].img)} alt={t("aboutEditor.standFor.cardImage")} className="h-full w-full object-contain" />
                                 ) : (
                                     <div className="flex h-full w-full items-center justify-center px-4 text-center text-sm text-main-coolGray">
-                                        No image uploaded yet
+                                        {t("aboutEditor.standFor.cardImageEmpty")}
                                     </div>
                                 )}
                             </div>
                             {standForDraftPreviews[index] && (
-                                <p className="text-xs text-main-primary">New image selected. It will upload on Save.</p>
+                                <p className="text-xs text-main-primary">{t("aboutEditor.standFor.cardImageSelected")}</p>
                             )}
                         </div>
 
@@ -134,8 +136,8 @@ const AboutStandForPage = () => {
                             <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                                 <div className="flex-1 space-y-2">
                                     <CmsFieldLabel
-                                        label="Upload Card Image"
-                                        hint="PNG or JPG recommended. Replaces the current card image after Save."
+                                        label={t("aboutEditor.standFor.uploadCardImage")}
+                                        hint={t("aboutEditor.standFor.uploadCardImageHint")}
                                     />
                                     <Input
                                         type="file"
@@ -157,7 +159,7 @@ const AboutStandForPage = () => {
                                         disabled={savingPart === "stand_for"}
                                     >
                                         <Trash2 size={14} />
-                                        Remove Image
+                                        {t("aboutEditor.standFor.removeImage")}
                                     </Button>
                                 )}
                             </div>
@@ -166,18 +168,18 @@ const AboutStandForPage = () => {
 
                         {/* Bilingual text fields */}
                         <BilingualField
-                            label="Card Title"
-                            hint="Short headline displayed on the card face."
+                            label={t("aboutEditor.standFor.cardTitle")}
+                            hint={t("aboutEditor.standFor.cardTitleHint")}
                             en={
                                 <Input
-                                    placeholder="Card title"
+                                    placeholder={t("aboutEditor.standFor.cardTitlePlaceholderEn")}
                                     value={standFor.en.cards[index]?.title ?? ""}
                                     onChange={(e) => updateStandForCard("en", index, { title: e.target.value })}
                                 />
                             }
                             ar={
                                 <Input
-                                    placeholder="عنوان البطاقة"
+                                    placeholder={t("aboutEditor.standFor.cardTitlePlaceholderAr")}
                                     value={standFor.ar.cards[index]?.title ?? ""}
                                     onChange={(e) => updateStandForCard("ar", index, { title: e.target.value })}
                                 />
@@ -187,12 +189,12 @@ const AboutStandForPage = () => {
                         />
 
                         <BilingualField
-                            label="Card Description"
-                            hint="Supporting copy under the title. Plain textarea; use line breaks for spacing."
+                            label={t("aboutEditor.standFor.cardDescription")}
+                            hint={t("aboutEditor.standFor.cardDescriptionHint")}
                             en={
                                 <textarea
                                     className="w-full min-h-[80px] rounded-lg border border-main-whiteMarble bg-main-white px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-main-primary/40 focus:border-main-primary"
-                                    placeholder="Card description"
+                                    placeholder={t("aboutEditor.standFor.cardDescriptionPlaceholderEn")}
                                     value={standFor.en.cards[index]?.description ?? ""}
                                     onChange={(e) => updateStandForCard("en", index, { description: e.target.value })}
                                 />
@@ -200,7 +202,7 @@ const AboutStandForPage = () => {
                             ar={
                                 <textarea
                                     className="w-full min-h-[80px] rounded-lg border border-main-whiteMarble bg-main-white px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-main-primary/40 focus:border-main-primary"
-                                    placeholder="وصف البطاقة"
+                                    placeholder={t("aboutEditor.standFor.cardDescriptionPlaceholderAr")}
                                     value={standFor.ar.cards[index]?.description ?? ""}
                                     onChange={(e) => updateStandForCard("ar", index, { description: e.target.value })}
                                 />
@@ -213,7 +215,7 @@ const AboutStandForPage = () => {
 
                 {standFor.en.cards.length === 0 && (
                     <div className="rounded-xl border border-dashed border-main-whiteMarble bg-main-titaniumWhite/25 px-4 py-5 text-sm text-main-coolGray">
-                        No cards yet. Add your first card to describe what the company stands for.
+                        {t("aboutEditor.standFor.emptyCards")}
                     </div>
                 )}
 
@@ -223,7 +225,7 @@ const AboutStandForPage = () => {
                     className="border-main-primary/30 text-main-primary hover:bg-main-primary/10"
                     onClick={addStandForCard}
                 >
-                    Add Card
+                    {t("aboutEditor.standFor.addCard")}
                 </Button>
             </div>
         </PageShell>

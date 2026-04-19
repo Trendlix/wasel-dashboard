@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import clsx from "clsx";
 import { ArrowLeft, CheckCircle, Send, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,10 +20,12 @@ import {
     type TTicketPriority,
     type TTicketStatus,
 } from "@/shared/core/pages/supportTickets";
+import { formatAppDateTime } from "@/lib/formatLocaleDate";
 
 const MAX_CHARS = 500;
 
 const TicketReplyPage = () => {
+    const { t, i18n } = useTranslation(["support", "common"]);
     const { ticketId } = useParams<{ ticketId: string }>();
     const navigate = useNavigate();
 
@@ -39,6 +42,11 @@ const TicketReplyPage = () => {
     const [chatHeight, setChatHeight] = useState(420);
     const dragStartY = useRef<number | null>(null);
     const dragStartH = useRef<number>(420);
+
+    const sendShortcutLabel =
+        typeof navigator !== "undefined" && /Mac|iPhone|iPad|iPod/.test(navigator.userAgent)
+            ? t("support:chat.shortcutSendMac")
+            : t("support:chat.shortcutSend");
 
     const onDragMouseDown = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -62,9 +70,8 @@ const TicketReplyPage = () => {
 
     useEffect(() => {
         if (ticketId) fetchTicketDetail(Number(ticketId));
-    }, [ticketId]);
+    }, [ticketId, fetchTicketDetail]);
 
-    // Subscribe to real-time new messages for this ticket
     useEffect(() => {
         const numId = Number(ticketId);
         if (!numId) return;
@@ -92,7 +99,6 @@ const TicketReplyPage = () => {
         });
     };
 
-    // Smooth scroll inside the container when a new message arrives
     const supportsLength = selectedTicket?.supports?.length ?? 0;
     const prevLengthRef = useRef(supportsLength);
     useEffect(() => {
@@ -102,7 +108,6 @@ const TicketReplyPage = () => {
         prevLengthRef.current = supportsLength;
     }, [supportsLength]);
 
-    // Jump to bottom instantly on initial load
     const ticketLoaded = !detailLoading && !!selectedTicket;
     useEffect(() => {
         if (ticketLoaded) {
@@ -141,9 +146,8 @@ const TicketReplyPage = () => {
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
             e.preventDefault();
-            handleSend();
+            void handleSend();
         }
-        // plain Enter → default textarea behaviour (new line)
     };
 
     const handleConfirm = async () => {
@@ -160,21 +164,26 @@ const TicketReplyPage = () => {
 
     const ticket = selectedTicket;
     const owner = ticket?.user ?? ticket?.driver;
-    const ownerName = owner ? getOwnerDisplayName(owner) : "Customer";
+    const rawOwnerName = owner ? getOwnerDisplayName(owner) : "";
+    const ownerName = owner ? (rawOwnerName || t("support:owner.noName")) : t("support:owner.customer");
     const ownerInitial = ownerName[0]?.toUpperCase() ?? "?";
     const isResolved = ticket?.status === "closed" || ticket?.status === "solved";
     const currentAdminId = userProfile?.id ?? null;
+
+    const createdLine =
+        ticket &&
+        `${formatAppDateTime(ticket.created_at, i18n.language)}`;
 
     return (
         <>
             <PageTransition>
                 <div className="flex flex-col gap-4">
-
-                    {/* ── Page title ──────────────────────────────────────────── */}
                     <div className="flex items-center gap-3 shrink-0">
                         <button
+                            type="button"
                             onClick={() => navigate("/support-tickets")}
                             className="w-9 h-9 rounded-full bg-main-primary flex items-center justify-center text-main-white hover:bg-main-primary/85 transition-colors shrink-0"
+                            aria-label={t("support:chat.backAria")}
                         >
                             <ArrowLeft size={16} />
                         </button>
@@ -186,24 +195,23 @@ const TicketReplyPage = () => {
                         ) : (
                             <div>
                                 <h1 className="font-bold text-xl text-main-mirage leading-tight">
-                                    Ticket #{ticket.id}
+                                    {t("support:chat.ticketHeading", { id: ticket.id })}
                                 </h1>
                                 <p className="text-main-sharkGray text-sm">{ticket.subject}</p>
                             </div>
                         )}
                     </div>
 
-                    {/* ── Blue info card ─────────────────────────────────────── */}
                     {ticket && !detailLoading && (
                         <div className="bg-main-primary common-rounded px-6 py-5 text-main-white shrink-0">
                             <div className="grid grid-cols-3 gap-4 mb-5">
-                                <InfoCell label="Status">
+                                <InfoCell label={t("support:chat.labels.status")}>
                                     <StatusBadge status={ticket.status} />
                                 </InfoCell>
-                                <InfoCell label="Priority">
+                                <InfoCell label={t("support:chat.labels.priority")}>
                                     <PriorityBadge priority={ticket.priority} />
                                 </InfoCell>
-                                <InfoCell label="Category">
+                                <InfoCell label={t("support:chat.labels.category")}>
                                     <span className="text-sm font-semibold">{ticket.category.name}</span>
                                 </InfoCell>
                             </div>
@@ -211,20 +219,14 @@ const TicketReplyPage = () => {
                             <hr className="border-main-white/15 mb-5" />
 
                             <div className="grid grid-cols-2 gap-4">
-                                <InfoCell label="Customer">
+                                <InfoCell label={t("support:chat.labels.customer")}>
                                     <p className="text-sm font-bold">{ownerName}</p>
                                     {owner?.email && (
                                         <p className="text-xs text-main-white/60">{owner.email}</p>
                                     )}
                                 </InfoCell>
-                                <InfoCell label="Created">
-                                    <p className="text-sm font-bold">
-                                        {new Date(ticket.created_at).toLocaleDateString("en-US", {
-                                            month: "short", day: "numeric", year: "numeric",
-                                        })}, {new Date(ticket.created_at).toLocaleTimeString("en-US", {
-                                            hour: "2-digit", minute: "2-digit",
-                                        })}
-                                    </p>
+                                <InfoCell label={t("support:chat.labels.created")}>
+                                    <p className="text-sm font-bold">{createdLine}</p>
                                 </InfoCell>
                             </div>
 
@@ -233,22 +235,24 @@ const TicketReplyPage = () => {
                                     <hr className="border-main-white/15 mt-5" />
                                     <div className="flex gap-2 mt-4">
                                         <Button
+                                            type="button"
                                             variant="ghost"
                                             size="sm"
                                             onClick={() => setConfirmAction("close")}
                                             className="h-8 px-3 bg-main-white/10 hover:bg-main-white/20 text-main-white font-semibold text-xs"
                                         >
                                             <XCircle size={13} />
-                                            Close Ticket
+                                            {t("support:chat.closeTicket")}
                                         </Button>
                                         <Button
+                                            type="button"
                                             variant="ghost"
                                             size="sm"
                                             onClick={() => setConfirmAction("solve")}
                                             className="h-8 px-3 bg-main-white/10 hover:bg-main-white/20 text-main-white font-semibold text-xs"
                                         >
                                             <CheckCircle size={13} />
-                                            Mark Solved
+                                            {t("support:chat.markSolved")}
                                         </Button>
                                     </div>
                                 </>
@@ -256,7 +260,6 @@ const TicketReplyPage = () => {
                         </div>
                     )}
 
-                    {/* ── Messages ──────────────────────────────────────────── */}
                     <div ref={chatRef} className="overflow-y-auto bg-main-white common-rounded p-6 space-y-5 transition-none" style={{ height: chatHeight }}>
                         {detailLoading ? (
                             <div className="space-y-5">
@@ -296,25 +299,26 @@ const TicketReplyPage = () => {
                                         currentAdminId={currentAdminId}
                                     />
                                 ))}
-
                             </>
                         ) : null}
                     </div>
 
-                    {/* ── Drag handle ──────────────────────────────────────── */}
                     <div
                         onMouseDown={onDragMouseDown}
                         className="flex items-center justify-center h-3 cursor-row-resize group shrink-0 -my-1"
-                        title="Drag to resize"
+                        title={t("support:chat.dragResize")}
+                        role="separator"
+                        aria-orientation="horizontal"
                     >
                         <div className="w-10 h-1 rounded-full bg-main-whiteMarble group-hover:bg-main-primary/30 transition-colors" />
                     </div>
 
-                    {/* ── Reply input ────────────────────────────────────────── */}
                     <div className="bg-main-white common-rounded px-5 py-4 shrink-0">
                         {isResolved ? (
                             <p className="text-center text-sm text-main-sharkGray py-1">
-                                This ticket is <strong className="capitalize">{ticket?.status}</strong> — replies are disabled.
+                                {t("support:chat.resolvedNotice", {
+                                    status: t(`support:statuses.${ticket?.status ?? "closed"}`),
+                                })}
                             </p>
                         ) : (
                             <div className="space-y-2">
@@ -325,34 +329,33 @@ const TicketReplyPage = () => {
                                         value={message}
                                         onChange={handleChange}
                                         onKeyDown={handleKeyDown}
-                                        placeholder="Type your reply…"
+                                        placeholder={t("support:chat.placeholder")}
                                         className="flex-1 min-h-[44px] max-h-40 resize-none bg-transparent text-sm text-main-mirage placeholder:text-main-sharkGray outline-none leading-relaxed py-3"
                                     />
                                     <Button
-                                        onClick={handleSend}
+                                        type="button"
+                                        onClick={() => void handleSend()}
                                         disabled={sending || !message.trim()}
                                         className="h-11 px-5 bg-main-primary text-main-white font-semibold shrink-0 mb-0.5"
                                     >
                                         <Send size={14} />
-                                        {sending ? "Sending…" : "Send"}
+                                        {sending ? t("support:chat.sending") : t("support:chat.send")}
                                     </Button>
                                 </div>
                                 <p className={clsx(
                                     "text-xs px-1",
                                     message.length >= MAX_CHARS ? "text-main-remove font-semibold" : "text-main-sharkGray"
                                 )}>
-                                    {message.length}/{MAX_CHARS}
+                                    {t("support:chat.charCount", { current: message.length, max: MAX_CHARS })}
                                     {" "}
-                                    (Ctrl+Enter to send)
+                                    ({sendShortcutLabel})
                                 </p>
                             </div>
                         )}
                     </div>
-
                 </div>
             </PageTransition>
 
-            {/* ── Confirmation modal ── */}
             <CommonModal
                 open={confirmAction !== null}
                 onOpenChange={(v) => !v && setConfirmAction(null)}
@@ -360,24 +363,30 @@ const TicketReplyPage = () => {
                 loading={acting}
             >
                 <CommonModalHeader
-                    title={confirmAction === "close" ? "Close Ticket?" : "Mark as Solved?"}
+                    title={
+                        confirmAction === "close"
+                            ? t("support:chat.confirmCloseTitle")
+                            : t("support:chat.confirmSolveTitle")
+                    }
                     description={
                         confirmAction === "close"
-                            ? "This ticket will be closed and no further replies can be sent."
-                            : "This will mark the ticket as solved. You can reopen it anytime."
+                            ? t("support:chat.confirmCloseBody")
+                            : t("support:chat.confirmSolveBody")
                     }
                 />
                 <CommonModalFooter>
                     <Button
+                        type="button"
                         variant="outline"
                         onClick={() => setConfirmAction(null)}
                         disabled={acting}
                         className="h-10 px-5 border-main-whiteMarble text-main-hydrocarbon"
                     >
-                        Cancel
+                        {t("common:cancel")}
                     </Button>
                     <Button
-                        onClick={handleConfirm}
+                        type="button"
+                        onClick={() => void handleConfirm()}
                         disabled={acting}
                         className={clsx(
                             "h-10 px-5 font-semibold text-main-white",
@@ -386,15 +395,17 @@ const TicketReplyPage = () => {
                                 : "bg-main-vividMint hover:bg-main-vividMint/90"
                         )}
                     >
-                        {acting ? "Processing…" : confirmAction === "close" ? "Yes, Close" : "Yes, Solved"}
+                        {acting
+                            ? t("support:chat.processing")
+                            : confirmAction === "close"
+                              ? t("support:chat.yesClose")
+                              : t("support:chat.yesSolved")}
                     </Button>
                 </CommonModalFooter>
             </CommonModal>
         </>
     );
 };
-
-// ─── Customer bubble (right-aligned, blue) ────────────────────────────────────
 
 const CustomerBubble = ({
     initial,
@@ -407,7 +418,8 @@ const CustomerBubble = ({
     timestamp: string;
     text: string;
 }) => {
-    const time = formatTime(timestamp);
+    const { i18n } = useTranslation("support");
+    const time = formatAppDateTime(timestamp, i18n.language);
     return (
         <div className="flex justify-end">
             <div className="bg-main-primary rounded-2xl rounded-tr-sm px-5 py-4 max-w-[65%]">
@@ -420,13 +432,11 @@ const CustomerBubble = ({
                         <p className="text-main-white/60 text-xs">{time}</p>
                     </div>
                 </div>
-                <p className="text-main-white text-sm leading-relaxed whitespace-pre-wrap break-words">{text}</p>
+                <p className="text-main-white text-sm leading-relaxed whitespace-pre-wrap wrap-break-word">{text}</p>
             </div>
         </div>
     );
 };
-
-// ─── Support bubble (left-aligned, white card) ────────────────────────────────
 
 const SupportBubble = ({
     timestamp,
@@ -439,10 +449,11 @@ const SupportBubble = ({
     updatedBy?: { id: number; name: string | null } | null;
     currentAdminId: number | null;
 }) => {
-    const time = formatTime(timestamp);
+    const { t, i18n } = useTranslation("support");
+    const time = formatAppDateTime(timestamp, i18n.language);
     const initial = updatedBy?.name?.[0]?.toUpperCase() ?? "S";
     const isMe = currentAdminId !== null && updatedBy?.id === currentAdminId;
-    const senderLabel = isMe ? "You" : (updatedBy?.name ?? "Support Team");
+    const senderLabel = isMe ? t("chat.you") : (updatedBy?.name ?? t("chat.supportTeam"));
 
     return (
         <div className="flex justify-start">
@@ -456,22 +467,11 @@ const SupportBubble = ({
                         <p className="text-main-sharkGray text-xs">{time}</p>
                     </div>
                 </div>
-                <p className="text-main-hydrocarbon text-sm leading-relaxed whitespace-pre-wrap break-words">{text}</p>
+                <p className="text-main-hydrocarbon text-sm leading-relaxed whitespace-pre-wrap wrap-break-word">{text}</p>
             </div>
         </div>
     );
 };
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-const formatTime = (ts: string) =>
-    new Date(ts).toLocaleString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-    });
 
 const InfoCell = ({ label, children }: { label: string; children: React.ReactNode }) => (
     <div className="flex flex-col gap-1">
@@ -481,19 +481,21 @@ const InfoCell = ({ label, children }: { label: string; children: React.ReactNod
 );
 
 const StatusBadge = ({ status }: { status: TTicketStatus }) => {
+    const { t } = useTranslation("support");
     const s = ticketStatusStyles[status] ?? ticketStatusStyles.pending;
     return (
         <span className={clsx("px-2.5 py-1 rounded-full text-xs font-semibold", s.bg, s.text)}>
-            {s.label}
+            {t(`statuses.${status}`)}
         </span>
     );
 };
 
 const PriorityBadge = ({ priority }: { priority: TTicketPriority }) => {
+    const { t } = useTranslation("support");
     const p = ticketPriorityStyles[priority] ?? ticketPriorityStyles.low;
     return (
         <span className={clsx("px-2.5 py-1 rounded-full text-xs font-semibold", p.bg, p.text)}>
-            {p.label}
+            {t(`priorities.${priority}`)}
         </span>
     );
 };

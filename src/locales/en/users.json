@@ -1,0 +1,48 @@
+{
+  "pageTitle": "Users",
+  "pageDescription": "Manage all registered users",
+  "searchPlaceholder": "Search by name, email or phone…",
+  "filters": {
+    "allStatuses": "All statuses",
+    "active": "Active",
+    "inactive": "Inactive",
+    "blocked": "Blocked",
+    "deleted": "Deleted"
+  },
+  "table": {
+    "user": "User",
+    "phone": "Phone",
+    "status": "Status",
+    "voucherUsage": "Voucher usage",
+    "joined": "Joined",
+    "actions": "Actions"
+  },
+  "viewDetails": "View details",
+  "emptyTitle": "No users found",
+  "emptyDescription": "Try adjusting your search or filters.",
+  "analytics": {
+    "totalUsers": "Total users",
+    "activeUsers": "Active users",
+    "blockedUsers": "Blocked users"
+  },
+  "modal": {
+    "title": "User details",
+    "description": "View user information and update their account status.",
+    "phone": "Phone",
+    "joined": "Joined",
+    "emailVerified": "Email verified",
+    "phoneVerified": "Phone verified",
+    "voucherUsage": "Voucher usage",
+    "accountStatus": "Account status",
+    "saveChanges": "Save changes",
+    "saving": "Saving…"
+  },
+  "statuses": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "blocked": "Blocked",
+    "deleted": "Deleted"
+  },
+  "yes": "Yes",
+  "no": "No"
+}

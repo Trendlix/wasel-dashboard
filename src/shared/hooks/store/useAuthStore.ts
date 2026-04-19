@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { isAxiosError } from "axios";
 import axiosNormalApiClient from "@/shared/utils/axios";
 import { getCookie, setCookie, removeCookie } from "@/shared/utils/cookieUtils";
+import { getNetworkErrorMessage } from "@/shared/utils/networkErrors";
 
 export enum CreateAccountCase {
     SIGNUP_PENDING_APPROVAL = "SIGNUP_PENDING_APPROVAL",
@@ -106,10 +107,10 @@ const extractErrorMessage = (error: unknown, fallback: string) => {
             .filter(Boolean)
             .join(", ");
 
-        return normalized || fallback;
+        return normalized || getNetworkErrorMessage(error);
     }
 
-    return fallback;
+    return getNetworkErrorMessage(error);
 };
 
 const useAuthStore = create<AuthState>((set, get) => ({

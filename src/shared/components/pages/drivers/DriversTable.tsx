@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Search, Star, RotateCcw, Download } from "lucide-react";
 import {
     Table, TableBody, TableCell,
@@ -14,16 +15,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { formInputWrapperClass } from "../../common/formStyles";
 import DriverDetailsModal from "./DriverDetailsModal";
-
-const STATUS_FILTER_OPTIONS: { value: string; label: string }[] = [
-    { value: "all", label: "All statuses" },
-    { value: "pending", label: "Pending" },
-    { value: "approved", label: "Approved" },
-    { value: "suspended", label: "Suspended" },
-    { value: "blocked", label: "Blocked" },
-    { value: "rejected", label: "Rejected" },
-    { value: "deleted", label: "Deleted" },
-];
+import DriversExportModal from "./DriversExportModal";
+import { formatAppDateShort } from "@/lib/formatLocaleDate";
 
 const SkeletonRow = () => (
     <TableRow className="border-b border-main-whiteMarble animate-pulse">
@@ -40,16 +33,27 @@ const SkeletonRow = () => (
         <TableCell className="py-4 px-6"><div className="h-6 w-20 rounded-full bg-main-whiteMarble" /></TableCell>
         <TableCell className="py-4 px-6"><div className="h-3.5 w-12 rounded bg-main-whiteMarble" /></TableCell>
         <TableCell className="py-4 px-6"><div className="h-3.5 w-24 rounded bg-main-whiteMarble" /></TableCell>
-        <TableCell className="py-4 px-6 text-right"><div className="h-3.5 w-16 rounded bg-main-whiteMarble ml-auto" /></TableCell>
+        <TableCell className="py-4 px-6 text-end"><div className="h-3.5 w-16 rounded bg-main-whiteMarble ms-auto" /></TableCell>
     </TableRow>
 );
 
 const DriversTable = () => {
+    const { t } = useTranslation(["drivers", "common"]);
     const { drivers, meta, loading, exporting, fetchDrivers, setQuery, setPage, resetQuery, exportDrivers } = useDriverStore();
+    const statusFilterOptions: { value: string; label: string }[] = [
+        { value: "all", label: t("drivers:filters.allStatuses") },
+        { value: "pending", label: t("drivers:filters.pending") },
+        { value: "approved", label: t("drivers:filters.approved") },
+        { value: "suspended", label: t("drivers:filters.suspended") },
+        { value: "blocked", label: t("drivers:filters.blocked") },
+        { value: "rejected", label: t("drivers:filters.rejected") },
+        { value: "deleted", label: t("drivers:filters.deleted") },
+    ];
     const [searchInput, setSearchInput] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
     const [selectedDriver, setSelectedDriver] = useState<IAppDriver | null>(null);
     const [modalOpen, setModalOpen] = useState(false);
+    const [exportModalOpen, setExportModalOpen] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => { fetchDrivers(); }, []);
@@ -83,10 +87,10 @@ const DriversTable = () => {
 
     return (
         <div className="space-y-6">
-            <div className="bg-main-white border border-main-whiteMarble common-rounded p-6 flex items-center gap-4">
+            <div className="bg-main-white border border-main-whiteMarble common-rounded p-6 flex items-center gap-4 flex-wrap">
                 <div
                     className={clsx(
-                        "flex items-center gap-2 flex-1 cursor-text",
+                        "flex items-center gap-2 flex-1 cursor-text min-w-[200px]",
                         formInputWrapperClass
                     )}
                     onClick={() => inputRef.current?.focus()}
@@ -97,7 +101,7 @@ const DriversTable = () => {
                         ref={inputRef}
                         value={searchInput}
                         onChange={(e) => setSearchInput(e.target.value)}
-                        placeholder="Search by name, email or phone…"
+                        placeholder={t("drivers:searchPlaceholder")}
                         className="border-0 shadow-none h-full p-0 placeholder:text-main-trueBlack/50 focus-visible:ring-0 bg-transparent"
                     />
                 </div>
@@ -105,27 +109,28 @@ const DriversTable = () => {
                 <StatusSelect
                     value={statusFilter}
                     onChange={handleStatusFilter}
-                    options={STATUS_FILTER_OPTIONS}
+                    options={statusFilterOptions}
                     statusStyles={driverStatusStyles}
-                    placeholder="All statuses"
+                    placeholder={t("drivers:filters.allStatuses")}
                 />
 
                 <Button
                     className="h-11 px-6 bg-main-primary text-main-white shrink-0 font-bold"
-                    onClick={exportDrivers}
+                    onClick={() => setExportModalOpen(true)}
                     disabled={exporting}
                 >
                     <Download size={16} />
-                    <span>{exporting ? "Exporting..." : "Export"}</span>
+                    <span>{t("common:export")}</span>
                 </Button>
 
                 <Button
+                    type="button"
                     variant="outline"
                     className="h-11 px-5 border-main-whiteMarble text-main-hydrocarbon shrink-0 font-semibold"
                     onClick={handleResetFilters}
+                    aria-label={t("common:resetFilters")}
                 >
                     <RotateCcw size={16} />
-                    <span>Reset</span>
                 </Button>
             </div>
 
@@ -133,12 +138,12 @@ const DriversTable = () => {
                 <Table>
                     <TableHeader>
                         <TableRow className="bg-main-luxuryWhite border-b border-main-whiteMarble hover:bg-main-luxuryWhite">
-                            <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">Driver</TableHead>
-                            <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">Phone</TableHead>
-                            <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">Status</TableHead>
-                            <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">Rating</TableHead>
-                            <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">Joined</TableHead>
-                            <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6 text-right">Actions</TableHead>
+                            <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">{t("drivers:table.driver")}</TableHead>
+                            <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">{t("drivers:table.phone")}</TableHead>
+                            <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">{t("drivers:table.status")}</TableHead>
+                            <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">{t("drivers:table.rating")}</TableHead>
+                            <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">{t("drivers:table.joined")}</TableHead>
+                            <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6 text-end">{t("drivers:table.actions")}</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -156,8 +161,8 @@ const DriversTable = () => {
                             <TableRow>
                                 <TableCell colSpan={6} className="p-2">
                                     <NoDataFound
-                                        title="No drivers found"
-                                        description="Try adjusting your search or filters."
+                                        title={t("drivers:emptyTitle")}
+                                        description={t("drivers:emptyDescription")}
                                     />
                                 </TableCell>
                             </TableRow>
@@ -175,9 +180,17 @@ const DriversTable = () => {
             </div>
 
             <DriverDetailsModal
+                key={`${selectedDriver?.id ?? "none"}-${modalOpen}`}
                 driver={selectedDriver}
                 open={modalOpen}
                 onOpenChange={setModalOpen}
+            />
+
+            <DriversExportModal
+                open={exportModalOpen}
+                loading={exporting}
+                onOpenChange={setExportModalOpen}
+                onConfirm={exportDrivers}
             />
         </div>
     );
@@ -190,7 +203,8 @@ const DriverRow = ({
     driver: IAppDriver;
     onViewDetails: (d: IAppDriver) => void;
 }) => {
-    const name = driver.name ?? "Driver";
+    const { t, i18n } = useTranslation("drivers");
+    const name = driver.name ?? t("defaultDriverName");
     const initials = name
         .split(" ")
         .map((n) => n[0])
@@ -198,11 +212,7 @@ const DriverRow = ({
         .slice(0, 2)
         .toUpperCase();
 
-    const joinDate = new Date(driver.created_at).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-    });
+    const joinDate = formatAppDateShort(driver.created_at, i18n.language);
 
     return (
         <TableRow className="border-b border-main-whiteMarble hover:bg-main-luxuryWhite/50 transition-colors">
@@ -226,16 +236,17 @@ const DriverRow = ({
                         <span className="text-main-mirage font-semibold text-sm">{driver.rating}</span>
                     </div>
                 ) : (
-                    <span className="text-main-sharkGray text-sm">N/A</span>
+                    <span className="text-main-sharkGray text-sm">{t("ratingNA")}</span>
                 )}
             </TableCell>
             <TableCell className="py-4 px-6 text-main-sharkGray text-sm">{joinDate}</TableCell>
-            <TableCell className="py-4 px-6 text-right">
+            <TableCell className="py-4 px-6 text-end">
                 <button
+                    type="button"
                     onClick={() => onViewDetails(driver)}
                     className="text-main-primary font-semibold text-sm hover:underline"
                 >
-                    View Details
+                    {t("viewDetails")}
                 </button>
             </TableCell>
         </TableRow>
@@ -243,8 +254,9 @@ const DriverRow = ({
 };
 
 const StatusBadge = ({ status }: { status: TDriverStatus }) => {
-    const { bg, text, label } = driverStatusStyles[status];
-    return <span className={clsx("px-3 py-1 rounded-full text-xs font-medium", bg, text)}>{label}</span>;
+    const { t } = useTranslation("drivers");
+    const { bg, text } = driverStatusStyles[status];
+    return <span className={clsx("px-3 py-1 rounded-full text-xs font-medium", bg, text)}>{t(`statuses.${status}`)}</span>;
 };
 
 export default DriversTable;

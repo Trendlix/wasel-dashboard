@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import useUserManagementStore, { type AdminUser } from "@/shared/hooks/store/useUserManagementStore";
 import useAuthStore from "@/shared/hooks/store/useAuthStore";
 import NoDataFound from "@/shared/components/common/NoDataFound";
@@ -11,6 +12,7 @@ import EditModal from "./EditModal";
 import RemoveModal from "./RemoveModal";
 
 const AdminUsersTable = () => {
+    const { t } = useTranslation("roles");
     const { fetchMe, userProfile } = useAuthStore();
     const { users, loading, fetchUsers } = useUserManagementStore();
 
@@ -18,11 +20,23 @@ const AdminUsersTable = () => {
     const [editOpen, setEditOpen] = useState(false);
     const [removeOpen, setRemoveOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
+    const [search, setSearch] = useState("");
 
     useEffect(() => {
         fetchMe();
         fetchUsers();
-    }, []);
+    }, [fetchMe, fetchUsers]);
+
+    const filteredUsers = search.trim()
+        ? users.filter((u) => {
+              const q = search.trim().toLowerCase();
+              return (
+                  u.name?.toLowerCase().includes(q) ||
+                  u.email?.toLowerCase().includes(q) ||
+                  u.role?.name?.toLowerCase().includes(q)
+              );
+          })
+        : users;
 
     const handleEdit = (user: AdminUser) => {
         setSelectedUser(user);
@@ -34,41 +48,43 @@ const AdminUsersTable = () => {
         setRemoveOpen(true);
     };
 
+    const emptyTitle = search.trim() ? t("users.noSearchTitle") : t("users.noUsersTitle");
+    const emptyDescription = search.trim()
+        ? t("users.noSearchDescription", { query: search.trim() })
+        : t("users.noUsersDescription");
+
     return (
         <div className="space-y-6">
-            <AdminUsersHeader onInvite={() => setInviteOpen(true)} />
+            <AdminUsersHeader onInvite={() => setInviteOpen(true)} search={search} onSearchChange={setSearch} />
 
             <div className="bg-main-white border border-main-whiteMarble common-rounded overflow-hidden">
                 <table className="w-full">
                     <thead className="bg-main-luxuryWhite border-b border-main-whiteMarble">
                         <tr>
-                            <TH>User</TH>
-                            <TH>Role</TH>
-                            <TH>Last Login</TH>
-                            <TH>2FA</TH>
-                            <TH>Status</TH>
-                            <TH>Actions</TH>
+                            <TH>{t("users.tableUser")}</TH>
+                            <TH>{t("users.tableRole")}</TH>
+                            <TH>{t("users.tableLastLogin")}</TH>
+                            <TH>{t("users.tableTwoFa")}</TH>
+                            <TH>{t("users.tableStatus")}</TH>
+                            <TH>{t("users.tableActions")}</TH>
                         </tr>
                     </thead>
                     <tbody>
                         {loading
                             ? Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)
-                            : users.map((user) => (
-                                <UserRow
-                                    key={user.id}
-                                    user={user}
-                                    currentUser={userProfile}
-                                    onEdit={handleEdit}
-                                    onRemove={handleRemove}
-                                />
-                            ))}
-                        {!loading && users.length === 0 && (
+                            : filteredUsers.map((user) => (
+                                  <UserRow
+                                      key={user.id}
+                                      user={user}
+                                      currentUser={userProfile}
+                                      onEdit={handleEdit}
+                                      onRemove={handleRemove}
+                                  />
+                              ))}
+                        {!loading && filteredUsers.length === 0 && (
                             <tr>
                                 <td colSpan={6}>
-                                    <NoDataFound
-                                        title="No users found"
-                                        description="We couldn't find any users."
-                                    />
+                                    <NoDataFound title={emptyTitle} description={emptyDescription} />
                                 </td>
                             </tr>
                         )}

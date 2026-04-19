@@ -1,0 +1,136 @@
+{
+  "pageTitle": "إدارة البيانات",
+  "pageDescription": "إدارة أنواع الشاحنات والبضائع والأوزان المستخدمة عبر المنصة",
+  "tabs": {
+    "trucks": "أنواع الشاحنات",
+    "goods": "أنواع البضائع"
+  },
+  "analytics": {
+    "truckTypes": "أنواع الشاحنات",
+    "activeGoodsTypes": "أنواع البضائع النشطة"
+  },
+  "status": {
+    "active": "نشط",
+    "inactive": "غير نشط"
+  },
+  "currencySuffix": "ج.م.",
+  "trucks": {
+    "sectionTitle": "أنواع الشاحنات",
+    "sectionSubtitle": "تُستخدم في القوائم المنسدلة في تطبيقي السائق والمستخدم",
+    "addButton": "إضافة نوع شاحنة",
+    "table": {
+      "nameEn": "الاسم (إنجليزي)",
+      "nameAr": "الاسم (عربي)",
+      "capacity": "السعة",
+      "pricePerKm": "السعر لكل كم",
+      "status": "الحالة",
+      "actions": "إجراءات"
+    },
+    "empty": {
+      "title": "لا توجد أنواع شاحنات",
+      "description": "أضف نوع شاحنة جديداً للبدء."
+    },
+    "editAria": "تعديل نوع الشاحنة",
+    "deleteAria": "حذف نوع الشاحنة"
+  },
+  "goods": {
+    "sectionTitle": "أنواع البضائع",
+    "sectionSubtitle": "تُستخدم في القوائم المنسدلة في تطبيقي السائق والمستخدم",
+    "addButton": "إضافة نوع بضاعة",
+    "table": {
+      "nameEn": "الاسم (إنجليزي)",
+      "nameAr": "الاسم (عربي)",
+      "description": "الوصف",
+      "allowedTrucks": "الشاحنات المسموحة",
+      "status": "الحالة",
+      "actions": "إجراءات"
+    },
+    "empty": {
+      "title": "لا توجد أنواع بضائع",
+      "description": "أضف نوع بضاعة جديداً للبدء."
+    },
+    "editAria": "تعديل نوع البضاعة",
+    "deleteAria": "حذف نوع البضاعة"
+  },
+  "storage": {
+    "sectionTitle": "أنواع التخزين",
+    "sectionSubtitle": "تُستخدم في حجز التخزين عبر المنصة",
+    "addButton": "إضافة نوع تخزين",
+    "table": {
+      "nameEn": "الاسم (إنجليزي)",
+      "nameAr": "الاسم (عربي)",
+      "size": "المساحة",
+      "status": "الحالة",
+      "actions": "إجراءات"
+    },
+    "editAria": "تعديل نوع التخزين",
+    "deleteAria": "حذف نوع التخزين"
+  },
+  "delete": {
+    "confirmTitle": "هل أنت متأكد؟",
+    "confirmBody": "أنت على وشك حذف {{name}}. لا يمكن التراجع عن هذا الإجراء وقد يفشل إذا كانت هناك سجلات مرتبطة.",
+    "deleting": "جاري الحذف…",
+    "delete": "حذف"
+  },
+  "truckModal": {
+    "addTitle": "إضافة نوع شاحنة",
+    "editTitle": "تعديل نوع شاحنة",
+    "addDescription": "إنشاء نوع شاحنة جديد للمنصة.",
+    "editDescription": "تحديث بيانات نوع الشاحنة هذا.",
+    "activeLabel": "حالة التفعيل",
+    "activeHint": "فعّل أو عطّل نوع الشاحنة هذا.",
+    "nameEn": "الاسم (إنجليزي)",
+    "nameEnPlaceholder": "مثال: Pickup",
+    "nameAr": "الاسم (عربي)",
+    "nameArPlaceholder": "مثال: بيك آب",
+    "capacity": "السعة",
+    "capacityPlaceholder": "مثال: 5000",
+    "unit": "الوحدة",
+    "unitPlaceholder": "مثال: kg",
+    "pricePerKm": "السعر لكل كيلومتر",
+    "pricePerKmPlaceholder": "مثال: 150",
+    "description": "الوصف",
+    "descriptionPlaceholder": "تفاصيل عن نوع الشاحنة",
+    "lengthCm": "الطول (سم)",
+    "widthCm": "العرض (سم)",
+    "heightCm": "الارتفاع (سم)",
+    "lengthPlaceholder": "600",
+    "widthPlaceholder": "250",
+    "heightPlaceholder": "300",
+    "saving": "جاري الحفظ…",
+    "saveAdd": "إضافة",
+    "saveUpdate": "تحديث"
+  },
+  "goodsModal": {
+    "addTitle": "إضافة نوع بضاعة",
+    "editTitle": "تعديل نوع بضاعة",
+    "addDescription": "إنشاء نوع بضاعة جديد للمنصة.",
+    "editDescription": "تحديث بيانات نوع البضاعة هذا.",
+    "activeLabel": "حالة التفعيل",
+    "activeHint": "فعّل أو عطّل نوع البضاعة هذا.",
+    "nameEn": "الاسم (إنجليزي)",
+    "nameEnPlaceholder": "مثال: إلكترونيات",
+    "nameAr": "الاسم (عربي)",
+    "nameArPlaceholder": "مثال: إلكترونيات",
+    "value": "المعرّف / القيمة",
+    "valuePlaceholder": "مثال: electronics",
+    "description": "الوصف",
+    "descriptionPlaceholder": "أضف تفاصيل أكثر عن نوع البضاعة",
+    "allowedTrucks": "أنواع الشاحنات المسموحة",
+    "selectedCount": "{{count}} محددة",
+    "noTruckTypes": "لا توجد أنواع شاحنات. يُرجى إضافة نوع شاحنة أولاً.",
+    "saving": "جاري الحفظ…",
+    "saveAdd": "إضافة",
+    "saveUpdate": "تحديث"
+  },
+  "validation": {
+    "nameRequired": "الاسم مطلوب",
+    "nameArRequired": "الاسم بالعربية مطلوب",
+    "descriptionRequired": "الوصف مطلوب",
+    "capacityRequired": "يجب أن تكون السعة 1 على الأقل",
+    "unitRequired": "الوحدة مطلوبة",
+    "priceRequired": "يجب أن يكون السعر 1 على الأقل",
+    "valueRequired": "القيمة مطلوبة",
+    "truckTypesMin": "اختر نوع شاحنة واحداً على الأقل"
+  }
+}

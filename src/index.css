@@ -23,6 +23,126 @@
   --main-hydrocarbon: #4A5565;
   --main-trueBlack: #0A0A0A;
   --main-sharkGray: #6A7282;
+
+  /* Motion — tuned for admin UI; overridden under prefers-reduced-motion */
+  --wasel-motion-duration-fast: 150ms;
+  --wasel-motion-duration: 200ms;
+  --wasel-motion-duration-slow: 280ms;
+  --wasel-motion-ease: cubic-bezier(0.33, 1, 0.68, 1);
+  --wasel-motion-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --wasel-shadow-hover: 0 10px 28px rgba(16, 24, 40, 0.07);
+  --wasel-shadow-elevate: 0 14px 36px rgba(16, 24, 40, 0.09);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --wasel-motion-duration-fast: 0.01ms;
+    --wasel-motion-duration: 0.01ms;
+    --wasel-motion-duration-slow: 0.01ms;
+  }
+}
+
+/* Page shell — used by PageTransition (CSS-only, avoids double Framer trees) */
+@keyframes wasel-page-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @keyframes wasel-page-enter {
+    from {
+      opacity: 0.92;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+@keyframes wasel-header-line {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@layer utilities {
+  .animate-wasel-page-enter {
+    animation: wasel-page-enter var(--wasel-motion-duration-slow) var(--wasel-motion-ease-out) both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-wasel-page-enter {
+      animation-duration: 1ms;
+    }
+  }
+
+  .animate-wasel-header-title {
+    animation: wasel-header-line var(--wasel-motion-duration) var(--wasel-motion-ease-out) both;
+  }
+
+  .animate-wasel-header-desc {
+    animation: wasel-header-line var(--wasel-motion-duration) var(--wasel-motion-ease-out) both;
+    animation-delay: 55ms;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-wasel-header-title,
+    .animate-wasel-header-desc {
+      animation: none;
+    }
+  }
+
+  .transition-surface {
+    transition-property: background-color, border-color, box-shadow, color, transform, opacity;
+    transition-duration: var(--wasel-motion-duration);
+    transition-timing-function: var(--wasel-motion-ease);
+  }
+
+  .transition-wasel {
+    transition-duration: var(--wasel-motion-duration);
+    transition-timing-function: var(--wasel-motion-ease-out);
+  }
+
+  .hover-elevate {
+    transition-property: box-shadow, transform, border-color;
+    transition-duration: var(--wasel-motion-duration);
+    transition-timing-function: var(--wasel-motion-ease-out);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hover-elevate:hover {
+      transform: none !important;
+    }
+  }
+
+  .hover-elevate:hover {
+    box-shadow: var(--wasel-shadow-hover);
+    transform: translateY(-1px);
+  }
+
+  /* Primary panels — opt-in on big white cards */
+  .wasel-panel-interactive {
+    transition-property: border-color, box-shadow, transform;
+    transition-duration: var(--wasel-motion-duration);
+    transition-timing-function: var(--wasel-motion-ease-out);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .wasel-panel-interactive:hover {
+      box-shadow: var(--wasel-shadow-hover);
+    }
+  }
 }
 
 @theme inline {

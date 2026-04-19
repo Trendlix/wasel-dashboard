@@ -1,18 +1,37 @@
 // axios.ts
-import axios from "axios";
+import axios, { isAxiosError, isCancel } from "axios";
 import { getCookie, setCookie, removeCookie } from "./cookieUtils";
 import { toastHandler } from "./toast";
+import { axiosRequestErrorMessage, shouldRetryGetAfterNetworkFailure } from "./networkErrors";
 
 const baseURL = import.meta.env.VITE_API_BASE_URL || "";
+
+const DEFAULT_TIMEOUT_MS = 45_000;
+
+const resolveTimeoutMs = (): number => {
+    const raw = import.meta.env.VITE_API_TIMEOUT_MS;
+    if (raw === undefined || raw === "") return DEFAULT_TIMEOUT_MS;
+    const n = Number.parseInt(String(raw), 10);
+    return Number.isFinite(n) && n > 0 ? n : DEFAULT_TIMEOUT_MS;
+};
+
+const REQUEST_TIMEOUT_MS = resolveTimeoutMs();
+
+const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 const RETRY_STATUSES = [401, 403, 498];
 
 // separate instance to avoid interceptor loop on refresh call
-const axiosRefreshClient = axios.create({ baseURL, withCredentials: true });
+const axiosRefreshClient = axios.create({
+    baseURL,
+    withCredentials: true,
+    timeout: REQUEST_TIMEOUT_MS,
+});
 
 const axiosNormalApiClient = axios.create({
     baseURL,
     withCredentials: true,
+    timeout: REQUEST_TIMEOUT_MS,
 });
 
 // ─── Request interceptor ──────────────────────────────────────────────────────
@@ -38,6 +57,8 @@ const processQueue = (error: unknown, token: string | null = null) => {
     failedQueue = [];
 };
 
+const MAX_GET_RETRIES = 2;
+
 axiosNormalApiClient.interceptors.response.use(
     (res) => {
         const method = res.config.method?.toUpperCase();
@@ -47,11 +68,19 @@ axiosNormalApiClient.interceptors.response.use(
         return res;
     },
     async (error) => {
+        if (isCancel(error)) {
+            return Promise.reject(error);
+        }
+
         const originalRequest = error.config;
         const status = error.response?.status;
 
         // ── Should we attempt a token refresh? ───────────────────────────────
-        if (RETRY_STATUSES.includes(status) && !originalRequest._retry) {
+        if (
+            originalRequest &&
+            RETRY_STATUSES.includes(status) &&
+            !originalRequest._retry
+        ) {
             const refreshToken = getCookie("wasel_admin_refresh_token");
 
             // No refresh token — logout immediately
@@ -98,14 +127,30 @@ axiosNormalApiClient.interceptors.response.use(
                 processQueue(err, null);
                 removeCookie("wasel_admin_access_token");
                 removeCookie("wasel_admin_refresh_token");
-                // toastHandler("Session expired. Please log in again.", 401, "error");
+                toastHandler(axiosRequestErrorMessage(err), undefined, "error");
                 return Promise.reject(err);
             } finally {
                 isRefreshing = false;
             }
         }
 
-        toastHandler(error.response?.data?.message, status, "error");
+        // ── Transient GET retry (network / timeout; no HTTP response) ─────────
+        if (
+            isAxiosError(error) &&
+            originalRequest &&
+            originalRequest.method?.toUpperCase() === "GET" &&
+            shouldRetryGetAfterNetworkFailure(error)
+        ) {
+            const count = originalRequest._getRetryCount ?? 0;
+            if (count < MAX_GET_RETRIES) {
+                originalRequest._getRetryCount = count + 1;
+                await sleep(1000 * 2 ** count);
+                return axiosNormalApiClient(originalRequest);
+            }
+        }
+
+        const message = axiosRequestErrorMessage(error);
+        toastHandler(message, status, "error");
         return Promise.reject(error);
     }
 );

@@ -13,6 +13,7 @@ import {
 } from "@/shared/components/pages/cms/outlet/about/_shared";
 import { useCmsBlogsStore, type BlogInfoCard } from "@/shared/hooks/store/useCmsBlogsStore";
 import { Trash2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 type Localized<T> = { en: T; ar: T };
 
@@ -28,6 +29,7 @@ const createEmptyCard = (): BlogInfoCard => ({
 type DraftInfo = Localized<{ title: string; description: string; cards: BlogInfoCard[] }>;
 
 const CmsBlogsInfoPage = () => {
+    const { t } = useTranslation("cms");
     const { info, loadingInfo, savingInfo, error, fetchInfo, saveInfo } = useCmsBlogsStore();
     const [draft, setDraft] = useState<DraftInfo>(info);
     const [localError, setLocalError] = useState<string | null>(null);
@@ -37,13 +39,13 @@ const CmsBlogsInfoPage = () => {
     useEffect(() => { setDraft(info); }, [info]);
 
     const validate = () => {
-        if (!draft.en.title.trim()) return "EN info title is required.";
-        if (!draft.ar.title.trim()) return "AR info title is required.";
-        if (!draft.en.description.trim()) return "EN info description is required.";
-        if (!draft.ar.description.trim()) return "AR info description is required.";
+        if (!draft.en.title.trim()) return t("blogsInfoEditor.validationEnTitle");
+        if (!draft.ar.title.trim()) return t("blogsInfoEditor.validationArTitle");
+        if (!draft.en.description.trim()) return t("blogsInfoEditor.validationEnDescription");
+        if (!draft.ar.description.trim()) return t("blogsInfoEditor.validationArDescription");
         for (const [index, card] of draft.en.cards.entries()) {
-            if (!card.title.trim()) return `Card #${index + 1} EN title is required.`;
-            if (!draft.ar.cards[index]?.title.trim()) return `Card #${index + 1} AR title is required.`;
+            if (!card.title.trim()) return t("blogsInfoEditor.validationCardEnTitle", { n: index + 1 });
+            if (!draft.ar.cards[index]?.title.trim()) return t("blogsInfoEditor.validationCardArTitle", { n: index + 1 });
         }
         return null;
     };
@@ -86,10 +88,10 @@ const CmsBlogsInfoPage = () => {
 
     return (
         <PageShell
-            title="Blogs / Info"
-            subtitle="Blogs Section"
-            description="Landing copy above the article grid: bilingual section title, rich intro, and highlight cards."
-            hint="Cards are paired by index—adding or removing syncs EN and AR. Shared fields apply to both locales."
+            title={t("blogsInfoEditor.pageTitle")}
+            subtitle={t("blogsInfoEditor.subtitle")}
+            description={t("blogsInfoEditor.description")}
+            hint={t("blogsInfoEditor.hint")}
             onSave={onSave}
             saving={savingInfo}
             loading={loadingInfo}
@@ -99,40 +101,40 @@ const CmsBlogsInfoPage = () => {
                 {/* Section header */}
                 <div className={sectionCardClass}>
                     <BilingualField
-                        label="Section Title"
-                        hint="H1-style heading for the blogs landing area."
+                        label={t("blogsInfoEditor.sectionTitle")}
+                        hint={t("blogsInfoEditor.sectionTitleHint")}
                         en={
                             <Input
                                 value={draft.en.title}
                                 onChange={(e) => setDraft((prev) => ({ ...prev, en: { ...prev.en, title: e.target.value } }))}
-                                placeholder="Blogs info title"
+                                placeholder={t("blogsInfoEditor.sectionTitlePlaceholderEn")}
                             />
                         }
                         ar={
                             <Input
                                 value={draft.ar.title}
                                 onChange={(e) => setDraft((prev) => ({ ...prev, ar: { ...prev.ar, title: e.target.value } }))}
-                                placeholder="عنوان قسم المدونة"
+                                placeholder={t("blogsInfoEditor.sectionTitlePlaceholderAr")}
                             />
                         }
                     />
 
                     <div className="mt-5">
                         <BilingualField
-                            label="Section Description"
-                            hint="Rich intro under the title. Supports formatting and media like the blog editor."
+                            label={t("blogsInfoEditor.sectionDescription")}
+                            hint={t("blogsInfoEditor.sectionDescriptionHint")}
                             en={
                                 <RichTextEditor
                                     value={draft.en.description}
                                     onChange={(value) => setDraft((prev) => ({ ...prev, en: { ...prev.en, description: value } }))}
-                                    placeholder="Blogs info description"
+                                    placeholder={t("blogsInfoEditor.sectionDescriptionPlaceholderEn")}
                                 />
                             }
                             ar={
                                 <RichTextEditor
                                     value={draft.ar.description}
                                     onChange={(value) => setDraft((prev) => ({ ...prev, ar: { ...prev.ar, description: value } }))}
-                                    placeholder="وصف قسم المدونة"
+                                    placeholder={t("blogsInfoEditor.sectionDescriptionPlaceholderAr")}
                                 />
                             }
                         />
@@ -144,7 +146,7 @@ const CmsBlogsInfoPage = () => {
                     <div key={`info-card-${index}`} className={sectionCardClass}>
                         <div className="flex items-center justify-between mb-4">
                             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-main-lightSlate">
-                                Info Card #{index + 1}
+                                {t("blogsInfoEditor.card", { n: index + 1 })}
                             </p>
                             <Button
                                 type="button"
@@ -153,7 +155,7 @@ const CmsBlogsInfoPage = () => {
                                 onClick={() => removeCard(index)}
                             >
                                 <Trash2 size={14} />
-                                Remove Card
+                                {t("blogsInfoEditor.removeCard")}
                             </Button>
                         </div>
 
@@ -161,8 +163,8 @@ const CmsBlogsInfoPage = () => {
                         <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mb-4">
                             <div className="space-y-2">
                                 <CmsFieldLabel
-                                    label="Tag (shared)"
-                                    hint="Badge text on the card; stored once and mirrored to AR for layout parity."
+                                    label={t("blogsInfoEditor.tagShared")}
+                                    hint={t("blogsInfoEditor.tagSharedHint")}
                                 />
                                 <Input
                                     value={draft.en.cards[index]?.tag ?? ""}
@@ -170,13 +172,13 @@ const CmsBlogsInfoPage = () => {
                                         updateCard("en", index, { tag: e.target.value });
                                         updateCard("ar", index, { tag: e.target.value });
                                     }}
-                                    placeholder="Tag"
+                                    placeholder={t("blogsInfoEditor.tagPlaceholder")}
                                 />
                             </div>
                             <div className="space-y-2">
                                 <CmsFieldLabel
-                                    label="Time To Read (shared)"
-                                    hint="Display string such as “5 min read”. Not validated as minutes—purely cosmetic."
+                                    label={t("blogsInfoEditor.timeToReadShared")}
+                                    hint={t("blogsInfoEditor.timeToReadSharedHint")}
                                 />
                                 <Input
                                     value={draft.en.cards[index]?.time_to_read ?? ""}
@@ -184,7 +186,7 @@ const CmsBlogsInfoPage = () => {
                                         updateCard("en", index, { time_to_read: e.target.value });
                                         updateCard("ar", index, { time_to_read: e.target.value });
                                     }}
-                                    placeholder="5 min read"
+                                    placeholder={t("blogsInfoEditor.timeToReadPlaceholder")}
                                 />
                             </div>
                         </div>
@@ -192,32 +194,32 @@ const CmsBlogsInfoPage = () => {
                         {/* Bilingual text fields */}
                         <div className="space-y-4">
                             <BilingualField
-                                label="Title"
-                                hint="Card headline in each language."
+                                label={t("blogsInfoEditor.title")}
+                                hint={t("blogsInfoEditor.titleHint")}
                                 en={
                                     <Input
                                         value={draft.en.cards[index]?.title ?? ""}
                                         onChange={(e) => updateCard("en", index, { title: e.target.value })}
-                                        placeholder="Card title"
+                                        placeholder={t("blogsInfoEditor.cardTitlePlaceholderEn")}
                                     />
                                 }
                                 ar={
                                     <Input
                                         value={draft.ar.cards[index]?.title ?? ""}
                                         onChange={(e) => updateCard("ar", index, { title: e.target.value })}
-                                        placeholder="عنوان البطاقة"
+                                        placeholder={t("blogsInfoEditor.cardTitlePlaceholderAr")}
                                     />
                                 }
                             />
 
                             <BilingualField
-                                label="Description"
-                                hint="Short teaser body for the card. Plain textarea; keep under a few sentences."
+                                label={t("blogsInfoEditor.descriptionLabel")}
+                                hint={t("blogsInfoEditor.descriptionHint")}
                                 en={
                                     <Textarea
                                         value={draft.en.cards[index]?.description ?? ""}
                                         onChange={(e) => updateCard("en", index, { description: e.target.value })}
-                                        placeholder="Card description"
+                                        placeholder={t("blogsInfoEditor.cardDescriptionPlaceholderEn")}
                                         rows={3}
                                     />
                                 }
@@ -225,7 +227,7 @@ const CmsBlogsInfoPage = () => {
                                     <Textarea
                                         value={draft.ar.cards[index]?.description ?? ""}
                                         onChange={(e) => updateCard("ar", index, { description: e.target.value })}
-                                        placeholder="وصف البطاقة"
+                                        placeholder={t("blogsInfoEditor.cardDescriptionPlaceholderAr")}
                                         rows={3}
                                     />
                                 }
@@ -240,7 +242,7 @@ const CmsBlogsInfoPage = () => {
                     className="border-main-primary/30 text-main-primary hover:bg-main-primary/10"
                     onClick={addCard}
                 >
-                    Add Info Card
+                    {t("blogsInfoEditor.addCard")}
                 </Button>
 
                 <InputError message={localError ?? undefined} />

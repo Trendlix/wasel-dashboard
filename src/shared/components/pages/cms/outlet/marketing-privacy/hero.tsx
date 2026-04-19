@@ -1,14 +1,18 @@
 import MarketingLegalHeroShared from "../marketing-legal/hero-shared";
 import useCmsMarketingPrivacyStore from "@/shared/hooks/store/useCmsMarketingPrivacyStore";
+import { useTranslation } from "react-i18next";
 
-const MarketingPrivacyHeroPage = () => (
-    <MarketingLegalHeroShared
-        useStore={useCmsMarketingPrivacyStore}
-        title="Hero"
-        description="This controls the top section of the public /policy page."
-        hint="Update the hero title and introduction in both languages before publishing."
-        saveButtonLabel="Save hero"
-    />
-);
+const MarketingPrivacyHeroPage = () => {
+    const { t } = useTranslation("cms");
+    return (
+        <MarketingLegalHeroShared
+            useStore={useCmsMarketingPrivacyStore}
+            title={t("legalMarketing.privacy.hero.title")}
+            description={t("legalMarketing.privacy.hero.description")}
+            hint={t("legalMarketing.privacy.hero.hint")}
+            saveButtonLabel={t("legalMarketing.privacy.hero.saveButton")}
+        />
+    );
+};
 
 export default MarketingPrivacyHeroPage;

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import clsx from "clsx";
+import { useTranslation } from "react-i18next";
 import { FileText, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import TablePagination from "@/shared/components/common/TablePagination";
@@ -17,12 +18,14 @@ import {
   CommonModalFooter,
   CommonModalHeader,
 } from "@/shared/components/common/CommonModal";
+import { formatAppDateShort } from "@/lib/formatLocaleDate";
 
 type TTab = TVerificationStatus;
 
 const tabs: TTab[] = ["pending", "approved", "rejected"];
 
 const VerificationList = () => {
+  const { t } = useTranslation(["verification", "common"]);
   const {
     verifications,
     meta,
@@ -76,7 +79,7 @@ const VerificationList = () => {
     } else {
       await updateVerificationStatus(confirmAction.verification.id, {
         status: "rejected",
-        reason_for_rejection: "Rejected by admin",
+        reason_for_rejection: t("verification:rejectReasonDefault"),
       });
     }
 
@@ -97,6 +100,9 @@ const VerificationList = () => {
   const totalPages = meta?.total_pages ?? 1;
   const showPagination = !loading && verifications.length > 0 && totalPages > 1;
 
+  const confirmName =
+    confirmAction?.verification.name ?? t("verification:confirm.nameFallback");
+
   return (
     <div className="bg-main-white border border-main-whiteMarble common-rounded overflow-hidden">
       <div className="border-b border-main-whiteMarble px-4">
@@ -104,6 +110,7 @@ const VerificationList = () => {
           {tabs.map((tab) => (
             <button
               key={tab}
+              type="button"
               onClick={() => setActiveTab(tab)}
               className={clsx(
                 "h-10 text-sm font-semibold border-b-2 transition",
@@ -112,7 +119,10 @@ const VerificationList = () => {
                   : "text-main-hydrocarbon border-transparent",
               )}
             >
-              {verificationStatusStyles[tab].label} ({currentCount[tab]})
+              {t("verification:list.tabWithCount", {
+                label: t(`verification:statuses.${tab}`),
+                count: currentCount[tab],
+              })}
             </button>
           ))}
         </div>
@@ -120,12 +130,12 @@ const VerificationList = () => {
 
       <div className="p-4 border-b border-main-whiteMarble">
         <div className="h-10 border border-main-whiteMarble common-rounded px-3 flex items-center gap-2">
-          <Search size={16} className="text-main-silverSteel" />
+          <Search size={16} className="text-main-silverSteel shrink-0" />
           <input
             type="search"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Search by name or type..."
+            placeholder={t("verification:list.searchPlaceholder")}
             className="w-full bg-transparent outline-none text-sm placeholder:text-main-silverSteel"
           />
         </div>
@@ -150,7 +160,7 @@ const VerificationList = () => {
           ))
         ) : (
           <div className="p-6 text-center text-main-sharkGray text-sm">
-            No verification requests found.
+            {t("verification:list.empty")}
           </div>
         )}
       </div>
@@ -180,17 +190,21 @@ const VerificationList = () => {
         loading={updating}
       >
         <CommonModalHeader
-          title={`${confirmAction?.type === "approve" ? "Approve" : "Reject"} Verification`}
+          title={
+            confirmAction?.type === "approve"
+              ? t("verification:confirm.approveTitle")
+              : t("verification:confirm.rejectTitle")
+          }
           description={
             confirmAction
-              ? `Are you sure you want to ${confirmAction.type} verification for ${confirmAction.verification.name ?? "this driver"}?`
-              : "Please confirm this action."
+              ? confirmAction.type === "approve"
+                ? t("verification:confirm.approveDescription", { name: confirmName })
+                : t("verification:confirm.rejectDescription", { name: confirmName })
+              : t("verification:confirm.fallbackDescription")
           }
         />
         <CommonModalBody className="pt-0">
-          <p className="text-sm text-main-sharkGray">
-            This action will update the verification status immediately.
-          </p>
+          <p className="text-sm text-main-sharkGray">{t("verification:confirm.note")}</p>
         </CommonModalBody>
         <CommonModalFooter>
           <Button
@@ -203,7 +217,7 @@ const VerificationList = () => {
             }}
             disabled={updating}
           >
-            Cancel
+            {t("common:cancel")}
           </Button>
           <Button
             type="button"
@@ -217,10 +231,10 @@ const VerificationList = () => {
             disabled={updating || !confirmAction}
           >
             {updating
-              ? "Saving..."
+              ? t("verification:confirm.saving")
               : confirmAction?.type === "approve"
-                ? "Confirm Approve"
-                : "Confirm Reject"}
+                ? t("verification:confirm.confirmApprove")
+                : t("verification:confirm.confirmReject")}
           </Button>
         </CommonModalFooter>
       </CommonModal>
@@ -241,24 +255,24 @@ const VerificationRow = ({
   onApprove: () => void;
   onReject: () => void;
 }) => {
-  const initials = (item.name ?? "Driver")
+  const { t, i18n } = useTranslation("verification");
+  const initials = (item.name ?? t("list.driverLabel"))
     .split(" ")
     .map((n) => n[0])
     .join("")
     .slice(0, 2)
     .toUpperCase();
 
-  const status = verificationStatusStyles[item.status];
-  const submittedAt = new Date(item.created_at).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  const statusKey = (["pending", "approved", "rejected"] as const).includes(item.status)
+    ? item.status
+    : "pending";
+  const status = verificationStatusStyles[statusKey];
+  const submittedAt = formatAppDateShort(item.created_at, i18n.language, "—");
 
-  const documents = [
-    item.profile?.national_id_front ? "ID" : null,
-    item.profile?.license_front ? "License" : null,
-    item.profile?.criminal_record ? "Criminal Record" : null,
+  const docLabels = [
+    item.profile?.national_id_front ? t("list.docId") : null,
+    item.profile?.license_front ? t("list.docLicense") : null,
+    item.profile?.criminal_record ? t("list.docCriminal") : null,
   ].filter(Boolean) as string[];
 
   return (
@@ -270,18 +284,18 @@ const VerificationRow = ({
 
         <div className="space-y-3">
           <div>
-            <h4 className="text-main-mirage font-semibold">{item.name ?? "Driver"}</h4>
+            <h4 className="text-main-mirage font-semibold">{item.name ?? t("list.driverLabel")}</h4>
             <p className="text-main-sharkGray text-xs">
-              Driver • {submittedAt}
+              {t("list.driverLabel")} • {submittedAt}
             </p>
           </div>
 
           <div>
-            <p className="text-main-sharkGray text-xs mb-2">Submitted Documents:</p>
+            <p className="text-main-sharkGray text-xs mb-2">{t("list.submittedDocuments")}</p>
             <div className="flex flex-wrap gap-2">
-              {(documents.length > 0 ? documents : ["No docs in list"]).map((doc) => (
+              {(docLabels.length > 0 ? docLabels : [t("list.noDocsListed")]).map((doc, idx) => (
                 <span
-                  key={doc}
+                  key={`${doc}-${idx}`}
                   className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-main-luxuryWhite text-main-hydrocarbon text-xs border border-main-whiteMarble"
                 >
                   <FileText size={12} />
@@ -291,34 +305,37 @@ const VerificationRow = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <button
+              type="button"
               onClick={onViewDocuments}
               disabled={updating}
               className="h-8 px-4 text-xs font-semibold bg-main-primary text-main-white rounded-md disabled:opacity-60"
             >
-              View Documents
+              {t("list.viewDocuments")}
             </button>
             <button
+              type="button"
               onClick={onApprove}
               disabled={updating}
               className="h-8 px-4 text-xs font-semibold bg-main-vividMint text-main-white rounded-md disabled:opacity-60"
             >
-              Approve
+              {t("list.approve")}
             </button>
             <button
+              type="button"
               onClick={onReject}
               disabled={updating}
               className="h-8 px-4 text-xs font-semibold bg-main-remove text-main-white rounded-md disabled:opacity-60"
             >
-              Reject
+              {t("list.reject")}
             </button>
           </div>
         </div>
       </div>
 
-      <span className={clsx("px-3 py-1 rounded-full text-xs font-medium", status.bg, status.text)}>
-        {status.label}
+      <span className={clsx("px-3 py-1 rounded-full text-xs font-medium shrink-0", status.bg, status.text)}>
+        {t(`statuses.${statusKey}`)}
       </span>
     </div>
   );

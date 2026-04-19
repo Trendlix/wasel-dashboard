@@ -10,6 +10,7 @@ const ToggleSwitch = ({ enabled, onChange }: IToggleSwitch) => {
         <button
             type="button"
             role="switch"
+            dir="ltr"
             aria-checked={enabled}
             onClick={() => onChange(!enabled)}
             className={clsx(

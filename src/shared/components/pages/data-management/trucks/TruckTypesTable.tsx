@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import clsx from "clsx";
+import { useTranslation } from "react-i18next";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import useDataManagementStore, { ITruckType } from "@/shared/hooks/store/useDataManagementStore";
 import TruckTypeModal from "../modals/TruckTypeModal";
@@ -8,12 +9,10 @@ import TablePagination from "@/shared/components/common/TablePagination";
 import NoDataFound from "@/shared/components/common/NoDataFound";
 
 const StatusBadge = ({ status }: { status: boolean }) => {
-    // TruckType doesn't have is_active in schema yet based on my previous view, 
-    // but I added it to the store interface for consistency. 
-    // The backend service treats all as active for now.
+    const { t } = useTranslation("dataManagement");
     const bg = status ? "bg-main-vividMint/10" : "bg-main-sharkGray/10";
     const text = status ? "text-main-vividMint" : "text-main-sharkGray";
-    const label = status ? "Active" : "Inactive";
+    const label = status ? t("status.active") : t("status.inactive");
 
     return (
         <span className={clsx("px-3 py-1 rounded-full text-xs font-semibold", bg, text)}>
@@ -23,23 +22,39 @@ const StatusBadge = ({ status }: { status: boolean }) => {
 };
 
 const TH = ({ children }: { children: React.ReactNode }) => (
-    <th className="text-main-hydrocarbon font-semibold text-xs uppercase tracking-wide py-4 px-6 text-left">
+    <th className="text-main-hydrocarbon font-semibold text-xs uppercase tracking-wide py-4 px-6 text-start">
         {children}
     </th>
 );
 
 const TruckRowSkeleton = () => (
     <tr className="border-b border-main-whiteMarble animate-pulse">
-        <td className="py-5 px-6"><div className="h-4 bg-main-titaniumWhite rounded w-24"></div></td>
-        <td className="py-5 px-6"><div className="h-4 bg-main-titaniumWhite rounded w-24"></div></td>
-        <td className="py-5 px-6"><div className="h-4 bg-main-titaniumWhite rounded w-16"></div></td>
-        <td className="py-5 px-6"><div className="h-4 bg-main-titaniumWhite rounded w-16"></div></td>
-        <td className="py-5 px-6"><div className="h-6 bg-main-titaniumWhite rounded-full w-20"></div></td>
-        <td className="py-5 px-6"><div className="flex gap-3"><div className="w-4 h-4 bg-main-titaniumWhite rounded"></div><div className="w-4 h-4 bg-main-titaniumWhite rounded"></div></div></td>
+        <td className="py-5 px-6">
+            <div className="h-4 bg-main-titaniumWhite rounded w-24" />
+        </td>
+        <td className="py-5 px-6">
+            <div className="h-4 bg-main-titaniumWhite rounded w-24" />
+        </td>
+        <td className="py-5 px-6">
+            <div className="h-4 bg-main-titaniumWhite rounded w-16" />
+        </td>
+        <td className="py-5 px-6">
+            <div className="h-4 bg-main-titaniumWhite rounded w-16" />
+        </td>
+        <td className="py-5 px-6">
+            <div className="h-6 bg-main-titaniumWhite rounded-full w-20" />
+        </td>
+        <td className="py-5 px-6">
+            <div className="flex gap-3">
+                <div className="w-4 h-4 bg-main-titaniumWhite rounded" />
+                <div className="w-4 h-4 bg-main-titaniumWhite rounded" />
+            </div>
+        </td>
     </tr>
 );
 
 const TruckTypesTable = () => {
+    const { t } = useTranslation("dataManagement");
     const { truckTypes, loading, fetchTruckTypes, deleteTruckType, meta, submitting } = useDataManagementStore();
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [editingTruck, setEditingTruck] = useState<ITruckType | null>(null);
@@ -67,16 +82,17 @@ const TruckTypesTable = () => {
     return (
         <div className="space-y-6">
             <div className="flex items-start justify-between gap-4 p-6">
-                <div>
-                    <h2 className="text-main-mirage font-bold text-xl">Truck Types</h2>
-                    <p className="text-main-sharkGray text-sm mt-1">Used in dropdowns across driver and user apps</p>
+                <div className="min-w-0">
+                    <h2 className="text-main-mirage font-bold text-xl">{t("trucks.sectionTitle")}</h2>
+                    <p className="text-main-sharkGray text-sm mt-1">{t("trucks.sectionSubtitle")}</p>
                 </div>
                 <button
+                    type="button"
                     onClick={() => setIsAddModalOpen(true)}
                     className="flex items-center gap-2 bg-main-primary text-main-white font-bold text-sm px-5 h-10 rounded-lg hover:bg-main-primary/90 transition-colors shrink-0"
                 >
-                    <Plus className="w-4 h-4" />
-                    Add Truck Type
+                    <Plus className="w-4 h-4 shrink-0" />
+                    {t("trucks.addButton")}
                 </button>
             </div>
 
@@ -84,12 +100,12 @@ const TruckTypesTable = () => {
                 <table className="w-full">
                     <thead className="border border-x-0 border-main-whiteMarble bg-main-luxuryWhite text-main-sharkGray">
                         <tr className="border-b border-main-whiteMarble">
-                            <TH>Name (English)</TH>
-                            <TH>Name (Arabic)</TH>
-                            <TH>Capacity</TH>
-                            <TH>Price/KM</TH>
-                            <TH>Status</TH>
-                            <TH>Actions</TH>
+                            <TH>{t("trucks.table.nameEn")}</TH>
+                            <TH>{t("trucks.table.nameAr")}</TH>
+                            <TH>{t("trucks.table.capacity")}</TH>
+                            <TH>{t("trucks.table.pricePerKm")}</TH>
+                            <TH>{t("trucks.table.status")}</TH>
+                            <TH>{t("trucks.table.actions")}</TH>
                         </tr>
                     </thead>
                     <tbody>
@@ -97,23 +113,38 @@ const TruckTypesTable = () => {
                             Array.from({ length: 5 }).map((_, i) => <TruckRowSkeleton key={i} />)
                         ) : (
                             truckTypes.map((truck) => (
-                                <tr key={truck.id} className="border-b border-main-whiteMarble last:border-0 hover:bg-main-luxuryWhite/50 transition-colors">
+                                <tr
+                                    key={truck.id}
+                                    className="border-b border-main-whiteMarble last:border-0 hover:bg-main-luxuryWhite/50 transition-colors"
+                                >
                                     <td className="py-5 px-6 text-main-mirage font-semibold text-sm">{truck.name}</td>
-                                    <td className="py-5 px-6 text-main-mirage text-sm" dir="rtl">{truck.name_ar}</td>
-                                    <td className="py-5 px-6 text-main-sharkGray text-sm">{truck.capacity} {truck.capacity_unit}</td>
-                                    <td className="py-5 px-6 text-main-mirage font-bold text-sm">{truck.price_per_km} EGP</td>
-                                    <td className="py-5 px-6"><StatusBadge status={truck.is_active} /></td>
+                                    <td className="py-5 px-6 text-main-mirage text-sm" dir="rtl">
+                                        {truck.name_ar}
+                                    </td>
+                                    <td className="py-5 px-6 text-main-sharkGray text-sm">
+                                        {truck.capacity} {truck.capacity_unit}
+                                    </td>
+                                    <td className="py-5 px-6 text-main-mirage font-bold text-sm">
+                                        {truck.price_per_km} {t("currencySuffix")}
+                                    </td>
+                                    <td className="py-5 px-6">
+                                        <StatusBadge status={truck.is_active} />
+                                    </td>
                                     <td className="py-5 px-6">
                                         <div className="flex items-center gap-3">
                                             <button
+                                                type="button"
                                                 onClick={() => handleEdit(truck)}
                                                 className="text-main-primary hover:opacity-70 transition-opacity"
+                                                aria-label={t("trucks.editAria")}
                                             >
                                                 <Pencil className="w-4 h-4" />
                                             </button>
                                             <button
+                                                type="button"
                                                 onClick={() => handleDelete(truck)}
                                                 className="text-main-remove hover:opacity-70 transition-opacity"
+                                                aria-label={t("trucks.deleteAria")}
                                             >
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
@@ -125,10 +156,7 @@ const TruckTypesTable = () => {
                         {!loading && truckTypes.length === 0 && (
                             <tr>
                                 <td colSpan={6} className="p-2">
-                                    <NoDataFound
-                                        title="No truck types found"
-                                        description="Add a new truck type to get started."
-                                    />
+                                    <NoDataFound title={t("trucks.empty.title")} description={t("trucks.empty.description")} />
                                 </td>
                             </tr>
                         )}

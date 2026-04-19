@@ -1,5 +1,7 @@
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { formatAppDateShort } from "@/lib/formatLocaleDate";
 import {
     Table,
     TableBody,
@@ -36,22 +38,23 @@ const SkeletonRow = () => (
         <TableCell className="py-4 px-6"><div className="h-6 w-20 rounded-full bg-main-whiteMarble" /></TableCell>
         <TableCell className="py-4 px-6"><div className="h-3.5 w-8 rounded bg-main-whiteMarble" /></TableCell>
         <TableCell className="py-4 px-6"><div className="h-3.5 w-24 rounded bg-main-whiteMarble" /></TableCell>
-        <TableCell className="py-4 px-6 text-right"><div className="h-3.5 w-16 rounded bg-main-whiteMarble ml-auto" /></TableCell>
+        <TableCell className="py-4 px-6 text-end"><div className="h-3.5 w-16 rounded bg-main-whiteMarble ms-auto" /></TableCell>
     </TableRow>
 );
 
 // ─── Main table ───────────────────────────────────────────────────────────────
 
-const STATUS_FILTER_OPTIONS: { value: string; label: string }[] = [
-    { value: "all", label: "All statuses" },
-    { value: "active", label: "Active" },
-    { value: "inactive", label: "Inactive" },
-    { value: "blocked", label: "Blocked" },
-    { value: "deleted", label: "Deleted" },
-];
-
 const UsersTable = () => {
+    const { t } = useTranslation(["users", "common"]);
     const { users, meta, loading, exporting, fetchUsers, setQuery, setPage, resetQuery, exportUsers } = useUserStore();
+
+    const statusFilterOptions: { value: string; label: string }[] = [
+        { value: "all", label: t("users:filters.allStatuses") },
+        { value: "active", label: t("users:filters.active") },
+        { value: "inactive", label: t("users:filters.inactive") },
+        { value: "blocked", label: t("users:filters.blocked") },
+        { value: "deleted", label: t("users:filters.deleted") },
+    ];
 
     const [searchInput, setSearchInput] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
@@ -110,7 +113,7 @@ const UsersTable = () => {
                         ref={inputRef}
                         value={searchInput}
                         onChange={(e) => setSearchInput(e.target.value)}
-                        placeholder="Search by name, email or phone…"
+                        placeholder={t("users:searchPlaceholder")}
                         className="border-0 shadow-none h-full p-0 placeholder:text-main-trueBlack/50 focus-visible:ring-0 bg-transparent"
                     />
                 </div>
@@ -119,9 +122,9 @@ const UsersTable = () => {
                 <StatusSelect
                     value={statusFilter}
                     onChange={handleStatusFilter}
-                    options={STATUS_FILTER_OPTIONS}
+                    options={statusFilterOptions}
                     statusStyles={statusStyles}
-                    placeholder="All statuses"
+                    placeholder={t("users:filters.allStatuses")}
                 />
 
                 {/* Export */}
@@ -131,17 +134,18 @@ const UsersTable = () => {
                     disabled={exporting}
                 >
                     <Download size={16} />
-                    <span>{exporting ? "Exporting..." : "Export"}</span>
+                    <span>{exporting ? t("common:exporting") : t("common:export")}</span>
                 </Button>
 
                 {/* Reset */}
                 <Button
+                    type="button"
                     variant="outline"
                     className="h-11 px-5 border-main-whiteMarble text-main-hydrocarbon shrink-0 font-semibold"
                     onClick={handleResetFilters}
+                    aria-label={t("common:resetFilters")}
                 >
                     <RotateCcw size={16} />
-                    <span>Reset</span>
                 </Button>
             </div>
 
@@ -150,12 +154,12 @@ const UsersTable = () => {
                 <Table>
                     <TableHeader>
                         <TableRow className="bg-main-luxuryWhite border-b border-main-whiteMarble hover:bg-main-luxuryWhite">
-                            <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">User</TableHead>
-                            <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">Phone</TableHead>
-                            <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">Status</TableHead>
-                            <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">Voucher Usage</TableHead>
-                            <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">Joined</TableHead>
-                            <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6 text-right">Actions</TableHead>
+                            <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">{t("users:table.user")}</TableHead>
+                            <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">{t("users:table.phone")}</TableHead>
+                            <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">{t("users:table.status")}</TableHead>
+                            <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">{t("users:table.voucherUsage")}</TableHead>
+                            <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">{t("users:table.joined")}</TableHead>
+                            <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6 text-end">{t("users:table.actions")}</TableHead>
                         </TableRow>
                     </TableHeader>
 
@@ -175,8 +179,8 @@ const UsersTable = () => {
                             <TableRow>
                                 <TableCell colSpan={6} className="p-2">
                                     <NoDataFound
-                                        title="No users found"
-                                        description="Try adjusting your search or filters."
+                                        title={t("users:emptyTitle")}
+                                        description={t("users:emptyDescription")}
                                     />
                                 </TableCell>
                             </TableRow>
@@ -212,18 +216,14 @@ const UserRow = ({
     user: IAppUser;
     onViewDetails: (u: IAppUser) => void;
 }) => {
+    const { t, i18n } = useTranslation("users");
+    const joinDate = formatAppDateShort(user.created_at, i18n.language);
     const initials = user.full_name
         .split(" ")
         .map((n) => n[0])
         .join("")
         .slice(0, 2)
         .toUpperCase();
-
-    const joinDate = new Date(user.created_at).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-    });
 
     return (
         <TableRow className="border-b border-main-whiteMarble hover:bg-main-luxuryWhite/50 transition-colors">
@@ -251,12 +251,13 @@ const UserRow = ({
 
             <TableCell className="py-4 px-6 text-main-sharkGray text-sm">{joinDate}</TableCell>
 
-            <TableCell className="py-4 px-6 text-right">
+            <TableCell className="py-4 px-6 text-end">
                 <button
+                    type="button"
                     onClick={() => onViewDetails(user)}
                     className="text-main-primary font-semibold text-sm hover:underline"
                 >
-                    View Details
+                    {t("viewDetails")}
                 </button>
             </TableCell>
         </TableRow>
@@ -266,10 +267,11 @@ const UserRow = ({
 // ─── Status badge ─────────────────────────────────────────────────────────────
 
 const StatusBadge = ({ status }: { status: TUserStatus }) => {
+    const { t } = useTranslation("users");
     const style = statusStyles[status] ?? statusStyles.inactive;
     return (
         <span className={clsx("px-3 py-1 rounded-full text-xs font-medium", style.bg, style.text)}>
-            {style.label}
+            {t(`statuses.${status}`)}
         </span>
     );
 };

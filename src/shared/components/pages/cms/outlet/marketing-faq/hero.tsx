@@ -4,15 +4,17 @@ import useCmsMarketingFaqStore from "@/shared/hooks/store/useCmsMarketingFaqStor
 import { formInputClass } from "@/shared/components/common/formStyles";
 import { BilingualField, BilingualStringArrayEditor } from "../about/_shared";
 import SectionCard from "./SectionCard";
+import { useTranslation } from "react-i18next";
 
 const MarketingFaqHeroPage = () => {
+    const { t } = useTranslation("cms");
     const { draft, saving, saveHero, setDraft } = useCmsMarketingFaqStore();
 
     return (
         <SectionCard
-            title="Hero"
-            description="This controls the top section of the public /faqs page."
-            hint="Update the hero title and introduction in both languages before publishing."
+            title={t("marketingNested.heroTitle")}
+            description={t("marketingNested.heroDescription")}
+            hint={t("marketingNested.heroHint")}
             actions={
                 <Button
                     type="button"
@@ -20,15 +22,15 @@ const MarketingFaqHeroPage = () => {
                     onClick={() => void saveHero()}
                     disabled={saving}
                 >
-                    {saving ? "Saving..." : "Save hero"}
+                    {saving ? t("marketingNested.saving") : t("marketingNested.saveHero")}
                 </Button>
             }
         >
             <div className="space-y-5">
                 <BilingualStringArrayEditor
-                    label="Hero title lines"
-                    hint="At least two lines are required because the public hero uses a split headline style."
-                    placeholder="Title line"
+                    label={t("marketingNested.heroTitleLines")}
+                    hint={t("marketingNested.heroTitleLinesHint")}
+                    placeholder={t("marketingNested.heroTitlePlaceholder")}
                     minRows={2}
                     itemClassName={formInputClass}
                     enValues={draft.en.titles}
@@ -38,8 +40,8 @@ const MarketingFaqHeroPage = () => {
                 />
 
                 <BilingualField
-                    label="Intro description"
-                    hint="This short intro appears under the hero title on the public page."
+                    label={t("marketingNested.introDescription")}
+                    hint={t("marketingNested.introDescriptionHint")}
                     required
                     en={
                         <Textarea
@@ -50,7 +52,7 @@ const MarketingFaqHeroPage = () => {
                                     en: { ...draft.en, description: e.target.value },
                                 })
                             }
-                            placeholder="English introduction"
+                            placeholder={t("marketingNested.introDescriptionPlaceholderEn")}
                         />
                     }
                     ar={
@@ -62,7 +64,7 @@ const MarketingFaqHeroPage = () => {
                                     ar: { ...draft.ar, description: e.target.value },
                                 })
                             }
-                            placeholder="المقدمة بالعربية"
+                            placeholder={t("marketingNested.introDescriptionPlaceholderAr")}
                         />
                     }
                 />

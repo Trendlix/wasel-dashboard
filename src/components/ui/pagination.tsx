@@ -70,7 +70,7 @@ function PaginationPrevious({
     <PaginationLink
       aria-label="Go to previous page"
       size="default"
-      className={cn("pl-1.5!", className)}
+      className={cn("ps-1.5!", className)}
       {...props}
     >
       <ChevronLeftIcon data-icon="inline-start" />
@@ -88,7 +88,7 @@ function PaginationNext({
     <PaginationLink
       aria-label="Go to next page"
       size="default"
-      className={cn("pr-1.5!", className)}
+      className={cn("pe-1.5!", className)}
       {...props}
     >
       <span className="hidden sm:block">{text}</span>
@@ -99,8 +99,9 @@ function PaginationNext({
 
 function PaginationEllipsis({
   className,
+  srText = "More pages",
   ...props
-}: React.ComponentProps<"span">) {
+}: React.ComponentProps<"span"> & { srText?: string }) {
   return (
     <span
       aria-hidden
@@ -113,7 +114,7 @@ function PaginationEllipsis({
     >
       <MoreHorizontalIcon
       />
-      <span className="sr-only">More pages</span>
+      <span className="sr-only">{srText}</span>
     </span>
   )
 }

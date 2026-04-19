@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Trash2 } from "lucide-react";
 import { RichTextEditor } from "@/shared/components/common/FormItems";
 import clsx from "clsx";
+import { useTranslation } from "react-i18next";
 import {
     useCmsServicesStore,
     type ServicesPart,
@@ -20,23 +21,12 @@ import {
     CmsFieldLabel,
 } from "../about/_shared";
 
-const PART_LABELS: Record<ServicesPart, string> = {
-    hero: "Services / Hero",
-    warehouse: "Services / Warehouse",
-    advertising: "Services / Advertising",
-};
-
-const PART_DESCRIPTIONS: Record<ServicesPart, string> = {
-    hero: "Intro strip for the services landing page: titles, description, and feature cards.",
-    warehouse: "Warehouse and storage offering: section copy plus bilingual cards with rich descriptions.",
-    advertising: "Advertising and growth services: same card pattern as other service tabs.",
-};
-
 interface ServiceSectionPageProps {
     part: ServicesPart;
 }
 
 const ServiceSectionPage = ({ part }: ServiceSectionPageProps) => {
+    const { t } = useTranslation("cms");
     const {
         [part]: sectionByLocale,
         cardDraftImages,
@@ -74,10 +64,10 @@ const ServiceSectionPage = ({ part }: ServiceSectionPageProps) => {
 
     return (
         <PageShell
-            title={PART_LABELS[part]}
-            subtitle="Services Section"
-            description={PART_DESCRIPTIONS[part]}
-            hint="Each tab saves separately. Card images are shared per card; text fields are bilingual."
+            title={t(`servicesEditor.partTitle.${part}`)}
+            subtitle={t("servicesEditor.subtitle")}
+            description={t(`servicesEditor.partDescription.${part}`)}
+            hint={t("servicesEditor.hint")}
             onSave={() => savePart(part)}
             saving={savingPart === part}
             loading={loading}
@@ -87,11 +77,11 @@ const ServiceSectionPage = ({ part }: ServiceSectionPageProps) => {
                 {/* ── Section header ───────────────────────────────────────── */}
                 <div className={clsx(sectionCardClass, "space-y-5")}>
                     <BilingualStringArrayEditor
-                        label="Section Titles"
-                        hint="Stacked headline fragments for this services block. Align EN/AR count when possible."
+                        label={t("servicesEditor.sectionTitles")}
+                        hint={t("servicesEditor.sectionTitlesHint")}
                         enValues={sectionByLocale.en.title}
                         arValues={sectionByLocale.ar.title}
-                        placeholder="Section title part"
+                        placeholder={t("servicesEditor.sectionTitlePlaceholder")}
                         onEnChange={(title) => setPart(part, "en", { title })}
                         onArChange={(title) => setPart(part, "ar", { title })}
                         enTopError={getEnError("title")}
@@ -101,11 +91,11 @@ const ServiceSectionPage = ({ part }: ServiceSectionPageProps) => {
                     />
 
                     <BilingualField
-                        label="Description"
-                        hint="Lead paragraph under the titles. Plain textarea; supports line breaks."
+                        label={t("servicesEditor.description")}
+                        hint={t("servicesEditor.descriptionHint")}
                         en={
                             <Textarea
-                                placeholder="Section description"
+                                placeholder={t("servicesEditor.descriptionPlaceholderEn")}
                                 value={sectionByLocale.en.description}
                                 onChange={(e) => setPart(part, "en", { description: e.target.value })}
                                 rows={3}
@@ -113,7 +103,7 @@ const ServiceSectionPage = ({ part }: ServiceSectionPageProps) => {
                         }
                         ar={
                             <Textarea
-                                placeholder="وصف القسم"
+                                placeholder={t("servicesEditor.descriptionPlaceholderAr")}
                                 value={sectionByLocale.ar.description}
                                 onChange={(e) => setPart(part, "ar", { description: e.target.value })}
                                 rows={3}
@@ -129,7 +119,7 @@ const ServiceSectionPage = ({ part }: ServiceSectionPageProps) => {
                     <div key={`${part}-card-${index}`} className={clsx(sectionCardClass, "space-y-4")}>
                         <div className="flex items-center justify-between">
                             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-main-lightSlate">
-                                Card #{index + 1}
+                                {t("servicesEditor.cardLabel", { n: index + 1 })}
                             </p>
                             <Button
                                 type="button"
@@ -138,29 +128,29 @@ const ServiceSectionPage = ({ part }: ServiceSectionPageProps) => {
                                 onClick={() => removeCard(part, index)}
                             >
                                 <Trash2 size={14} />
-                                Remove Card
+                                {t("servicesEditor.removeCard")}
                             </Button>
                         </div>
 
                         {/* Shared image */}
                         <div className="space-y-2">
                             <CmsFieldLabel
-                                label="Card Image (shared)"
-                                hint="Illustration for this service card. One image for both locales."
+                                label={t("servicesEditor.cardImage")}
+                                hint={t("servicesEditor.cardImageHint")}
                             />
                             <div className="h-[240px] w-[240px] max-w-full overflow-hidden rounded-xl border border-main-whiteMarble bg-main-titaniumWhite/30">
                                 {cardDraftPreviews[index] ? (
-                                    <img src={cardDraftPreviews[index]} alt={`Card ${index + 1} preview`} className="h-full w-full object-contain" />
+                                    <img src={cardDraftPreviews[index]} alt={t("servicesEditor.cardImage")} className="h-full w-full object-contain" />
                                 ) : sectionByLocale.en.cards[index]?.img ? (
-                                    <img src={cmsImageUrl(sectionByLocale.en.cards[index].img)} alt={`Card ${index + 1}`} className="h-full w-full object-contain" />
+                                    <img src={cmsImageUrl(sectionByLocale.en.cards[index].img)} alt={t("servicesEditor.cardImage")} className="h-full w-full object-contain" />
                                 ) : (
                                     <div className="flex h-full w-full items-center justify-center px-4 text-center text-sm text-main-coolGray">
-                                        No image uploaded yet
+                                        {t("servicesEditor.cardImageEmpty")}
                                     </div>
                                 )}
                             </div>
                             {cardDraftPreviews[index] && (
-                                <p className="text-xs text-main-primary">New image selected. It will upload on Save.</p>
+                                <p className="text-xs text-main-primary">{t("servicesEditor.cardImageSelected")}</p>
                             )}
                         </div>
 
@@ -168,8 +158,8 @@ const ServiceSectionPage = ({ part }: ServiceSectionPageProps) => {
                             <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                                 <div className="flex-1 space-y-2">
                                     <CmsFieldLabel
-                                        label="Upload Card Image"
-                                        hint="Upload replaces the image for this card after Save."
+                                        label={t("servicesEditor.uploadCardImage")}
+                                        hint={t("servicesEditor.uploadCardImageHint")}
                                     />
                                     <Input
                                         type="file"
@@ -191,7 +181,7 @@ const ServiceSectionPage = ({ part }: ServiceSectionPageProps) => {
                                         disabled={savingPart === part}
                                     >
                                         <Trash2 size={14} />
-                                        Remove Image
+                                        {t("servicesEditor.removeImage")}
                                     </Button>
                                 )}
                             </div>
@@ -200,18 +190,18 @@ const ServiceSectionPage = ({ part }: ServiceSectionPageProps) => {
 
                         {/* Bilingual text fields */}
                         <BilingualField
-                            label="Tag"
-                            hint="Small label or badge above the card title (e.g. feature name)."
+                            label={t("servicesEditor.tag")}
+                            hint={t("servicesEditor.tagHint")}
                             en={
                                 <Input
-                                    placeholder="e.g. Fast, Reliable"
+                                    placeholder={t("servicesEditor.tagPlaceholderEn")}
                                     value={sectionByLocale.en.cards[index]?.tag ?? ""}
                                     onChange={(e) => updateCard(part, "en", index, { tag: e.target.value })}
                                 />
                             }
                             ar={
                                 <Input
-                                    placeholder="مثل: سريع، موثوق"
+                                    placeholder={t("servicesEditor.tagPlaceholderAr")}
                                     value={sectionByLocale.ar.cards[index]?.tag ?? ""}
                                     onChange={(e) => updateCard(part, "ar", index, { tag: e.target.value })}
                                 />
@@ -221,18 +211,18 @@ const ServiceSectionPage = ({ part }: ServiceSectionPageProps) => {
                         />
 
                         <BilingualField
-                            label="Card Title"
-                            hint="Main heading on the card."
+                            label={t("servicesEditor.cardTitle")}
+                            hint={t("servicesEditor.cardTitleHint")}
                             en={
                                 <Input
-                                    placeholder="Card title"
+                                    placeholder={t("servicesEditor.cardTitlePlaceholderEn")}
                                     value={sectionByLocale.en.cards[index]?.title ?? ""}
                                     onChange={(e) => updateCard(part, "en", index, { title: e.target.value })}
                                 />
                             }
                             ar={
                                 <Input
-                                    placeholder="عنوان البطاقة"
+                                    placeholder={t("servicesEditor.cardTitlePlaceholderAr")}
                                     value={sectionByLocale.ar.cards[index]?.title ?? ""}
                                     onChange={(e) => updateCard(part, "ar", index, { title: e.target.value })}
                                 />
@@ -242,18 +232,18 @@ const ServiceSectionPage = ({ part }: ServiceSectionPageProps) => {
                         />
 
                         <BilingualField
-                            label="Card Description"
-                            hint="Rich text body: formatting, lists, and embedded media are allowed."
+                            label={t("servicesEditor.cardDescription")}
+                            hint={t("servicesEditor.cardDescriptionHint")}
                             en={
                                 <RichTextEditor
-                                    placeholder="Card description"
+                                    placeholder={t("servicesEditor.cardDescriptionPlaceholderEn")}
                                     value={sectionByLocale.en.cards[index]?.description ?? ""}
                                     onChange={(html) => updateCard(part, "en", index, { description: html })}
                                 />
                             }
                             ar={
                                 <RichTextEditor
-                                    placeholder="وصف البطاقة"
+                                    placeholder={t("servicesEditor.cardDescriptionPlaceholderAr")}
                                     value={sectionByLocale.ar.cards[index]?.description ?? ""}
                                     onChange={(html) => updateCard(part, "ar", index, { description: html })}
                                 />
@@ -266,7 +256,7 @@ const ServiceSectionPage = ({ part }: ServiceSectionPageProps) => {
 
                 {sectionByLocale.en.cards.length === 0 && (
                     <div className="rounded-xl border border-dashed border-main-whiteMarble bg-main-titaniumWhite/25 px-4 py-5 text-sm text-main-coolGray">
-                        No cards yet. Add cards to showcase this service.
+                        {t("servicesEditor.emptyCards")}
                     </div>
                 )}
 
@@ -276,7 +266,7 @@ const ServiceSectionPage = ({ part }: ServiceSectionPageProps) => {
                     className="border-main-primary/30 text-main-primary hover:bg-main-primary/10"
                     onClick={() => addCard(part)}
                 >
-                    Add Card
+                    {t("servicesEditor.addCard")}
                 </Button>
             </div>
         </PageShell>

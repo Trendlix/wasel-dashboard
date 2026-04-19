@@ -1,0 +1,117 @@
+{
+  "pageTitle": "Support tickets",
+  "pageDescription": "Manage customer support tickets and inquiries",
+  "analytics": {
+    "total": "Total tickets",
+    "open": "Open",
+    "pendingReply": "Pending reply",
+    "closed": "Closed",
+    "solved": "Solved"
+  },
+  "table": {
+    "searchPlaceholder": "Search by subject or description…",
+    "manageCategories": "Manage categories",
+    "emptyTitle": "No tickets found",
+    "emptyDescription": "Try adjusting your filters.",
+    "viewDetails": "View details",
+    "headers": {
+      "ticket": "Ticket",
+      "subject": "Subject",
+      "customer": "Customer",
+      "type": "Type",
+      "category": "Category",
+      "priority": "Priority",
+      "status": "Status",
+      "updated": "Updated",
+      "actions": "Actions"
+    }
+  },
+  "filters": {
+    "allStatus": "All statuses",
+    "allPriority": "All priorities",
+    "newestFirst": "Newest first",
+    "oldestFirst": "Oldest first"
+  },
+  "statuses": {
+    "pending": "Open",
+    "reply": "Pending reply",
+    "closed": "Closed",
+    "solved": "Solved"
+  },
+  "priorities": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High"
+  },
+  "owner": {
+    "user": "User",
+    "driver": "Driver",
+    "unknown": "Unknown",
+    "customer": "Customer",
+    "noName": "Unnamed"
+  },
+  "details": {
+    "loading": "Loading…",
+    "ticketTitle": "Ticket #{{id}}",
+    "description": "Description",
+    "replySummary_one": "{{count}} reply — open chat to view the full conversation.",
+    "replySummary_other": "{{count}} replies — open chat to view the full conversation.",
+    "created": "Created",
+    "lastUpdated": "Last updated",
+    "close": "Close",
+    "solved": "Solved",
+    "openChat": "Open chat",
+    "confirmCloseTitle": "Close ticket?",
+    "confirmSolveTitle": "Mark as solved?",
+    "confirmCloseBody": "This ticket will be closed and no further replies can be sent.",
+    "confirmSolveBody": "This will mark the ticket as solved. You can reopen it anytime.",
+    "processing": "Processing…",
+    "yesClose": "Yes, close",
+    "yesSolved": "Yes, solved"
+  },
+  "categories": {
+    "title": "Manage ticket categories",
+    "description": "Add or remove categories to organize your support tickets.",
+    "addLabel": "Add new category",
+    "placeholder": "e.g. Billing issues",
+    "addButton": "Add",
+    "addHint": "Press Enter or click Add to create a new category.",
+    "existing": "Existing categories",
+    "countTickets_one": "{{count}} ticket",
+    "countTickets_other": "{{count}} tickets",
+    "emptyTitle": "No categories",
+    "emptyDescription": "No categories were found.",
+    "deleteCategory": "Delete category",
+    "done": "Done"
+  },
+  "chat": {
+    "backAria": "Back to support tickets",
+    "ticketHeading": "Ticket #{{id}}",
+    "labels": {
+      "status": "Status",
+      "priority": "Priority",
+      "category": "Category",
+      "customer": "Customer",
+      "created": "Created"
+    },
+    "closeTicket": "Close ticket",
+    "markSolved": "Mark solved",
+    "dragResize": "Drag to resize",
+    "resolvedNotice": "This ticket is {{status}} — replies are disabled.",
+    "placeholder": "Type your reply…",
+    "send": "Send",
+    "sending": "Sending…",
+    "charCount": "{{current}} / {{max}}",
+    "shortcutSend": "Ctrl+Enter to send",
+    "shortcutSendMac": "⌘+Enter to send",
+    "you": "You",
+    "supportTeam": "Support team",
+    "confirmCloseTitle": "Close ticket?",
+    "confirmSolveTitle": "Mark as solved?",
+    "confirmCloseBody": "This ticket will be closed and no further replies can be sent.",
+    "confirmSolveBody": "This will mark the ticket as solved. You can reopen it anytime.",
+    "processing": "Processing…",
+    "yesClose": "Yes, close",
+    "yesSolved": "Yes, solved"
+  }
+}

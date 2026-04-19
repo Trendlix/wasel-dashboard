@@ -1,9 +1,13 @@
 import { z } from "zod";
 
-export const roleSchema = z.object({
-    name: z.string().min(3, "Role name must be at least 3 characters").max(50, "Role name too long"),
-    description: z.string().max(200, "Description too long").optional(),
-    pages: z.array(z.string()).min(1, "Slect at least one page"),
-});
+/** Single-key lookups only; avoids `t()` overload ambiguity with Zod message factories. */
+type RolesT = (key: string) => string;
 
-export type RoleFormValues = z.infer<typeof roleSchema>;
+export const createRoleSchema = (t: RolesT) =>
+    z.object({
+        name: z.string().min(3, t("validation.roleNameMin")).max(50, t("validation.roleNameMax")),
+        description: z.string().max(200, t("validation.descriptionMax")).optional(),
+        pages: z.array(z.string()).min(1, t("validation.pagesMin")),
+    });
+
+export type RoleFormValues = z.infer<ReturnType<typeof createRoleSchema>>;

@@ -8,6 +8,8 @@ import {
 } from "@/components/ui/dialog";
 import React from "react";
 
+type CommonModalVariant = "default" | "danger" | "success";
+
 interface CommonModalProps {
     open: boolean;
     onOpenChange: (v: boolean) => void;
@@ -15,7 +17,14 @@ interface CommonModalProps {
     maxWidth?: string;
     className?: string;
     loading?: boolean;
+    variant?: CommonModalVariant;
 }
+
+const stripeClasses: Record<CommonModalVariant, string> = {
+    default: "from-main-primary/40 via-main-primary to-main-primary/40",
+    danger:  "from-main-remove/40 via-main-remove to-main-remove/40",
+    success: "from-main-vividMint/40 via-main-vividMint to-main-vividMint/40",
+};
 
 export const CommonModal = ({
     open,
@@ -24,6 +33,7 @@ export const CommonModal = ({
     maxWidth = "sm:max-w-[480px]",
     className,
     loading = false,
+    variant = "default",
 }: CommonModalProps) => (
     <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent
@@ -32,10 +42,12 @@ export const CommonModal = ({
             onEscapeKeyDown={(e) => loading && e.preventDefault()}
             className={cn(
                 maxWidth,
-                "bg-white p-0 border-0 ring-0 shadow-2xl rounded-3xl overflow-hidden outline-none",
+                "bg-white p-0 border-0 ring-0 shadow-[0_24px_64px_-12px_rgba(17,24,39,0.18)] rounded-3xl overflow-hidden outline-none",
                 className
             )}
         >
+            {/* Accent stripe */}
+            <div className={cn("h-[3px] w-full bg-linear-to-r shrink-0", stripeClasses[variant])} />
             <div className="flex flex-col">{children}</div>
         </DialogContent>
     </Dialog>

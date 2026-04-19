@@ -1,17 +1,19 @@
 import { BookOpen, Info } from "lucide-react";
 import { NavLink, Navigate, Outlet } from "react-router-dom";
 import clsx from "clsx";
+import { useTranslation } from "react-i18next";
 
 const tabs = [
-    { key: "info", label: "Info", to: "/cms/blogs/info", icon: Info },
-    { key: "items", label: "Blog Items", to: "/cms/blogs/blog-items", icon: BookOpen },
+    { key: "info", tabKey: "info" as const, to: "/cms/blogs/info", icon: Info },
+    { key: "items", tabKey: "items" as const, to: "/cms/blogs/blog-items", icon: BookOpen },
 ];
 
 const CmsBlogsLayout = () => {
+    const { t } = useTranslation("cms");
     return (
         <div className="space-y-4">
             <p className="text-sm text-main-coolGray">
-                Configure the blogs landing (info + cards) and manage individual posts under Blog Items.
+                {t("blogsNav.intro")}
             </p>
             <div className="rounded-2xl border border-main-whiteMarble bg-main-white p-2 shadow-[0_12px_30px_rgba(17,24,39,0.04)]">
                 <div className="flex flex-wrap items-center gap-2">
@@ -29,7 +31,7 @@ const CmsBlogsLayout = () => {
                             }
                         >
                             <tab.icon size={16} className="opacity-90 group-hover:opacity-100" />
-                            {tab.label}
+                            {t(`blogsNav.${tab.tabKey}`)}
                         </NavLink>
                     ))}
                 </div>

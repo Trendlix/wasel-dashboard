@@ -1,4 +1,5 @@
 import { Bell } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import useSettingsStore from "@/shared/hooks/store/useSettingsStore";
 import SettingsSectionHeader from "./SettingsSectionHeader";
 import ToggleSwitch from "./ToggleSwitch";
@@ -15,13 +16,20 @@ const NOTIFICATION_PREF_TOGGLE_KEYS = [
 
 type NotificationPrefToggleKey = (typeof NOTIFICATION_PREF_TOGGLE_KEYS)[number];
 
-const PREF_LABELS: Record<NotificationPrefToggleKey, string> = {
-    email_notifications_for_users: "Email notifications for new users",
-    email_notifications_for_drivers: "Email notifications for new drivers",
+type SettingsPrefLabelKey =
+    | "pref_email_notifications_for_users"
+    | "pref_email_notifications_for_drivers"
+    | "pref_email_notifications_for_drivers_Pending_verifications"
+    | "pref_daily_revenue_reports"
+    | "pref_weekly_analytics_summary";
+
+const PREF_LABEL_KEYS: Record<NotificationPrefToggleKey, SettingsPrefLabelKey> = {
+    email_notifications_for_users: "pref_email_notifications_for_users",
+    email_notifications_for_drivers: "pref_email_notifications_for_drivers",
     email_notifications_for_drivers_Pending_verifications:
-        "Email notifications for pending driver verifications",
-    daily_revenue_reports: "Daily revenue reports",
-    weekly_analytics_summary: "Weekly analytics summary",
+        "pref_email_notifications_for_drivers_Pending_verifications",
+    daily_revenue_reports: "pref_daily_revenue_reports",
+    weekly_analytics_summary: "pref_weekly_analytics_summary",
 };
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
@@ -46,6 +54,7 @@ const NotificationPreferencesSkeleton = () => (
 // ─── Component ────────────────────────────────────────────────────────────────
 
 const NotificationPreferences = () => {
+    const { t } = useTranslation("settings");
     const { notificationPreferences, loading, setNotificationPref } = useSettingsStore();
 
     if (loading || !notificationPreferences) return <NotificationPreferencesSkeleton />;
@@ -54,7 +63,7 @@ const NotificationPreferences = () => {
         <div className="bg-main-white border border-main-whiteMarble common-rounded p-6">
             <SettingsSectionHeader
                 icon={Bell}
-                title="Notification Preferences"
+                title={t("notificationPreferencesHeader")}
                 iconBg="bg-main-ladyBlue/10"
                 iconColor="text-main-ladyBlue"
             />
@@ -63,9 +72,9 @@ const NotificationPreferences = () => {
                 {NOTIFICATION_PREF_TOGGLE_KEYS.map((key) => (
                     <div
                         key={key}
-                        className="flex items-center justify-between py-3.5 px-4 bg-main-luxuryWhite common-rounded"
+                        className="flex items-center justify-between gap-3 py-3.5 px-4 bg-main-luxuryWhite common-rounded rtl:flex-row-reverse"
                     >
-                        <span className="text-main-mirage text-sm">{PREF_LABELS[key]}</span>
+                        <span className="text-main-mirage text-sm flex-1 min-w-0">{t(PREF_LABEL_KEYS[key])}</span>
                         <ToggleSwitch
                             enabled={Boolean(notificationPreferences[key])}
                             onChange={(val) => setNotificationPref(key, val)}

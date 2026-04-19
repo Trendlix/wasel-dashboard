@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +10,7 @@ import { formInputWrapperClass } from "@/shared/components/common/formStyles";
 import { RotateCcw, Search } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CommonModal, CommonModalFooter, CommonModalHeader } from "@/shared/components/common/CommonModal";
+import { formatAppDateShort } from "@/lib/formatLocaleDate";
 
 type ConfirmActionType = "publish" | "draft" | "delete";
 type StatusFilter = "all" | BlogStatus;
@@ -21,11 +23,6 @@ interface ConfirmActionState {
 
 const stripHtml = (value: string) => value.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 const ITEMS_PER_PAGE = 10;
-const formatStatusLabel = (status: BlogStatus) => {
-    if (status === "scheduled") return "Scheduled";
-    if (status === "published") return "Published";
-    return "Draft";
-};
 
 const statusBadgeClass: Record<BlogStatus, string> = {
     draft: "bg-main-coolGray/15 text-main-coolGray",
@@ -33,14 +30,8 @@ const statusBadgeClass: Record<BlogStatus, string> = {
     published: "bg-emerald-100 text-emerald-700",
 };
 
-const filterTabs: Array<{ value: StatusFilter; label: string }> = [
-    { value: "all", label: "All Blogs" },
-    { value: "draft", label: "Drafts" },
-    { value: "scheduled", label: "Scheduled" },
-    { value: "published", label: "Published" },
-];
-
 const BlogItemsListPage = () => {
+    const { t, i18n } = useTranslation(["cms", "common"]);
     const navigate = useNavigate();
     const searchInputRef = useRef<HTMLInputElement>(null);
     const [searchQuery, setSearchQuery] = useState("");
@@ -64,6 +55,15 @@ const BlogItemsListPage = () => {
         publishItem,
         draftItem,
     } = useCmsBlogsStore();
+
+    const filterTabs: Array<{ value: StatusFilter; labelKey: "filterAll" | "filterDrafts" | "filterScheduled" | "filterPublished" }> = [
+        { value: "all", labelKey: "filterAll" },
+        { value: "draft", labelKey: "filterDrafts" },
+        { value: "scheduled", labelKey: "filterScheduled" },
+        { value: "published", labelKey: "filterPublished" },
+    ];
+
+    const formatStatusLabel = (status: BlogStatus) => t(`cms:blogItemsList.status.${status}`);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -135,33 +135,33 @@ const BlogItemsListPage = () => {
             return {
                 title: "",
                 description: "",
-                buttonLabel: "Confirm",
+                buttonLabel: t("cms:blogItemsList.confirmDefault"),
                 buttonClassName: "",
             };
         }
 
         if (confirmAction.type === "delete") {
             return {
-                title: "Delete Blog",
-                description: `Are you sure you want to delete "${confirmAction.itemTitle}"? This action cannot be undone.`,
-                buttonLabel: "Yes, Delete",
+                title: t("cms:blogItemsList.confirmDeleteTitle"),
+                description: t("cms:blogItemsList.confirmDeleteBody", { title: confirmAction.itemTitle }),
+                buttonLabel: t("cms:blogItemsList.confirmDeleteButton"),
                 buttonClassName: "bg-main-remove hover:bg-main-remove/90 text-white",
             };
         }
 
         if (confirmAction.type === "draft") {
             return {
-                title: "Move Blog to Draft",
-                description: `Move "${confirmAction.itemTitle}" back to draft status? It will no longer appear as published.`,
-                buttonLabel: "Yes, Move to Draft",
+                title: t("cms:blogItemsList.confirmDraftTitle"),
+                description: t("cms:blogItemsList.confirmDraftBody", { title: confirmAction.itemTitle }),
+                buttonLabel: t("cms:blogItemsList.confirmDraftButton"),
                 buttonClassName: "bg-main-gunmetalBlue hover:bg-main-gunmetalBlue/90 text-white",
             };
         }
 
         return {
-            title: "Publish Blog",
-            description: `Publish "${confirmAction.itemTitle}" now? It will become visible as published content.`,
-            buttonLabel: "Yes, Publish",
+            title: t("cms:blogItemsList.confirmPublishTitle"),
+            description: t("cms:blogItemsList.confirmPublishBody", { title: confirmAction.itemTitle }),
+            buttonLabel: t("cms:blogItemsList.confirmPublishButton"),
             buttonClassName: "bg-main-primary hover:bg-main-primary/90 text-white",
         };
     };
@@ -172,10 +172,10 @@ const BlogItemsListPage = () => {
         <div className="rounded-2xl border border-main-whiteMarble bg-main-white p-5 shadow-[0_12px_32px_rgba(17,24,39,0.04)] space-y-4">
             <div className="flex items-center justify-between gap-3">
                 <h3 className="text-lg font-semibold text-main-mirage">
-                    All Blog Items
+                    {t("cms:blogItemsList.title")}
                 </h3>
-                <Button onClick={() => navigate("/cms/blogs/blog-items/new")}>
-                    Add Blog
+                <Button type="button" onClick={() => navigate("/cms/blogs/blog-items/new")}>
+                    {t("cms:blogItemsList.addBlog")}
                 </Button>
             </div>
 
@@ -192,7 +192,7 @@ const BlogItemsListPage = () => {
                                     : "inline-flex h-8 items-center rounded-lg bg-main-white px-3 text-xs font-semibold text-main-sharkGray hover:bg-main-whiteMarble/70 hover:text-main-primary"
                             }
                         >
-                            {tab.label}
+                            {t(`cms:blogItemsList.${tab.labelKey}`)}
                         </button>
                     ))}
                 </div>
@@ -208,17 +208,17 @@ const BlogItemsListPage = () => {
                             type="search"
                             value={searchQuery}
                             onChange={(event) => setSearchQuery(event.target.value)}
-                            placeholder="Search by title, category, or description..."
+                            placeholder={t("cms:blogItemsList.searchPlaceholder")}
                             className="h-full border-0 bg-transparent p-0 shadow-none placeholder:text-main-trueBlack/50 focus-visible:ring-0"
                         />
                     </div>
 
                     <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                         <SelectTrigger className="h-11 w-[220px]">
-                            <SelectValue placeholder="All categories" />
+                            <SelectValue placeholder={t("cms:blogItemsList.allCategories")} />
                         </SelectTrigger>
                         <SelectContent align="end">
-                            <SelectItem value="all">All categories</SelectItem>
+                            <SelectItem value="all">{t("cms:blogItemsList.allCategories")}</SelectItem>
                             {categories.map((category) => (
                                 <SelectItem key={category} value={category}>
                                     {category}
@@ -229,12 +229,12 @@ const BlogItemsListPage = () => {
 
                     <Select value={selectedLocale} onValueChange={(value) => setSelectedLocale(value as "all" | CmsLocale)}>
                         <SelectTrigger className="h-11 w-[160px]">
-                            <SelectValue placeholder="All locales" />
+                            <SelectValue placeholder={t("cms:blogItemsList.allLocales")} />
                         </SelectTrigger>
                         <SelectContent align="end">
-                            <SelectItem value="all">All locales</SelectItem>
-                            <SelectItem value="en">English</SelectItem>
-                            <SelectItem value="ar">Arabic</SelectItem>
+                            <SelectItem value="all">{t("cms:blogItemsList.allLocales")}</SelectItem>
+                            <SelectItem value="en">{t("common:english")}</SelectItem>
+                            <SelectItem value="ar">{t("common:arabic")}</SelectItem>
                         </SelectContent>
                     </Select>
 
@@ -243,13 +243,13 @@ const BlogItemsListPage = () => {
                         variant="outline"
                         className="h-11 border-main-whiteMarble px-4 text-main-hydrocarbon"
                         onClick={handleResetFilters}
+                        aria-label={t("common:resetFilters")}
                     >
                         <RotateCcw size={14} />
-                        Reset
                     </Button>
                 </div>
                 {loadingCategories && (
-                    <p className="text-xs text-main-coolGray">Loading categories...</p>
+                    <p className="text-xs text-main-coolGray">{t("cms:blogItemsList.loadingCategories")}</p>
                 )}
             </div>
 
@@ -292,8 +292,8 @@ const BlogItemsListPage = () => {
                 </div>
             ) : items.length === 0 ? (
                 <NoDataFound
-                    title="No blogs found"
-                    description="No items match the selected filters."
+                    title={t("cms:blogItemsList.emptyTitle")}
+                    description={t("cms:blogItemsList.emptyDescription")}
                 />
             ) : (
                 <div className="space-y-4">
@@ -301,11 +301,11 @@ const BlogItemsListPage = () => {
                     {items.map((item) => {
                         const summary = stripHtml(item.description ?? "");
                         const releaseLabel = item.release_date
-                            ? new Date(item.release_date).toLocaleDateString()
-                            : "Not scheduled";
+                            ? formatAppDateShort(item.release_date, i18n.language)
+                            : t("cms:blogItemsList.notScheduled");
                         const createdLabel = item.created_at
-                            ? new Date(item.created_at).toLocaleDateString()
-                            : "-";
+                            ? formatAppDateShort(item.created_at, i18n.language)
+                            : "—";
 
                         return (
                             <article
@@ -325,7 +325,7 @@ const BlogItemsListPage = () => {
                                 <div className="space-y-3 px-4 py-4">
                                     <div className="flex items-center justify-between gap-3">
                                         <span className="inline-flex rounded-full bg-main-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-main-primary">
-                                            {item.category || "General"}
+                                            {item.category || t("cms:blogItemsList.generalCategory")}
                                         </span>
                                         <div className="flex items-center gap-2">
                                             <span className="inline-flex rounded-full bg-main-titaniumWhite px-2 py-1 text-[10px] font-semibold uppercase text-main-sharkGray">
@@ -344,13 +344,15 @@ const BlogItemsListPage = () => {
                                     </h4>
 
                                     <p className="line-clamp-2 text-sm leading-relaxed text-main-sharkGray">
-                                        {summary || "No description"}
+                                        {summary || t("cms:blogItemsList.noDescription")}
                                     </p>
 
                                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-main-coolGray">
                                         <span>{createdLabel}</span>
                                         <span>{releaseLabel}</span>
-                                        {item.time_to_read && <span>{item.time_to_read} min read</span>}
+                                        {item.time_to_read != null && Number(item.time_to_read) > 0 && (
+                                            <span>{t("cms:blogItemsList.minRead", { minutes: Number(item.time_to_read) })}</span>
+                                        )}
                                     </div>
 
                                     <div className="flex flex-wrap gap-1.5 pt-1">
@@ -360,7 +362,7 @@ const BlogItemsListPage = () => {
                                             className="h-7 border-main-whiteMarble px-3 text-xs text-main-mirage hover:bg-main-luxuryWhite"
                                             onClick={() => navigate(`/cms/blogs/blog-items/${item.id}/edit`)}
                                         >
-                                            Edit
+                                            {t("cms:blogItemsList.edit")}
                                         </Button>
                                         {item.status !== "published" ? (
                                             <Button
@@ -368,7 +370,7 @@ const BlogItemsListPage = () => {
                                                 className="h-7 bg-main-primary px-3 text-xs text-white hover:bg-main-primary/90"
                                                 onClick={() => handleOpenConfirm("publish", item.id, item.title)}
                                             >
-                                                Publish
+                                                {t("cms:blogItemsList.publish")}
                                             </Button>
                                         ) : (
                                             <Button
@@ -377,7 +379,7 @@ const BlogItemsListPage = () => {
                                                 className="h-7 border-main-whiteMarble px-3 text-xs text-main-gunmetalBlue hover:bg-main-gunmetalBlue/10"
                                                 onClick={() => handleOpenConfirm("draft", item.id, item.title)}
                                             >
-                                                Move to Draft
+                                                {t("cms:blogItemsList.moveToDraft")}
                                             </Button>
                                         )}
                                         <Button
@@ -386,7 +388,7 @@ const BlogItemsListPage = () => {
                                             className="h-7 px-3 text-xs text-main-remove hover:bg-main-remove/10 hover:text-main-remove"
                                             onClick={() => handleOpenConfirm("delete", item.id, item.title)}
                                         >
-                                            Delete
+                                            {t("cms:blogItemsList.delete")}
                                         </Button>
                                     </div>
                                 </div>
@@ -422,7 +424,7 @@ const BlogItemsListPage = () => {
                         onClick={handleCloseConfirm}
                         disabled={confirmLoading}
                     >
-                        Cancel
+                        {t("common:cancel")}
                     </Button>
                     <Button
                         type="button"
@@ -430,7 +432,7 @@ const BlogItemsListPage = () => {
                         onClick={handleConfirmAction}
                         disabled={confirmLoading}
                     >
-                        {confirmLoading ? "Please wait..." : confirmCopy.buttonLabel}
+                        {confirmLoading ? t("cms:blogItemsList.pleaseWait") : confirmCopy.buttonLabel}
                     </Button>
                 </CommonModalFooter>
             </CommonModal>

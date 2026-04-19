@@ -1,0 +1,73 @@
+{
+  "pageTitle": "مركز التحقق",
+  "pageDescription": "مراجعة والموافقة على طلبات تحقق السائقين وأصحاب المخازن",
+  "statuses": {
+    "pending": "قيد المراجعة",
+    "approved": "مقبول",
+    "rejected": "مرفوض"
+  },
+  "analytics": {
+    "pendingReviews": "قيد المراجعة",
+    "approved": "المقبولة",
+    "rejected": "المرفوضة"
+  },
+  "list": {
+    "tabWithCount": "{{label}} ({{count}})",
+    "searchPlaceholder": "ابحث بالاسم أو النوع…",
+    "empty": "لا توجد طلبات تحقق.",
+    "driverLabel": "سائق",
+    "submittedDocuments": "المستندات المرفوعة:",
+    "docId": "الهوية",
+    "docLicense": "الرخصة",
+    "docCriminal": "الفيش الجنائي",
+    "noDocsListed": "لا توجد مستندات في القائمة",
+    "viewDocuments": "عرض المستندات",
+    "approve": "قبول",
+    "reject": "رفض"
+  },
+  "confirm": {
+    "nameFallback": "هذا الطلب",
+    "approveTitle": "تأكيد القبول",
+    "rejectTitle": "تأكيد الرفض",
+    "approveDescription": "هل تريد قبول التحقق لـ {{name}}؟",
+    "rejectDescription": "هل تريد رفض التحقق لـ {{name}}؟",
+    "fallbackDescription": "يرجى تأكيد الإجراء.",
+    "note": "سيتم تحديث حالة التحقق فوراً.",
+    "confirmApprove": "تأكيد القبول",
+    "confirmReject": "تأكيد الرفض",
+    "saving": "جاري الحفظ…"
+  },
+  "rejectReasonDefault": "مرفوض من الإدارة",
+  "rejectError": "تعذّر رفض التحقق. حاول مرة أخرى.",
+  "details": {
+    "title": "مستندات التحقق",
+    "description": "راجع المستندات المرفوعة ثم قرّر قبول أو رفض الطلب.",
+    "noEmail": "لا يوجد بريد",
+    "submitted": "تاريخ الإرسال",
+    "submittedAt": "تاريخ الإرسال: {{date}}",
+    "open": "فتح",
+    "previewUnavailable": "المعاينة غير متاحة",
+    "noDocuments": "لا توجد مستندات مرفوعة.",
+    "nationalIdExpiry": "انتهاء الهوية",
+    "licenseExpiry": "انتهاء الرخصة",
+    "address": "العنوان",
+    "additionalPhone": "هاتف إضافي",
+    "notesLabel": "ملاحظات التحقق",
+    "notesPlaceholder": "أضف ملاحظات داخلية لهذا الطلب…",
+    "rejectionLabel": "سبب الرفض",
+    "rejectionPlaceholder": "مطلوب عند رفض التحقق…",
+    "loadError": "تعذّر تحميل تفاصيل التحقق.",
+    "reject": "رفض",
+    "approve": "قبول",
+    "rejecting": "جاري الرفض…",
+    "approving": "جاري القبول…"
+  },
+  "documents": {
+    "profileImage": "صورة الملف",
+    "nationalIdFront": "الهوية (الوجه)",
+    "nationalIdBack": "الهوية (الخلف)",
+    "licenseFront": "الرخصة (الوجه)",
+    "licenseBack": "الرخصة (الخلف)",
+    "criminalRecord": "الفيش الجنائي"
+  }
+}

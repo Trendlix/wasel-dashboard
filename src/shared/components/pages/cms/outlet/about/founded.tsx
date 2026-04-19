@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import clsx from "clsx";
+import { useTranslation } from "react-i18next";
 import useCmsAboutStore from "@/shared/hooks/store/useCmsAboutStore";
 import {
     PageShell,
@@ -10,6 +11,7 @@ import {
 } from "./_shared";
 
 const AboutFoundedPage = () => {
+    const { t } = useTranslation("cms");
     const {
         founded,
         loading,
@@ -28,10 +30,10 @@ const AboutFoundedPage = () => {
 
     return (
         <PageShell
-            title="About / Founded"
-            subtitle="About Section"
-            description="Company origin story: title lines and supporting copy in English and Arabic."
-            hint="Hide removes the whole section from the live site. Titles and descriptions are independent lists per language."
+            title={t("aboutEditor.founded.pageTitle")}
+            subtitle={t("aboutEditor.founded.subtitle")}
+            description={t("aboutEditor.founded.description")}
+            hint={t("aboutEditor.founded.hint")}
             onSave={() => savePart("founded")}
             saving={savingPart === "founded"}
             loading={loading}
@@ -40,8 +42,8 @@ const AboutFoundedPage = () => {
             <div className={clsx(sectionCardClass, "space-y-4")}>
                 <div className="space-y-2">
                     <CmsFieldLabel
-                        label="Section visibility"
-                        hint="When hidden, the Founded block is omitted on the public About page for every locale."
+                            label={t("aboutEditor.founded.visibility")}
+                            hint={t("aboutEditor.founded.visibilityHint")}
                     />
                     <SectionVisibilityToggle
                         checked={founded.en.hide}
@@ -53,11 +55,11 @@ const AboutFoundedPage = () => {
                 </div>
 
                 <BilingualStringArrayEditor
-                    label="Founded Titles"
-                    hint="Short lines that introduce how the company started. Order matches the visual stack on the site."
+                    label={t("aboutEditor.founded.titles")}
+                    hint={t("aboutEditor.founded.titlesHint")}
                     enValues={founded.en.titles}
                     arValues={founded.ar.titles}
-                    placeholder="Founded title"
+                    placeholder={t("aboutEditor.founded.titlePlaceholder")}
                     onEnChange={(titles) => setFounded("en", { titles })}
                     onArChange={(titles) => setFounded("ar", { titles })}
                     enTopError={getEnError("titles")}
@@ -67,11 +69,11 @@ const AboutFoundedPage = () => {
                 />
 
                 <BilingualStringArrayEditor
-                    label="Founded Descriptions"
-                    hint="Longer paragraphs paired with the titles. Use multiline rows for each paragraph block."
+                    label={t("aboutEditor.founded.descriptions")}
+                    hint={t("aboutEditor.founded.descriptionsHint")}
                     enValues={founded.en.descriptions}
                     arValues={founded.ar.descriptions}
-                    placeholder="Founded description"
+                    placeholder={t("aboutEditor.founded.descriptionPlaceholder")}
                     multiline
                     onEnChange={(descriptions) => setFounded("en", { descriptions })}
                     onArChange={(descriptions) => setFounded("ar", { descriptions })}

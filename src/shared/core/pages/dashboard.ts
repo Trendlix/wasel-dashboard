@@ -1,138 +1,89 @@
 import { DollarSign, TrendingUp, Truck, Users } from "lucide-react";
 import type { IAnalyticsCard } from "../../components/common/AnalyticsCard";
+import type { LucideIcon } from "lucide-react";
 
+export type TDashboardMetricKey =
+    | "totalRevenue"
+    | "totalTrips"
+    | "activeUsers"
+    | "activeDrivers";
 
-export const IDashboardAnalytics: IAnalyticsCard[] = [
+export const IDashboardAnalytics: Array<
+    Pick<IAnalyticsCard, "id" | "value" | "classname"> & { metricKey: TDashboardMetricKey; icon: LucideIcon }
+> = [
     {
         id: 1,
-        title: "Total Revenue",
+        metricKey: "totalRevenue",
         value: "EGP 328K",
-        description: "↑ 12.5% from last month",
         icon: DollarSign,
-        classname: "bg-main-vividMint"
+        classname: "bg-main-vividMint",
     },
     {
         id: 2,
-        title: "Total Trips",
+        metricKey: "totalTrips",
         value: "9.120",
-        description: "↑ 8.2% from last month",
         icon: TrendingUp,
-        classname: "bg-main-primary"
+        classname: "bg-main-primary",
     },
     {
         id: 3,
-        title: "Active Users",
+        metricKey: "activeUsers",
         value: "3.247",
-        description: "↑↑ 3.1% from last month",
         icon: Users,
-        classname: "bg-main-ladyBlue"
+        classname: "bg-main-ladyBlue",
     },
     {
         id: 4,
-        title: "Active Drivers",
+        metricKey: "activeDrivers",
         value: "892",
-        description: "↑ 5.4% from last month",
         icon: Truck,
-        classname: "bg-main-mustardGold"
+        classname: "bg-main-mustardGold",
     },
-]
+];
 
+export type TPendingRoleKey = "driver";
 
 export interface IPendingVerification {
-    id: number,
+    id: number;
     name: string;
-    role: string;
+    roleKey: TPendingRoleKey;
     createdAt: Date;
 }
 
 export const pendingVerifications: IPendingVerification[] = [
-    {
-        id: 1,
-        name: "John Doe",
-        role: "Driver",
-        createdAt: new Date(),
-    },
-    {
-        id: 2,
-        name: "John Doe",
-        role: "Driver",
-        createdAt: new Date(),
-    },
-    {
-        id: 3,
-        name: "John Doe",
-        role: "Driver",
-        createdAt: new Date(),
-    }
-]
+    { id: 1, name: "John Doe", roleKey: "driver", createdAt: new Date() },
+    { id: 2, name: "John Doe", roleKey: "driver", createdAt: new Date() },
+    { id: 3, name: "John Doe", roleKey: "driver", createdAt: new Date() },
+];
 
 export type TActivityTag = "trip" | "user" | "driver" | "payment" | "verification" | "storage";
 
+export type TActivityTitleKey =
+    | "tripStarted"
+    | "userRegistered"
+    | "driverVerified"
+    | "paymentReceived"
+    | "verificationPending"
+    | "storageAdded"
+    | "tripCompleted"
+    | "paymentFailed";
+
 export interface IRecentActivity {
     id: number;
-    title: string;
-    description: string;
+    titleKey: TActivityTitleKey;
     tag: TActivityTag;
-    time: string;
+    timeKey: string;
 }
 
 export const recentActivities: IRecentActivity[] = [
-    {
-        id: 1,
-        title: "New Trip Started",
-        description: "Driver Ahmed started a trip to Cairo.",
-        tag: "trip",
-        time: "2 hours ago",
-    },
-    {
-        id: 2,
-        title: "New User Registered",
-        description: "User Mohamed Ali joined the platform.",
-        tag: "user",
-        time: "4 hours ago",
-    },
-    {
-        id: 3,
-        title: "Driver Verified",
-        description: "Driver Khaled Hassan passed verification.",
-        tag: "driver",
-        time: "5 hours ago",
-    },
-    {
-        id: 4,
-        title: "Payment Received",
-        description: "Payment of $120 received from Omar Salem.",
-        tag: "payment",
-        time: "6 hours ago",
-    },
-    {
-        id: 5,
-        title: "Verification Pending",
-        description: "Storage owner Mona Adel submitted documents.",
-        tag: "verification",
-        time: "8 hours ago",
-    },
-    {
-        id: 6,
-        title: "Storage Added",
-        description: "New storage unit added in Alexandria.",
-        tag: "storage",
-        time: "10 hours ago",
-    },
-    {
-        id: 7,
-        title: "Trip Completed",
-        description: "Trip #1042 completed successfully.",
-        tag: "trip",
-        time: "12 hours ago",
-    },
-    {
-        id: 8,
-        title: "Payment Failed",
-        description: "Payment of $80 failed for user Sara Hassan.",
-        tag: "payment",
-        time: "1 day ago",
-    },
+    { id: 1, titleKey: "tripStarted", tag: "trip", timeKey: "hours2" },
+    { id: 2, titleKey: "userRegistered", tag: "user", timeKey: "hours4" },
+    { id: 3, titleKey: "driverVerified", tag: "driver", timeKey: "hours5" },
+    { id: 4, titleKey: "paymentReceived", tag: "payment", timeKey: "hours6" },
+    { id: 5, titleKey: "verificationPending", tag: "verification", timeKey: "hours8" },
+    { id: 6, titleKey: "storageAdded", tag: "storage", timeKey: "hours10" },
+    { id: 7, titleKey: "tripCompleted", tag: "trip", timeKey: "hours12" },
+    { id: 8, titleKey: "paymentFailed", tag: "payment", timeKey: "day1" },
 ];
 
 export const tagColors: Record<TActivityTag, { bg: string; text: string }> = {

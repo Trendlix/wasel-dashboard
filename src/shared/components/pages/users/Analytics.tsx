@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { usersAnalyticsConfig } from "../../../core/pages/users";
 import AnalyticsCard, { AnalyticsCardSkeleton } from "../../common/AnalyticsCard";
 import useUserStore from "@/shared/hooks/store/useUserStore";
@@ -10,6 +11,7 @@ const iconClasses = [
 ];
 
 const Analytics = () => {
+    const { t } = useTranslation("users");
     const { meta, loading, analytics, analyticsLoading, fetchUsersAnalytics } = useUserStore();
 
     useEffect(() => {
@@ -37,8 +39,11 @@ const Analytics = () => {
             {usersAnalyticsConfig.map((card, i) => (
                 <AnalyticsCard
                     key={card.id}
-                    {...card}
+                    id={card.id}
+                    title={t(`analytics.${card.titleKey}`)}
                     value={values[i]}
+                    icon={card.icon}
+                    classname={card.classname}
                     iconClass={iconClasses[i]}
                     notColorfull
                 />

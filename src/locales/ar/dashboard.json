@@ -1,0 +1,88 @@
+{
+  "pageTitle": "لوحة التحكم",
+  "pageDescription": "نظرة عامة على أداء المنصة والمقاييس الرئيسية",
+  "alertTitle": "تنبيه نظام",
+  "alertDescription": "٣ طلبات تحقق من السائقين تحتاج متابعة فورية. آخر تحديث منذ ساعتين.",
+  "charts": {
+    "revenueTrends": "اتجاهات الإيرادات",
+    "tripsOverTime": "الرحلات عبر الزمن",
+    "tooltipValue": "{{label}}: {{value}}",
+    "tooltipHint": "بيانات تجريبية لهذه الفترة."
+  },
+  "pendingVerificationsTitle": "طلبات التحقق المعلّقة",
+  "recentActivitiesTitle": "أحدث النشاطات",
+  "review": "مراجعة",
+  "roles": {
+    "driver": "سائق"
+  },
+  "metrics": {
+    "totalRevenue": {
+      "title": "إجمالي الإيرادات",
+      "subtitle": "↑ ١٢٫٥٪ عن الشهر الماضي"
+    },
+    "totalTrips": {
+      "title": "إجمالي الرحلات",
+      "subtitle": "↑ ٨٫٢٪ عن الشهر الماضي"
+    },
+    "activeUsers": {
+      "title": "المستخدمون النشطون",
+      "subtitle": "↑ ٣٫١٪ عن الشهر الماضي"
+    },
+    "activeDrivers": {
+      "title": "السائقون النشطون",
+      "subtitle": "↑ ٥٫٤٪ عن الشهر الماضي"
+    }
+  },
+  "activityTags": {
+    "trip": "رحلة",
+    "user": "مستخدم",
+    "driver": "سائق",
+    "payment": "دفع",
+    "verification": "تحقق",
+    "storage": "تخزين"
+  },
+  "activities": {
+    "tripStarted": {
+      "title": "بدء رحلة جديدة",
+      "description": "السائق أحمد بدأ رحلة إلى القاهرة."
+    },
+    "userRegistered": {
+      "title": "تسجيل مستخدم جديد",
+      "description": "انضم المستخدم محمد علي إلى المنصة."
+    },
+    "driverVerified": {
+      "title": "تم التحقق من سائق",
+      "description": "اجتاز السائق خالد حسن التحقق."
+    },
+    "paymentReceived": {
+      "title": "استلام دفعة",
+      "description": "تم استلام ١٢٠ دولاراً من عمر سالم."
+    },
+    "verificationPending": {
+      "title": "تحقق قيد الانتظار",
+      "description": "أرسلت مالكة المخزن منى عادل المستندات."
+    },
+    "storageAdded": {
+      "title": "إضافة مخزن",
+      "description": "تمت إضافة وحدة تخزين جديدة في الإسكندرية."
+    },
+    "tripCompleted": {
+      "title": "اكتمال رحلة",
+      "description": "اكتملت الرحلة رقم ١٠٤٢ بنجاح."
+    },
+    "paymentFailed": {
+      "title": "فشل دفع",
+      "description": "فشل دفع ٨٠ دولاراً للمستخدمة سارة حسن."
+    }
+  },
+  "activityTimes": {
+    "hours2": "منذ ساعتين",
+    "hours4": "منذ ٤ ساعات",
+    "hours5": "منذ ٥ ساعات",
+    "hours6": "منذ ٦ ساعات",
+    "hours8": "منذ ٨ ساعات",
+    "hours10": "منذ ١٠ ساعات",
+    "hours12": "منذ ١٢ ساعة",
+    "day1": "منذ يوم"
+  }
+}

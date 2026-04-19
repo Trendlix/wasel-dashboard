@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { useTranslation } from "react-i18next";
 import { DollarSign, Truck, TrendingUp, Users } from "lucide-react";
 import { analyticsCards } from "@/shared/core/pages/analytics";
 
@@ -17,6 +18,7 @@ const iconStyles = {
 };
 
 const AnalyticsCards = () => {
+    const { t } = useTranslation("analytics");
     return (
         <div className="grid grid-cols-4 gap-4">
             {analyticsCards.map((card) => {
@@ -24,7 +26,7 @@ const AnalyticsCards = () => {
                 return (
                     <div key={card.id} className="bg-main-white border border-main-whiteMarble common-rounded p-4 flex items-center justify-between">
                         <div>
-                            <p className="text-main-sharkGray text-sm">{card.title}</p>
+                            <p className="text-main-sharkGray text-sm">{t(`cards.${card.cardKey}`)}</p>
                             <p className="text-main-mirage text-4xl font-bold">{card.value}</p>
                         </div>
                         <div className={clsx("w-10 h-10 rounded-lg flex items-center justify-center", iconStyles[card.icon as keyof typeof iconStyles])}>

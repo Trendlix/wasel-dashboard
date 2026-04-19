@@ -1,5 +1,7 @@
 import { Settings, Globe, Phone, Mail } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import useSettingsStore from "@/shared/hooks/store/useSettingsStore";
+import useLanguageStore from "@/shared/hooks/store/useLanguageStore";
 import SettingsSectionHeader from "./SettingsSectionHeader";
 import SettingsField from "./SettingsField";
 import SettingsInput from "./SettingsInput";
@@ -20,7 +22,7 @@ const GeneralSettingsSkeleton = () => (
             <div className="h-5 w-36 rounded bg-main-whiteMarble" />
         </div>
         <div className="flex flex-col gap-5">
-            {Array.from({ length: 6 }).map((_, i) => (
+            {Array.from({ length: 7 }).map((_, i) => (
                 <div key={i} className="flex flex-col gap-1.5">
                     <div className="h-4 w-28 rounded bg-main-whiteMarble" />
                     <div className="h-11 w-full rounded-lg bg-main-whiteMarble" />
@@ -33,12 +35,15 @@ const GeneralSettingsSkeleton = () => (
 // ─── Field error helper ───────────────────────────────────────────────────────
 
 const FieldError = ({ msg }: { msg?: string }) =>
-    msg ? <p className="text-xs text-red-500 mt-1">{msg}</p> : null;
+    msg ? <p className="text-xs font-medium text-main-red mt-1">{msg}</p> : null;
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 const GeneralSettings = () => {
+    const { t } = useTranslation("settings");
+    const { t: tc } = useTranslation("common");
     const { settings, loading, setSettings, fieldErrors } = useSettingsStore();
+    const { lang, setLang } = useLanguageStore();
 
     if (loading || !settings) return <GeneralSettingsSkeleton />;
 
@@ -53,23 +58,23 @@ const GeneralSettings = () => {
         <div className="bg-main-white border border-main-whiteMarble common-rounded p-6">
             <SettingsSectionHeader
                 icon={Settings}
-                title="General Settings"
+                title={t("generalSettings")}
                 iconBg="bg-main-primary/10"
                 iconColor="text-main-primary"
             />
 
             <div className="flex flex-col gap-5">
-                <SettingsField label="Platform Name">
+                <SettingsField label={t("platformName")}>
                     <SettingsInput
                         value={settings.platform_name}
                         onChange={set("platform_name")}
-                        placeholder="e.g. Wasel"
+                        placeholder={t("platformNamePlaceholder")}
                         className={e("platform_name") ? "border-red-400 focus:border-red-400" : ""}
                     />
                     <FieldError msg={e("platform_name")} />
                 </SettingsField>
 
-                <SettingsField label="Support Email" prefix={<Mail size={15} className="text-main-sharkGray" />}>
+                <SettingsField label={t("supportEmail")} prefix={<Mail size={15} className="text-main-sharkGray" />}>
                     <SettingsInput
                         type="email"
                         value={settings.support_email}
@@ -80,7 +85,7 @@ const GeneralSettings = () => {
                     <FieldError msg={e("support_email")} />
                 </SettingsField>
 
-                <SettingsField label="Support Phone" prefix={<Phone size={15} className="text-main-sharkGray" />}>
+                <SettingsField label={t("supportPhone")} prefix={<Phone size={15} className="text-main-sharkGray" />}>
                     <SettingsInput
                         type="tel"
                         value={settings.support_phone}
@@ -91,7 +96,7 @@ const GeneralSettings = () => {
                     <FieldError msg={e("support_phone")} />
                 </SettingsField>
 
-                <SettingsField label="Hotline Number" prefix={<Phone size={15} className="text-main-sharkGray" />}>
+                <SettingsField label={t("hotlineNumber")} prefix={<Phone size={15} className="text-main-sharkGray" />}>
                     <SettingsInput
                         type="tel"
                         value={settings.hotline_number}
@@ -102,7 +107,7 @@ const GeneralSettings = () => {
                     <FieldError msg={e("hotline_number")} />
                 </SettingsField>
 
-                <SettingsField label="WhatsApp Chatbot Number" prefix={<Phone size={15} className="text-main-sharkGray" />}>
+                <SettingsField label={t("whatsappChatbot")} prefix={<Phone size={15} className="text-main-sharkGray" />}>
                     <SettingsInput
                         type="tel"
                         value={settings.whatsapp_chatbot_number}
@@ -113,20 +118,17 @@ const GeneralSettings = () => {
                     <FieldError msg={e("whatsapp_chatbot_number")} />
                 </SettingsField>
 
-                <SettingsField label="Default Language" prefix={<Globe size={15} className="text-main-sharkGray" />}>
-                    <Select
-                        value={settings.default_language}
-                        onValueChange={(val) => setSettings({ default_language: val as "en" | "ar" })}
-                    >
-                        <SelectTrigger className={`w-full h-11 border common-rounded px-4 text-sm text-main-mirage bg-main-white focus:ring-0 focus:border-main-primary ${e("default_language") ? "border-red-400" : "border-main-whiteMarble"}`}>
-                            <SelectValue placeholder="Select language" />
+                <SettingsField label={tc("dashboardLanguage")} prefix={<Globe size={15} className="text-main-sharkGray" />}>
+                    <Select value={lang} onValueChange={(val) => setLang(val as "en" | "ar")}>
+                        <SelectTrigger className="w-full h-11 border common-rounded px-4 text-sm text-main-mirage bg-main-white focus:ring-0 focus:border-main-primary border-main-whiteMarble">
+                            <SelectValue placeholder={tc("selectLanguage")} />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="en">English</SelectItem>
-                            <SelectItem value="ar">Arabic</SelectItem>
+                            <SelectItem value="en">{tc("english")}</SelectItem>
+                            <SelectItem value="ar">{tc("arabic")}</SelectItem>
                         </SelectContent>
                     </Select>
-                    <FieldError msg={e("default_language")} />
+                    <p className="text-xs text-main-sharkGray mt-1.5 leading-relaxed">{tc("dashboardLanguageHint")}</p>
                 </SettingsField>
             </div>
         </div>

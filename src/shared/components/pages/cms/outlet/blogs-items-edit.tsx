@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import BlogItemForm from "@/shared/components/pages/cms/outlet/blogs-item-form";
 import { useCmsBlogsStore, type BlogItem } from "@/shared/hooks/store/useCmsBlogsStore";
 
 const CmsBlogsItemsEditPage = () => {
+    const { t } = useTranslation("cms");
     const navigate = useNavigate();
     const { id } = useParams();
     const { fetchItemById } = useCmsBlogsStore();
@@ -39,7 +41,7 @@ const CmsBlogsItemsEditPage = () => {
     if (!item) {
         return (
             <div className="rounded-2xl border border-main-whiteMarble bg-main-white p-6 text-sm text-main-coolGray">
-                Blog item not found.
+                {t("blogsItemsEdit.notFound")}
             </div>
         );
     }

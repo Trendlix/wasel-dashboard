@@ -1,15 +1,15 @@
 import { Outlet } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import PageHeader from "@/shared/components/common/PageHeader";
 import PageTransition from "@/shared/components/common/PageTransition";
 import LegalHelpAnalytics from "@/shared/components/pages/legal-help/LegalHelpAnalytics";
 import LegalHelpTabs from "@/shared/components/pages/legal-help/LegalHelpTabs";
 
-const LegalHelpLayout = () => (
+const LegalHelpLayout = () => {
+    const { t } = useTranslation("legalHelp");
+    return (
     <PageTransition>
-        <PageHeader
-            title="Legal & help"
-            description="Manage in-app FAQs and terms & privacy for mobile apps. Policy entries (not shown in tabs) are available at /legal-help/policies."
-        />
+        <PageHeader title={t("pageTitle")} description={t("pageDescription")} />
 
         <LegalHelpAnalytics />
 
@@ -20,6 +20,7 @@ const LegalHelpLayout = () => (
             </div>
         </div>
     </PageTransition>
-);
+    );
+};
 
 export default LegalHelpLayout;

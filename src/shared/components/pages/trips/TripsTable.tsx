@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Download, RotateCcw, Search } from "lucide-react";
 import {
   Table,
@@ -20,19 +21,6 @@ import { tripStatusStyles, type TTripStatus } from "@/shared/core/pages/trips";
 import TripsExportModal from "./TripsExportModal";
 import TripDetailsModal from "./TripDetailsModal";
 
-const STATUS_FILTER_OPTIONS: { value: string; label: string }[] = [
-  { value: "all", label: "All statuses" },
-  { value: "pending", label: "Pending" },
-  { value: "accepted", label: "Accepted" },
-  { value: "scheduled", label: "Scheduled" },
-  { value: "on_the_way", label: "On the way" },
-  { value: "arrived", label: "Arrived" },
-  { value: "picked_up", label: "Picked up" },
-  { value: "delivered", label: "Delivered" },
-  { value: "completed", label: "Completed" },
-  { value: "cancelled", label: "Cancelled" },
-];
-
 const SkeletonRow = () => (
   <TableRow className="border-b border-main-whiteMarble animate-pulse">
     {Array.from({ length: 7 }).map((_, idx) => (
@@ -44,7 +32,20 @@ const SkeletonRow = () => (
 );
 
 const TripsTable = () => {
+  const { t } = useTranslation(["trips", "common"]);
   const { trips, meta, loading, exporting, fetchTrips, setQuery, setPage, resetQuery, exportTrips } = useTripsStore();
+  const statusFilterOptions: { value: string; label: string }[] = [
+    { value: "all", label: t("trips:filters.allStatuses") },
+    { value: "pending", label: t("trips:filters.pending") },
+    { value: "accepted", label: t("trips:filters.accepted") },
+    { value: "scheduled", label: t("trips:filters.scheduled") },
+    { value: "on_the_way", label: t("trips:filters.on_the_way") },
+    { value: "arrived", label: t("trips:filters.arrived") },
+    { value: "picked_up", label: t("trips:filters.picked_up") },
+    { value: "delivered", label: t("trips:filters.delivered") },
+    { value: "completed", label: t("trips:filters.completed") },
+    { value: "cancelled", label: t("trips:filters.cancelled") },
+  ];
   const [searchInput, setSearchInput] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [exportModalOpen, setExportModalOpen] = useState(false);
@@ -114,7 +115,7 @@ const TripsTable = () => {
               ref={inputRef}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Search trips..."
+              placeholder={t("trips:searchPlaceholder")}
               className="border-0 shadow-none h-full p-0 placeholder:text-main-trueBlack/50 focus-visible:ring-0 bg-transparent"
             />
           </div>
@@ -122,9 +123,9 @@ const TripsTable = () => {
           <StatusSelect
             value={statusFilter}
             onChange={handleStatusFilter}
-            options={STATUS_FILTER_OPTIONS}
+            options={statusFilterOptions}
             statusStyles={tripStatusStyles}
-            placeholder="All statuses"
+            placeholder={t("trips:filters.allStatuses")}
           />
 
           <Button
@@ -133,16 +134,17 @@ const TripsTable = () => {
             disabled={exporting}
           >
             <Download size={16} />
-            <span>{exporting ? "Exporting..." : "Export"}</span>
+            <span>{exporting ? t("common:exporting") : t("common:export")}</span>
           </Button>
 
           <Button
+            type="button"
             variant="outline"
             className="h-11 px-5 border-main-whiteMarble text-main-hydrocarbon shrink-0 font-semibold"
             onClick={handleResetFilters}
+            aria-label={t("common:resetFilters")}
           >
             <RotateCcw size={16} />
-            <span>Reset</span>
           </Button>
         </div>
 
@@ -151,13 +153,13 @@ const TripsTable = () => {
             <Table className="min-w-[1120px]">
               <TableHeader>
                 <TableRow className="bg-main-luxuryWhite border-b border-main-whiteMarble hover:bg-main-luxuryWhite">
-                  <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">Booking Number</TableHead>
-                  <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">User</TableHead>
-                  <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">Driver</TableHead>
-                  <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">Route</TableHead>
-                  <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">Price</TableHead>
-                  <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">Status</TableHead>
-                  <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6 text-right">Actions</TableHead>
+                  <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">{t("trips:table.bookingNumber")}</TableHead>
+                  <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">{t("trips:table.user")}</TableHead>
+                  <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">{t("trips:table.driver")}</TableHead>
+                  <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">{t("trips:table.route")}</TableHead>
+                  <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">{t("trips:table.price")}</TableHead>
+                  <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">{t("trips:table.status")}</TableHead>
+                  <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6 text-end">{t("trips:table.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -175,8 +177,8 @@ const TripsTable = () => {
                   <TableRow>
                     <TableCell colSpan={7} className="p-2">
                       <NoDataFound
-                        title="No trips found"
-                        description="Try adjusting your search or filters."
+                        title={t("trips:emptyTitle")}
+                        description={t("trips:emptyDescription")}
                       />
                     </TableCell>
                   </TableRow>
@@ -220,10 +222,13 @@ const TripRow = ({
   trip: IAppTrip;
   onViewDetails: (trip: IAppTrip) => void;
 }) => {
+  const { t, i18n } = useTranslation("trips");
   const price = Number(trip.final_price || 0);
   const waselShare = Math.round(price * 0.05);
   const driverShare = Math.max(0, price - waselShare);
   const currency = trip.currency || "EGP";
+  const numLocale = i18n.language?.startsWith("ar") ? "ar-SA" : "en-US";
+  const fmt = (n: number) => n.toLocaleString(numLocale);
 
   return (
     <TableRow className="border-b border-main-whiteMarble hover:bg-main-luxuryWhite/50 transition-colors">
@@ -244,18 +249,25 @@ const TripRow = ({
       </TableCell>
       <TableCell className="py-4 px-6">
         <div className="space-y-0.5">
-          <p className="text-main-vividMint font-semibold text-sm">Total: {currency} {price.toLocaleString()}</p>
-          <p className="text-main-primary font-semibold text-xs">Wasel % ({currency} {waselShare.toLocaleString()})</p>
-          <p className="text-main-mustardGold font-semibold text-xs">Driver % ({currency} {driverShare.toLocaleString()})</p>
+          <p className="text-main-vividMint font-semibold text-sm">
+            {t("trips:row.total", { currency, amount: fmt(price) })}
+          </p>
+          <p className="text-main-primary font-semibold text-xs">
+            {t("trips:row.waselShare", { currency, amount: fmt(waselShare) })}
+          </p>
+          <p className="text-main-mustardGold font-semibold text-xs">
+            {t("trips:row.driverShare", { currency, amount: fmt(driverShare) })}
+          </p>
         </div>
       </TableCell>
       <TableCell className="py-4 px-6"><StatusBadge status={trip.status} /></TableCell>
-      <TableCell className="py-4 px-6 text-right">
+      <TableCell className="py-4 px-6 text-end">
         <button
+          type="button"
           onClick={() => onViewDetails(trip)}
           className="text-main-primary font-semibold text-sm hover:underline"
         >
-          View Details
+          {t("trips:viewDetails")}
         </button>
       </TableCell>
     </TableRow>
@@ -263,10 +275,11 @@ const TripRow = ({
 };
 
 const StatusBadge = ({ status }: { status: TTripStatus }) => {
+  const { t } = useTranslation("trips");
   const style = tripStatusStyles[status];
   return (
     <span className={clsx("px-3 py-1 rounded-full text-xs font-medium", style.bg, style.text)}>
-      {style.label}
+      {t(`trips:statuses.${status}`)}
     </span>
   );
 };

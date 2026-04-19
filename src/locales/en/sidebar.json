@@ -1,0 +1,16 @@
+{
+  "dashboard": "Dashboard",
+  "analytics": "Analytics",
+  "dataManagement": "Data Management",
+  "usersManagement": "Users Management",
+  "driversManagement": "Drivers Management",
+  "driversVerification": "Drivers Verification",
+  "tripsManagement": "Trips Management",
+  "appsNotifications": "Apps Notifications",
+  "commissionAndPricing": "Commission & Pricing",
+  "voucherAndPromo": "Voucher & Promo",
+  "supportTickets": "Support Tickets",
+  "cms": "CMS",
+  "adminRolesPermissions": "Admin Roles & Permissions",
+  "adminSettings": "Admin Settings"
+}

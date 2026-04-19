@@ -1,0 +1,89 @@
+{
+  "pageTitle": "نظام القسائم والعروض",
+  "pageDescription": "إنشاء وتعديل وتعطيل وتصدير القسائم الترويجية",
+  "searchPlaceholder": "ابحث في القسائم بالرمز أو الوصف…",
+  "filters": {
+    "allStatuses": "كل الحالات",
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "suspended": "معلّق",
+    "expired": "منتهي"
+  },
+  "addVoucher": "إضافة قسيمة",
+  "table": {
+    "code": "الرمز",
+    "description": "الوصف",
+    "discount": "الخصم",
+    "usage": "الاستخدام",
+    "validTo": "صالح حتى",
+    "status": "الحالة",
+    "actions": "إجراءات"
+  },
+  "disable": "تعطيل",
+  "enable": "تفعيل",
+  "emptyTitle": "لا توجد قسائم",
+  "emptyDescription": "جرّب تعديل البحث أو حالة التصفية.",
+  "analytics": {
+    "activeVouchers": "القسائم النشطة",
+    "activeVouchersDesc": "قيد التشغيل حالياً",
+    "totalRedemptions": "إجمالي الاسترداد",
+    "totalRedemptionsDesc": "عبر كل القسائم",
+    "expiringSoon": "تنتهي قريباً",
+    "expiringSoonDesc": "خلال ٣٠ يوماً",
+    "totalVouchers": "إجمالي القسائم",
+    "totalVouchersDesc": "كل القسائم المُنشأة"
+  },
+  "statuses": {
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "suspended": "معلّق",
+    "expired": "منتهي"
+  },
+  "currencyEgp": "ج.م",
+  "export": {
+    "title": "تصدير القسائم",
+    "description": "اختر نطاقاً زمنياً لتصدير القسائم المُنشأة خلاله."
+  },
+  "exportDateHint": "اترك الحقلين فارغين لتصدير كل القسائم.",
+  "delete": {
+    "title": "حذف القسيمة؟",
+    "description": "أنت على وشك حذف القسيمة {{code}} نهائياً. لا يمكن التراجع عن هذا الإجراء.",
+    "deleting": "جاري الحذف…",
+    "confirm": "نعم، احذف"
+  },
+  "form": {
+    "editTitle": "تعديل القسيمة",
+    "addTitle": "إضافة قسيمة",
+    "editDescription": "تحديث تفاصيل القسيمة",
+    "addDescription": "إنشاء قسيمة جديدة لعملائك",
+    "generateTooltip": "انقر لتوليد الرمز",
+    "codePlaceholder": "WELCOME10",
+    "discountType": "نوع الخصم",
+    "selectDiscountType": "اختر النوع",
+    "discountTypes": {
+      "percentage": "نسبة مئوية",
+      "fixed": "مبلغ ثابت"
+    },
+    "discountValue": "قيمة الخصم",
+    "usagePerUser": "الاستخدام لكل مستخدم",
+    "usageLimit": "حد الاستخدام",
+    "optional": "(اختياري)",
+    "status": "الحالة",
+    "selectStatus": "اختر الحالة",
+    "validFrom": "صالح من",
+    "validTo": "صالح حتى",
+    "descriptionPlaceholder": "وصف مختصر للقسيمة",
+    "saving": "جاري الحفظ…",
+    "create": "إنشاء",
+    "update": "تحديث",
+    "errors": {
+      "codeMin": "يجب أن يكون الرمز ٣ أحرف على الأقل",
+      "codeMax": "الرمز طويل جداً",
+      "discountMin": "يجب أن تكون قيمة الخصم ٠ أو أكبر",
+      "usagePerUserMin": "الاستخدام لكل مستخدم يجب أن يكون ٠ أو أكبر",
+      "validFromRequired": "تاريخ البداية مطلوب",
+      "validToRequired": "تاريخ النهاية مطلوب",
+      "validToAfterFrom": "يجب أن يكون «صالح حتى» بعد «صالح من»"
+    }
+  }
+}

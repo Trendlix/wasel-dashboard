@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import HelpHint from "./HelpHint";
 
 interface FieldProps {
@@ -9,6 +10,7 @@ interface FieldProps {
 }
 
 const Field = ({ label, hint, required = false, children }: FieldProps) => {
+    const { t } = useTranslation("cms");
     return (
         <div className="space-y-1.5 overflow-visible">
             <div className="flex items-center gap-2 overflow-visible">
@@ -16,8 +18,8 @@ const Field = ({ label, hint, required = false, children }: FieldProps) => {
                     {label}
                 </p>
                 {required ? (
-                    <span className="text-xs font-semibold uppercase tracking-[0.1em] text-main-remove">
-                        Required
+                    <span className="text-xs font-semibold uppercase tracking-widest text-main-remove">
+                        {t("sharedEditor.required")}
                     </span>
                 ) : null}
                 {hint ? <HelpHint text={hint} /> : null}

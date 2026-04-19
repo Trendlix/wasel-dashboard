@@ -1,0 +1,23 @@
+{
+  "pageTitle": "Settings",
+  "pageDescription": "Configure platform settings and preferences",
+  "generalSettings": "General Settings",
+  "platformName": "Platform Name",
+  "platformNamePlaceholder": "e.g. Wasel",
+  "supportEmail": "Support Email",
+  "supportPhone": "Support Phone",
+  "hotlineNumber": "Hotline Number",
+  "whatsappChatbot": "WhatsApp Chatbot Number",
+  "defaultPlatformLanguage": "Default platform language",
+  "notificationPreferencesHeader": "Notification Preferences",
+  "rolesPermissionsHeader": "Roles & Permissions",
+  "pref_email_notifications_for_users": "Email notifications for new users",
+  "pref_email_notifications_for_drivers": "Email notifications for new drivers",
+  "pref_email_notifications_for_drivers_Pending_verifications": "Email notifications for pending driver verifications",
+  "pref_daily_revenue_reports": "Daily revenue reports",
+  "pref_weekly_analytics_summary": "Weekly analytics summary",
+  "noRolesTitle": "No roles configured",
+  "noRolesDescription": "No admin roles have been created yet. Add roles from the Roles & Permissions page.",
+  "userSingular": "user",
+  "usersPlural": "users"
+}

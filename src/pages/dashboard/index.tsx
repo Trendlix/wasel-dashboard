@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { useTranslation } from "react-i18next";
 import PageHeader from "../../shared/components/common/PageHeader";
 import Analytics from "../../shared/components/pages/dashboard/Analytics";
 import RevenueChart from "../../shared/components/pages/dashboard/RevenueChart";
@@ -9,10 +10,11 @@ import Alert from "../../shared/components/pages/dashboard/Alert";
 import PageTransition from "@/shared/components/common/PageTransition";
 
 const DashboardPage = () => {
+    const { t } = useTranslation("dashboard");
     return (
         <PageTransition>
             <div className={clsx("flex flex-col gap-8")}>
-                <PageHeader title="Dashboard" description="Overview of platform performance and key metrics" />
+                <PageHeader title={t("pageTitle")} description={t("pageDescription")} />
                 <Analytics />
                 <div className="grid grid-cols-2 gap-6 *:h-fit">
                     <RevenueChart />
@@ -22,7 +24,7 @@ const DashboardPage = () => {
                     <Pendingverifications />
                     <RecentActivities />
                 </div>
-                <Alert title="System Alert" description="3 pending driver verifications require immediate attention. Last updated 2 hours ago." />
+                <Alert title={t("alertTitle")} description={t("alertDescription")} />
             </div>
         </PageTransition>
     );

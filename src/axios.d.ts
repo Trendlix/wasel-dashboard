@@ -7,5 +7,7 @@ declare module "axios" {
             toastType?: "success" | "error" | "info" | "alert";
         };
         _retry?: boolean;
+        /** GET retries after transient network failures (internal). */
+        _getRetryCount?: number;
     }
 }

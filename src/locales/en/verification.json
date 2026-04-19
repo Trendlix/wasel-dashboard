@@ -1,0 +1,73 @@
+{
+  "pageTitle": "Verification center",
+  "pageDescription": "Review and approve driver and storage owner verifications",
+  "statuses": {
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected"
+  },
+  "analytics": {
+    "pendingReviews": "Pending reviews",
+    "approved": "Approved",
+    "rejected": "Rejected"
+  },
+  "list": {
+    "tabWithCount": "{{label}} ({{count}})",
+    "searchPlaceholder": "Search by name or type…",
+    "empty": "No verification requests found.",
+    "driverLabel": "Driver",
+    "submittedDocuments": "Submitted documents:",
+    "docId": "ID",
+    "docLicense": "License",
+    "docCriminal": "Criminal record",
+    "noDocsListed": "No documents listed",
+    "viewDocuments": "View documents",
+    "approve": "Approve",
+    "reject": "Reject"
+  },
+  "confirm": {
+    "nameFallback": "this applicant",
+    "approveTitle": "Approve verification",
+    "rejectTitle": "Reject verification",
+    "approveDescription": "Are you sure you want to approve verification for {{name}}?",
+    "rejectDescription": "Are you sure you want to reject verification for {{name}}?",
+    "fallbackDescription": "Please confirm this action.",
+    "note": "This action will update the verification status immediately.",
+    "confirmApprove": "Confirm approve",
+    "confirmReject": "Confirm reject",
+    "saving": "Saving…"
+  },
+  "rejectReasonDefault": "Rejected by admin",
+  "rejectError": "Failed to reject verification. Please try again.",
+  "details": {
+    "title": "Verification documents",
+    "description": "Review uploaded documents and decide whether to approve or reject this verification request.",
+    "noEmail": "No email",
+    "submitted": "Submitted",
+    "submittedAt": "Submitted: {{date}}",
+    "open": "Open",
+    "previewUnavailable": "Preview unavailable",
+    "noDocuments": "No uploaded documents found.",
+    "nationalIdExpiry": "National ID expiry",
+    "licenseExpiry": "License expiry",
+    "address": "Address",
+    "additionalPhone": "Additional phone",
+    "notesLabel": "Verification notes",
+    "notesPlaceholder": "Add internal notes for this verification…",
+    "rejectionLabel": "Rejection reason",
+    "rejectionPlaceholder": "Required when rejecting verification…",
+    "loadError": "Unable to load verification details.",
+    "reject": "Reject",
+    "approve": "Approve",
+    "rejecting": "Rejecting…",
+    "approving": "Approving…"
+  },
+  "documents": {
+    "profileImage": "Profile image",
+    "nationalIdFront": "National ID (front)",
+    "nationalIdBack": "National ID (back)",
+    "licenseFront": "License (front)",
+    "licenseBack": "License (back)",
+    "criminalRecord": "Criminal record"
+  }
+}

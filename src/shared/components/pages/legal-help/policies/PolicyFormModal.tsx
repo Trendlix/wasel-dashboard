@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/select";
 import type { IPolicyRow, TPolicyType } from "@/shared/hooks/store/useLegalHelpStore";
 
-const labelClass = "text-xs font-semibold uppercase tracking-[0.12em] text-main-lightSlate";
+const labelClass = "text-sm font-semibold text-main-mirage";
 
 interface PolicyFormModalProps {
     open: boolean;
@@ -62,18 +62,18 @@ const PolicyFormModal = ({
     return (
         <CommonModal open={open} onOpenChange={onOpenChange} loading={loading} maxWidth="sm:max-w-[520px]">
             <CommonModalHeader
-                title={editing ? "Edit policy entry" : "Add policy entry"}
-                description="Key/value rows (terms or privacy type)."
+                title={editing ? "Edit Policy Entry" : "Add Policy Entry"}
+                description="Create or update a key/value row for terms or privacy policy."
             />
             <CommonModalBody className="space-y-4">
-                <div>
+                <div className="space-y-1.5">
                     <p className={labelClass}>Type</p>
                     <Select
                         value={type}
                         onValueChange={(v) => setType(v as TPolicyType)}
                         disabled={!!editing}
                     >
-                        <SelectTrigger className="mt-1.5">
+                        <SelectTrigger className="h-11 border-main-whiteMarble focus:ring-main-primary/30 common-rounded">
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -82,22 +82,23 @@ const PolicyFormModal = ({
                         </SelectContent>
                     </Select>
                 </div>
-                <div>
+                <div className="space-y-1.5">
                     <p className={labelClass}>Key</p>
                     <Input
-                        className="mt-1.5"
+                        className="h-11 border-main-whiteMarble focus-visible:ring-main-primary/30 common-rounded"
                         value={key}
                         onChange={(e) => setKey(e.target.value)}
                         placeholder="e.g. cookie_policy"
                         disabled={!!editing}
                     />
                 </div>
-                <div>
-                    <p className={labelClass}>Answer / content</p>
+                <div className="space-y-1.5">
+                    <p className={labelClass}>Answer / Content</p>
                     <Textarea
-                        className="mt-1.5 min-h-[140px]"
+                        className="min-h-[140px] border-main-whiteMarble focus-visible:ring-main-primary/30"
                         value={answer}
                         onChange={(e) => setAnswer(e.target.value)}
+                        placeholder="Enter the full content for this policy entry..."
                     />
                 </div>
             </CommonModalBody>
@@ -105,7 +106,7 @@ const PolicyFormModal = ({
                 <Button
                     type="button"
                     variant="ghost"
-                    className="font-bold text-main-sharkGray"
+                    className="font-semibold text-main-sharkGray h-11 px-6 common-rounded hover:bg-main-titaniumWhite"
                     onClick={() => onOpenChange(false)}
                     disabled={loading}
                 >
@@ -113,7 +114,7 @@ const PolicyFormModal = ({
                 </Button>
                 <Button
                     type="button"
-                    className="bg-main-primary hover:bg-main-primary/90 text-main-white font-bold"
+                    className="bg-main-primary hover:bg-main-primary/90 text-main-white font-bold h-11 px-8 common-rounded shadow-lg shadow-main-primary/20"
                     disabled={loading || !key.trim() || !answer.trim()}
                     onClick={() => void handleSave()}
                 >

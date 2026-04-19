@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+import useLanguageStore from "@/shared/hooks/store/useLanguageStore";
 import {
     Pagination,
     PaginationContent,
@@ -15,6 +17,8 @@ interface ITablePagination {
 }
 
 const TablePagination = ({ currentPage, totalPages, onPageChange }: ITablePagination) => {
+    const { t } = useTranslation("common");
+    const isRTL = useLanguageStore((s) => s.isRTL);
     const getPages = () => {
         const pages: (number | "ellipsis")[] = [];
 
@@ -34,17 +38,18 @@ const TablePagination = ({ currentPage, totalPages, onPageChange }: ITablePagina
     };
 
     return (
-        <div className="flex items-center justify-between px-6 py-4 border-t border-main-whiteMarble">
+        <div className="flex w-full min-w-0 flex-wrap items-center justify-between gap-3 px-6 py-4 border-t border-main-whiteMarble">
             <span className="text-main-sharkGray text-sm text-nowrap">
-                Page <span className="font-semibold text-main-mirage">{currentPage}</span> of{" "}
-                <span className="font-semibold text-main-mirage">{totalPages}</span>
+                {t("pagination.pageOf", { current: currentPage, total: totalPages })}
             </span>
 
-            <Pagination>
+            <Pagination aria-label={t("pagination.navLabel")} dir={isRTL ? "ltr" : undefined}>
                 <PaginationContent>
                     {/* Previous */}
                     <PaginationItem>
                         <PaginationPrevious
+                            text={t("pagination.previous")}
+                            aria-label={t("pagination.goToPrevious")}
                             onClick={() => onPageChange(Math.max(1, currentPage - 1))}
                             className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
                         />
@@ -54,7 +59,7 @@ const TablePagination = ({ currentPage, totalPages, onPageChange }: ITablePagina
                     {getPages().map((page, index) =>
                         page === "ellipsis" ? (
                             <PaginationItem key={`ellipsis-${index}`}>
-                                <PaginationEllipsis />
+                                <PaginationEllipsis srText={t("pagination.morePages")} />
                             </PaginationItem>
                         ) : (
                             <PaginationItem key={page}>
@@ -75,6 +80,8 @@ const TablePagination = ({ currentPage, totalPages, onPageChange }: ITablePagina
                     {/* Next */}
                     <PaginationItem>
                         <PaginationNext
+                            text={t("pagination.next")}
+                            aria-label={t("pagination.goToNext")}
                             onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
                             className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
                         />

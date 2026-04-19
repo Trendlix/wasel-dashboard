@@ -6,8 +6,7 @@ import useCmsMarketingPrivacyStore from "@/shared/hooks/store/useCmsMarketingPri
 const MarketingPrivacyLayout = () => (
     <MarketingLegalLayoutShared
         useStore={useCmsMarketingPrivacyStore}
-        title="Marketing Privacy"
-        description="Configure the public privacy page with bilingual alert, hero content, and grouped sections."
+        variant="privacy"
         heroPath="/cms/legal-help/marketing-privacy/hero"
         faqsPath="/cms/legal-help/marketing-privacy/faqs"
     />

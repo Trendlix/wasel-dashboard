@@ -1,4 +1,6 @@
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { formatAppDateTime } from "@/lib/formatLocaleDate";
 import { ArrowLeft, Calendar, Mail, Phone, User, Hash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PageHeader from "@/shared/components/common/PageHeader";
@@ -10,19 +12,6 @@ import type {
     IDetailedTripNotification,
     TDetailedNotification,
 } from "@/shared/hooks/store/useDetailedOpenedNotification";
-
-const formatDate = (value: string | null | undefined) => {
-    if (!value) return "—";
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return "—";
-    return date.toLocaleString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-    });
-};
 
 const Field = ({ label, value }: { label: string; value: React.ReactNode }) => (
     <div className="flex flex-col gap-1">
@@ -38,10 +27,16 @@ const Section = ({ title, children }: { title: string; children: React.ReactNode
     </div>
 );
 
-const typeConfig: Record<TDetailedNotificationType, { label: string; backPath: string }> = {
-    user: { label: "User Notification", backPath: "/notifications" },
-    driver: { label: "Driver Notification", backPath: "/notifications" },
-    trip: { label: "Trip Notification", backPath: "/notifications" },
+const typeBackPath: Record<TDetailedNotificationType, string> = {
+    user: "/notifications/user",
+    driver: "/notifications/driver",
+    trip: "/notifications/trip",
+};
+
+const typeTitleKey: Record<TDetailedNotificationType, "userNotification" | "driverNotification" | "tripNotification"> = {
+    user: "userNotification",
+    driver: "driverNotification",
+    trip: "tripNotification",
 };
 
 interface Props {
@@ -53,7 +48,11 @@ interface Props {
 
 const NotificationDetailPage = ({ type, loading, error, notification }: Props) => {
     const navigate = useNavigate();
-    const config = typeConfig[type];
+    const { t, i18n } = useTranslation(["notifications", "common"]);
+    const backPath = typeBackPath[type];
+    const titleKey = typeTitleKey[type];
+
+    const formatDate = (value: string | null | undefined) => formatAppDateTime(value, i18n.language);
 
     if (loading) {
         return (
@@ -80,14 +79,14 @@ const NotificationDetailPage = ({ type, loading, error, notification }: Props) =
                 <Button
                     variant="outline"
                     className="h-9 px-4 border-main-whiteMarble text-main-hydrocarbon gap-2"
-                    onClick={() => navigate(config.backPath)}
+                    onClick={() => navigate(backPath)}
                 >
                     <ArrowLeft size={15} />
-                    Back
+                    {t("common:back")}
                 </Button>
                 <NoDataFound
-                    title="Notification not found"
-                    description={error ?? "This notification could not be loaded."}
+                    title={t("notifications:notFoundTitle")}
+                    description={error ?? t("notifications:notFoundDescription")}
                 />
             </div>
         );
@@ -97,25 +96,28 @@ const NotificationDetailPage = ({ type, loading, error, notification }: Props) =
         if (type === "user") {
             const { user } = notification as IDetailedUserNotification;
             return (
-                <Section title="User Details">
-                    <Field label="Full Name" value={<span className="inline-flex items-center gap-1.5"><User size={13} />{user?.full_name}</span>} />
-                    <Field label="Email" value={<span className="inline-flex items-center gap-1.5"><Mail size={13} />{user?.email}</span>} />
-                    <Field label="Phone" value={<span className="inline-flex items-center gap-1.5"><Phone size={13} />{user?.phone}</span>} />
-                    <Field label="Account Created" value={<span className="inline-flex items-center gap-1.5"><Calendar size={13} />{formatDate(user?.created_at)}</span>} />
-                    <Field label="Status" value={user?.is_deleted ? <span className="text-main-lightCoral font-medium">Deleted</span> : <span className="text-main-primary font-medium">Active</span>} />
+                <Section title={t("notifications:sectionUserDetails")}>
+                    <Field label={t("notifications:fieldFullName")} value={<span className="inline-flex items-center gap-1.5"><User size={13} />{user?.full_name}</span>} />
+                    <Field label={t("common:email")} value={<span className="inline-flex items-center gap-1.5"><Mail size={13} />{user?.email}</span>} />
+                    <Field label={t("common:phone")} value={<span className="inline-flex items-center gap-1.5"><Phone size={13} />{user?.phone}</span>} />
+                    <Field label={t("notifications:fieldAccountCreated")} value={<span className="inline-flex items-center gap-1.5"><Calendar size={13} />{formatDate(user?.created_at)}</span>} />
+                    <Field label={t("common:status")} value={user?.is_deleted ? <span className="text-main-lightCoral font-medium">{t("notifications:statusDeleted")}</span> : <span className="text-main-primary font-medium">{t("notifications:statusActive")}</span>} />
                 </Section>
             );
         }
 
         if (type === "driver") {
             const { driver } = notification as IDetailedDriverNotification;
+            const deletedSuffix = driver?.deleted_at
+                ? ` ${t("notifications:deletedOn", { date: formatDate(driver.deleted_at) })}`
+                : "";
             return (
-                <Section title="Driver Details">
-                    <Field label="Name" value={<span className="inline-flex items-center gap-1.5"><User size={13} />{driver?.name ?? "—"}</span>} />
-                    <Field label="Email" value={<span className="inline-flex items-center gap-1.5"><Mail size={13} />{driver?.email ?? "—"}</span>} />
-                    <Field label="Phone" value={<span className="inline-flex items-center gap-1.5"><Phone size={13} />{driver?.phone}</span>} />
-                    <Field label="Account Created" value={<span className="inline-flex items-center gap-1.5"><Calendar size={13} />{formatDate(driver?.created_at)}</span>} />
-                    <Field label="Status" value={driver?.is_deleted ? <span className="text-main-lightCoral font-medium">Deleted {driver?.deleted_at ? `on ${formatDate(driver?.deleted_at)}` : ""}</span> : <span className="text-main-primary font-medium">Active</span>} />
+                <Section title={t("notifications:sectionDriverDetails")}>
+                    <Field label={t("common:name")} value={<span className="inline-flex items-center gap-1.5"><User size={13} />{driver?.name ?? "—"}</span>} />
+                    <Field label={t("common:email")} value={<span className="inline-flex items-center gap-1.5"><Mail size={13} />{driver?.email ?? "—"}</span>} />
+                    <Field label={t("common:phone")} value={<span className="inline-flex items-center gap-1.5"><Phone size={13} />{driver?.phone}</span>} />
+                    <Field label={t("notifications:fieldAccountCreated")} value={<span className="inline-flex items-center gap-1.5"><Calendar size={13} />{formatDate(driver?.created_at)}</span>} />
+                    <Field label={t("common:status")} value={driver?.is_deleted ? <span className="text-main-lightCoral font-medium">{t("notifications:statusDeleted")}{deletedSuffix}</span> : <span className="text-main-primary font-medium">{t("notifications:statusActive")}</span>} />
                 </Section>
             );
         }
@@ -124,18 +126,21 @@ const NotificationDetailPage = ({ type, loading, error, notification }: Props) =
             const { trip } = notification as IDetailedTripNotification;
             const { user } = trip?.request ?? {};
             const { driver } = trip;
+            const driverDeletedSuffix = driver?.deleted_at
+                ? ` ${t("notifications:deletedOn", { date: formatDate(driver.deleted_at) })}`
+                : "";
             return (
                 <>
-                    <Section title="Trip Details">
-                        <Field label="Booking Number" value={<span className="inline-flex items-center gap-1.5"><Hash size={13} />{trip?.booking_number}</span>} />
-                        <Field label="Status" value={<span className="capitalize font-medium">{trip?.status}</span>} />
-                        <Field label="Created At" value={<span className="inline-flex items-center gap-1.5"><Calendar size={13} />{formatDate(trip?.created_at)}</span>} />
-                        <Field label="Picked Up At" value={formatDate(trip?.picked_up_at)} />
-                        <Field label="Completed At" value={formatDate(trip?.completed_at)} />
-                        <Field label="Cancelled At" value={formatDate(trip?.cancelled_at)} />
+                    <Section title={t("notifications:sectionTripDetails")}>
+                        <Field label={t("notifications:fieldBookingNumber")} value={<span className="inline-flex items-center gap-1.5"><Hash size={13} />{trip?.booking_number}</span>} />
+                        <Field label={t("common:status")} value={<span className="capitalize font-medium">{trip?.status}</span>} />
+                        <Field label={t("common:createdAt")} value={<span className="inline-flex items-center gap-1.5"><Calendar size={13} />{formatDate(trip?.created_at)}</span>} />
+                        <Field label={t("notifications:fieldPickedUpAt")} value={formatDate(trip?.picked_up_at)} />
+                        <Field label={t("notifications:fieldCompletedAt")} value={formatDate(trip?.completed_at)} />
+                        <Field label={t("notifications:fieldCancelledAt")} value={formatDate(trip?.cancelled_at)} />
                         {trip?.cancelled_by && (
                             <Field
-                                label="Cancelled By"
+                                label={t("notifications:fieldCancelledBy")}
                                 value={
                                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize border ${trip?.cancelled_by === "user"
                                         ? "bg-blue-50 text-blue-700 border-blue-200"
@@ -148,20 +153,20 @@ const NotificationDetailPage = ({ type, loading, error, notification }: Props) =
 
                     </Section>
 
-                    <Section title="User Details">
-                        <Field label="Full Name" value={<span className="inline-flex items-center gap-1.5"><User size={13} />{user?.full_name}</span>} />
-                        <Field label="Email" value={<span className="inline-flex items-center gap-1.5"><Mail size={13} />{user?.email}</span>} />
-                        <Field label="Phone" value={<span className="inline-flex items-center gap-1.5"><Phone size={13} />{user?.phone}</span>} />
-                        <Field label="Account Created" value={<span className="inline-flex items-center gap-1.5"><Calendar size={13} />{formatDate(user?.created_at)}</span>} />
-                        <Field label="Status" value={user?.is_deleted ? <span className="text-main-lightCoral font-medium">Deleted</span> : <span className="text-main-primary font-medium">Active</span>} />
+                    <Section title={t("notifications:sectionUserDetails")}>
+                        <Field label={t("notifications:fieldFullName")} value={<span className="inline-flex items-center gap-1.5"><User size={13} />{user?.full_name}</span>} />
+                        <Field label={t("common:email")} value={<span className="inline-flex items-center gap-1.5"><Mail size={13} />{user?.email}</span>} />
+                        <Field label={t("common:phone")} value={<span className="inline-flex items-center gap-1.5"><Phone size={13} />{user?.phone}</span>} />
+                        <Field label={t("notifications:fieldAccountCreated")} value={<span className="inline-flex items-center gap-1.5"><Calendar size={13} />{formatDate(user?.created_at)}</span>} />
+                        <Field label={t("common:status")} value={user?.is_deleted ? <span className="text-main-lightCoral font-medium">{t("notifications:statusDeleted")}</span> : <span className="text-main-primary font-medium">{t("notifications:statusActive")}</span>} />
                     </Section>
 
-                    <Section title="Driver Details">
-                        <Field label="Name" value={<span className="inline-flex items-center gap-1.5"><User size={13} />{driver?.name ?? "—"}</span>} />
-                        <Field label="Email" value={<span className="inline-flex items-center gap-1.5"><Mail size={13} />{driver?.email ?? "—"}</span>} />
-                        <Field label="Phone" value={<span className="inline-flex items-center gap-1.5"><Phone size={13} />{driver?.phone}</span>} />
-                        <Field label="Account Created" value={<span className="inline-flex items-center gap-1.5"><Calendar size={13} />{formatDate(driver?.created_at)}</span>} />
-                        <Field label="Status" value={driver?.is_deleted ? <span className="text-main-lightCoral font-medium">Deleted {driver?.deleted_at ? `on ${formatDate(driver?.deleted_at)}` : ""}</span> : <span className="text-main-primary font-medium">Active</span>} />
+                    <Section title={t("notifications:sectionDriverDetails")}>
+                        <Field label={t("common:name")} value={<span className="inline-flex items-center gap-1.5"><User size={13} />{driver?.name ?? "—"}</span>} />
+                        <Field label={t("common:email")} value={<span className="inline-flex items-center gap-1.5"><Mail size={13} />{driver?.email ?? "—"}</span>} />
+                        <Field label={t("common:phone")} value={<span className="inline-flex items-center gap-1.5"><Phone size={13} />{driver?.phone}</span>} />
+                        <Field label={t("notifications:fieldAccountCreated")} value={<span className="inline-flex items-center gap-1.5"><Calendar size={13} />{formatDate(driver?.created_at)}</span>} />
+                        <Field label={t("common:status")} value={driver?.is_deleted ? <span className="text-main-lightCoral font-medium">{t("notifications:statusDeleted")}{driverDeletedSuffix}</span> : <span className="text-main-primary font-medium">{t("notifications:statusActive")}</span>} />
                     </Section>
                 </>
             );
@@ -175,23 +180,21 @@ const NotificationDetailPage = ({ type, loading, error, notification }: Props) =
             <Button
                 variant="outline"
                 className="h-9 px-4 border-main-whiteMarble text-main-hydrocarbon gap-2"
-                onClick={() => navigate(config.backPath)}
+                onClick={() => navigate(backPath)}
             >
                 <ArrowLeft size={15} />
-                Back
+                {t("common:back")}
             </Button>
-            <PageHeader title={config.label} description={`Notification #${notification.id}`} />
+            <PageHeader title={t(`notifications:${titleKey}`)} description={t("notifications:detailPageDescription", { id: notification.id })} />
 
-            {/* Notification body */}
-            <Section title="Notification">
-                <Field label="Title" value={notification.title} />
-                <Field label="Sent At" value={formatDate(notification.created_at)} />
+            <Section title={t("notifications:sectionNotification")}>
+                <Field label={t("common:title")} value={notification.title} />
+                <Field label={t("notifications:fieldSentAt")} value={formatDate(notification.created_at)} />
                 <div className="col-span-2">
-                    <Field label="Message" value={<p className="whitespace-pre-wrap leading-6">{notification.description}</p>} />
+                    <Field label={t("common:description")} value={<p className="whitespace-pre-wrap leading-6">{notification.description}</p>} />
                 </div>
             </Section>
 
-            {/* Related entity */}
             {renderRelatedEntity()}
         </div>
     );

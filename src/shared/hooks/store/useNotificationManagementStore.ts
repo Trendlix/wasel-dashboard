@@ -291,11 +291,19 @@ const useNotificationManagementStore = create<NotificationManagementState>((set,
 
     handleMarkAllAsRead: async () => {
         const { activeTab, markAllLoading, fetchNotifications } = get();
-        const storeTab = toStoreTab(activeTab);
-        if (!storeTab || markAllLoading) return;
+        if (markAllLoading) return;
         set({ markAllLoading: true });
         try {
-            await useDashboardNotificationsStore.getState().markTabNotificationsAsRead(storeTab);
+            if (activeTab === "offers-updates") {
+                await Promise.all([
+                    axiosNormalApiClient.patch("/dashboard/offers-notifications/read-all", {}),
+                    axiosNormalApiClient.patch("/dashboard/updates-notifications/read-all", {}),
+                ]);
+            } else {
+                const storeTab = toStoreTab(activeTab);
+                if (!storeTab) return;
+                await useDashboardNotificationsStore.getState().markTabNotificationsAsRead(storeTab);
+            }
             await fetchNotifications();
         } finally {
             set({ markAllLoading: false });

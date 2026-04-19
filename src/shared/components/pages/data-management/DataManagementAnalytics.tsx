@@ -1,16 +1,17 @@
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import AnalyticsCard, { AnalyticsCardSkeleton } from "../../common/AnalyticsCard";
 import useDataManagementStore from "@/shared/hooks/store/useDataManagementStore";
 import { Truck, Box } from "lucide-react";
 
 const DataManagementAnalytics = () => {
+    const { t } = useTranslation("dataManagement");
     const { analytics, fetchAnalytics, analyticsLoading } = useDataManagementStore();
 
     useEffect(() => {
         fetchAnalytics();
     }, [fetchAnalytics]);
 
-    // Show skeleton while loading or if analytics hasn't been fetched yet
     if (analyticsLoading && !analytics) {
         return (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -23,14 +24,14 @@ const DataManagementAnalytics = () => {
     const cards = [
         {
             id: 1,
-            title: "Truck Types",
+            title: t("analytics.truckTypes"),
             value: analytics?.truckTypes?.total?.toString() || "0",
             icon: Truck,
             classname: "bg-main-primary",
         },
         {
             id: 2,
-            title: "Active Goods Types",
+            title: t("analytics.activeGoodsTypes"),
             value: analytics?.goodsTypes?.active?.toString() || "0",
             icon: Box,
             classname: "bg-main-vividSubmarine",

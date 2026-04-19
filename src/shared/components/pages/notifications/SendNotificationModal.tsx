@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { CalendarClock, Search, TicketPercent, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,7 @@ import {
     CommonModalHeader,
 } from "@/shared/components/common/CommonModal";
 import { formInputClass, formSelectTriggerClass } from "@/shared/components/common/formStyles";
+import { formatAppDateShort } from "@/lib/formatLocaleDate";
 import axiosNormalApiClient from "@/shared/utils/axios";
 import { showToast } from "@/shared/utils/toast";
 import type { TNotificationManagementTab } from "@/shared/core/pages/notifications";
@@ -58,13 +60,7 @@ interface ISendNotificationModalProps {
     initialMessage?: string;
 }
 
-const notificationColorOptions: { value: TNotificationColor; label: string }[] = [
-    { value: "blue", label: "Blue" },
-    { value: "green", label: "Green" },
-    { value: "yellow", label: "Yellow" },
-    { value: "red", label: "Red" },
-    { value: "gray", label: "Gray" },
-];
+const NOTIFICATION_COLOR_VALUES: TNotificationColor[] = ["blue", "green", "yellow", "red", "gray"];
 
 const SendNotificationModal = ({
     open,
@@ -74,6 +70,7 @@ const SendNotificationModal = ({
     initialTitle = "",
     initialMessage = "",
 }: ISendNotificationModalProps) => {
+    const { t, i18n } = useTranslation(["notifications", "common"]);
     const [title, setTitle] = useState(initialTitle);
     const [message, setMessage] = useState(initialMessage);
     const [audienceMode, setAudienceMode] = useState<TNotificationAudienceMode>("all");
@@ -97,6 +94,16 @@ const SendNotificationModal = ({
     const [sending, setSending] = useState(false);
 
     const isValid = title.trim().length > 0 && message.trim().length > 0;
+
+    const notificationColorOptions = useMemo(
+        () =>
+            NOTIFICATION_COLOR_VALUES.map((value) => ({
+                value,
+                label: t(`notifications:sendModal.colors.${value}`),
+            })),
+        [t],
+    );
+
     const scheduleDateIso = useMemo(() => {
         if (!scheduleAt) return null;
         const parsed = new Date(scheduleAt);
@@ -201,17 +208,17 @@ const SendNotificationModal = ({
         if (!isValid || sending) return;
 
         if (asScheduled && !scheduleDateIso) {
-            showToast("Please choose a valid date and time for scheduling.", "alert");
+            showToast(t("notifications:sendModal.toast.invalidSchedule"), "alert");
             return;
         }
 
         if (audienceMode === "specific" && selectedUsers.length === 0) {
-            showToast("Please select at least one user.", "alert");
+            showToast(t("notifications:sendModal.toast.selectUser"), "alert");
             return;
         }
 
         if (kind === "offer" && offerType === "voucher" && !voucherCode.trim()) {
-            showToast("Please provide a voucher code for voucher offers.", "alert");
+            showToast(t("notifications:sendModal.toast.voucherCodeRequired"), "alert");
             return;
         }
 
@@ -266,37 +273,41 @@ const SendNotificationModal = ({
         <>
             <CommonModal open={open} onOpenChange={onOpenChange} maxWidth="sm:max-w-[760px]" loading={sending}>
                 <CommonModalHeader
-                    title="Send New Notification"
-                    description="Create and send a new notification with audience targeting."
+                    title={t("notifications:sendNewNotification")}
+                    description={t("notifications:sendModal.description")}
                 />
 
                 <CommonModalBody className="space-y-6 px-2 sm:px-3 pb-6 pt-1">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-main-mirage">Type</label>
+                            <label className="text-sm font-medium text-main-mirage">
+                                {t("notifications:sendModal.typeLabel")}
+                            </label>
                             <Select
                                 value={kind}
                                 onValueChange={(value) => setKind(value as "offer" | "update")}
                             >
                                 <SelectTrigger className={`${formSelectTriggerClass} w-full`}>
-                                    <SelectValue placeholder="Select type" />
+                                    <SelectValue placeholder={t("notifications:sendModal.selectType")} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="offer">Offer</SelectItem>
-                                    <SelectItem value="update">Update</SelectItem>
+                                    <SelectItem value="offer">{t("notifications:typeOffer")}</SelectItem>
+                                    <SelectItem value="update">{t("notifications:typeUpdate")}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-main-mirage">Priority</label>
+                            <label className="text-sm font-medium text-main-mirage">
+                                {t("notifications:sendModal.priorityLabel")}
+                            </label>
                             <Select value={priority} onValueChange={(value) => setPriority(value as "normal" | "high")}>
                                 <SelectTrigger className={`${formSelectTriggerClass} w-full`}>
-                                    <SelectValue placeholder="Select priority" />
+                                    <SelectValue placeholder={t("notifications:sendModal.selectPriority")} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="normal">Normal</SelectItem>
-                                    <SelectItem value="high">High</SelectItem>
+                                    <SelectItem value="normal">{t("notifications:sendModal.priorityNormal")}</SelectItem>
+                                    <SelectItem value="high">{t("notifications:sendModal.priorityHigh")}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -304,14 +315,16 @@ const SendNotificationModal = ({
 
                     {kind === "offer" && (
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-main-mirage">Offer Type</label>
+                            <label className="text-sm font-medium text-main-mirage">
+                                {t("notifications:sendModal.offerTypeLabel")}
+                            </label>
                             <Select value={offerType} onValueChange={(value) => setOfferType(value as "offer" | "voucher")}>
                                 <SelectTrigger className={`${formSelectTriggerClass} w-full`}>
-                                    <SelectValue placeholder="Select offer type" />
+                                    <SelectValue placeholder={t("notifications:sendModal.selectOfferType")} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="offer">General Offer</SelectItem>
-                                    <SelectItem value="voucher">Voucher Offer</SelectItem>
+                                    <SelectItem value="offer">{t("notifications:sendModal.generalOffer")}</SelectItem>
+                                    <SelectItem value="voucher">{t("notifications:sendModal.voucherOffer")}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -320,7 +333,9 @@ const SendNotificationModal = ({
                     {kind === "offer" && offerType === "voucher" && (
                         <>
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-main-mirage">Voucher Code</label>
+                                <label className="text-sm font-medium text-main-mirage">
+                                    {t("notifications:sendModal.voucherCodeLabel")}
+                                </label>
                                 <div className="flex items-center gap-2">
                                     <Input
                                         value={voucherCode}
@@ -328,23 +343,25 @@ const SendNotificationModal = ({
                                             setVoucherCode(event.target.value);
                                             setVoucherType("");
                                         }}
-                                        placeholder="Enter voucher code or choose from list..."
+                                        placeholder={t("notifications:sendModal.voucherCodePlaceholder")}
                                         className={formInputClass}
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setVoucherModalOpen(true)}
                                         className="h-11 px-3 common-rounded border border-main-whiteMarble text-main-primary hover:bg-main-primary/10 text-xs font-semibold inline-flex items-center gap-1.5 shrink-0"
-                                        title="Choose voucher code"
+                                        title={t("notifications:sendModal.chooseVoucherTooltip")}
                                     >
                                         <TicketPercent size={14} />
-                                        Choose
+                                        {t("notifications:sendModal.choose")}
                                     </button>
                                 </div>
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-main-mirage">Voucher Type</label>
+                                <label className="text-sm font-medium text-main-mirage">
+                                    {t("notifications:sendModal.voucherTypeLabel")}
+                                </label>
                                 <Input
                                     value={voucherType}
                                     readOnly
@@ -355,13 +372,15 @@ const SendNotificationModal = ({
                     )}
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-main-mirage">Color</label>
+                        <label className="text-sm font-medium text-main-mirage">
+                            {t("notifications:sendModal.colorLabel")}
+                        </label>
                         <Select
                             value={notificationColor}
                             onValueChange={(value) => setNotificationColor(value as TNotificationColor)}
                         >
                             <SelectTrigger className={`${formSelectTriggerClass} w-full`}>
-                                <SelectValue placeholder="Select color" />
+                                <SelectValue placeholder={t("notifications:sendModal.selectColor")} />
                             </SelectTrigger>
                             <SelectContent>
                                 {notificationColorOptions.map((option) => (
@@ -374,21 +393,25 @@ const SendNotificationModal = ({
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-main-mirage">Title</label>
+                        <label className="text-sm font-medium text-main-mirage">
+                            {t("notifications:sendModal.titleLabel")}
+                        </label>
                         <Input
                             value={title}
                             onChange={(event) => setTitle(event.target.value)}
-                            placeholder="Enter notification title..."
+                            placeholder={t("notifications:sendModal.titlePlaceholder")}
                             className={formInputClass}
                         />
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-main-mirage">Message</label>
+                        <label className="text-sm font-medium text-main-mirage">
+                            {t("notifications:sendModal.messageLabel")}
+                        </label>
                         <Textarea
                             value={message}
                             onChange={(event) => setMessage(event.target.value)}
-                            placeholder="Write your notification message..."
+                            placeholder={t("notifications:sendModal.messagePlaceholder")}
                             className="min-h-[120px] border-main-whiteMarble focus-visible:ring-main-primary/30"
                         />
                         {selectedVoucher && kind === "offer" && offerType === "voucher" && (
@@ -412,7 +435,9 @@ const SendNotificationModal = ({
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-main-mirage">Schedule (optional)</label>
+                            <label className="text-sm font-medium text-main-mirage">
+                                {t("notifications:sendModal.scheduleOptional")}
+                            </label>
                             <div className="relative">
                                 <CalendarClock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-main-sharkGray" />
                                 <Input
@@ -425,11 +450,13 @@ const SendNotificationModal = ({
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-main-mirage">Deep Link (optional)</label>
+                            <label className="text-sm font-medium text-main-mirage">
+                                {t("notifications:sendModal.deepLinkOptional")}
+                            </label>
                             <Input
                                 value={deepLink}
                                 onChange={(event) => setDeepLink(event.target.value)}
-                                placeholder="e.g. wasel://offers/latest"
+                                placeholder={t("notifications:sendModal.deepLinkPlaceholder")}
                                 className={formInputClass}
                             />
                         </div>
@@ -437,7 +464,9 @@ const SendNotificationModal = ({
 
                     <div className="space-y-3">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-main-mirage">Target Audience</label>
+                            <label className="text-sm font-medium text-main-mirage">
+                                {t("notifications:sendModal.targetAudienceLabel")}
+                            </label>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                 <button
                                     type="button"
@@ -447,7 +476,7 @@ const SendNotificationModal = ({
                                         : "border-main-whiteMarble text-main-hydrocarbon hover:bg-main-luxuryWhite"
                                         }`}
                                 >
-                                    All Users
+                                    {t("notifications:sendModal.allUsers")}
                                 </button>
                                 <button
                                     type="button"
@@ -457,7 +486,7 @@ const SendNotificationModal = ({
                                         : "border-main-whiteMarble text-main-hydrocarbon hover:bg-main-luxuryWhite"
                                         }`}
                                 >
-                                    Specific Users
+                                    {t("notifications:sendModal.specificUsers")}
                                 </button>
                             </div>
                         </div>
@@ -469,17 +498,21 @@ const SendNotificationModal = ({
                                     <Input
                                         value={usersQuery}
                                         onChange={(event) => setUsersQuery(event.target.value)}
-                                        placeholder="Search by name, email, or phone..."
+                                        placeholder={t("notifications:sendModal.searchUsersPlaceholder")}
                                         className="pl-9 h-11 border-main-whiteMarble focus-visible:ring-main-primary/30"
                                     />
                                 </div>
                                 <div className="max-h-[180px] overflow-y-auto border border-main-whiteMarble common-rounded divide-y divide-main-whiteMarble">
                                     {usersLoading && (
-                                        <div className="px-3 py-3 text-sm text-main-sharkGray">Searching users...</div>
+                                        <div className="px-3 py-3 text-sm text-main-sharkGray">
+                                            {t("notifications:sendModal.searchingUsers")}
+                                        </div>
                                     )}
 
                                     {!usersLoading && userOptions.length === 0 && (
-                                        <div className="px-3 py-3 text-sm text-main-sharkGray">No users found.</div>
+                                        <div className="px-3 py-3 text-sm text-main-sharkGray">
+                                            {t("notifications:sendModal.noUsersFound")}
+                                        </div>
                                     )}
 
                                     {!usersLoading && userOptions.map((user) => {
@@ -489,7 +522,7 @@ const SendNotificationModal = ({
                                                 type="button"
                                                 key={user.id}
                                                 onClick={() => toggleUser(user)}
-                                                className={`w-full px-3 py-3 text-left transition-colors ${checked ? "bg-main-primary/10" : "hover:bg-main-luxuryWhite"}`}
+                                                className={`w-full px-3 py-3 text-start transition-colors ${checked ? "bg-main-primary/10" : "hover:bg-main-luxuryWhite"}`}
                                             >
                                                 <div className="flex items-start justify-between gap-3">
                                                     <div>
@@ -531,29 +564,29 @@ const SendNotificationModal = ({
                 <CommonModalFooter>
                     <Button
                         type="button"
-                        variant="outline"
+                        variant="ghost"
                         onClick={() => onOpenChange(false)}
-                        className="h-11 px-5 border-main-whiteMarble text-main-hydrocarbon"
+                        className="h-11 px-5 text-main-sharkGray hover:bg-main-titaniumWhite font-semibold common-rounded"
                         disabled={sending}
                     >
-                        Cancel
+                        {t("common:cancel")}
                     </Button>
                     <Button
                         type="button"
                         variant="outline"
                         onClick={() => sendNotification(true)}
-                        className="h-11 px-5 border-main-primary text-main-primary hover:bg-main-primary/10"
+                        className="h-11 px-5 border-main-primary text-main-primary hover:bg-main-primary/10 font-semibold common-rounded"
                         disabled={!isValid || sending}
                     >
-                        {sending ? "Scheduling..." : "Schedule"}
+                        {sending ? t("notifications:sendModal.scheduling") : t("notifications:sendModal.schedule")}
                     </Button>
                     <Button
                         type="button"
                         onClick={() => sendNotification(false)}
-                        className="h-11 px-5 bg-main-primary text-main-white hover:bg-main-primary/90"
+                        className="h-11 px-5 bg-main-primary text-main-white hover:bg-main-primary/90 font-bold common-rounded shadow-lg shadow-main-primary/20"
                         disabled={!isValid || sending}
                     >
-                        {sending ? "Sending..." : "Send Now"}
+                        {sending ? t("notifications:sendModal.sending") : t("notifications:sendModal.sendNow")}
                     </Button>
                 </CommonModalFooter>
             </CommonModal>
@@ -564,8 +597,8 @@ const SendNotificationModal = ({
                 maxWidth="sm:max-w-[560px]"
             >
                 <CommonModalHeader
-                    title="Choose Voucher Code"
-                    description="Select one voucher to insert automatically into the notification message."
+                    title={t("notifications:voucherPicker.title")}
+                    description={t("notifications:voucherPicker.description")}
                 />
                 <CommonModalBody className="space-y-4 px-2 sm:px-3 pb-6 pt-1">
                     <div className="relative">
@@ -573,18 +606,22 @@ const SendNotificationModal = ({
                         <Input
                             value={voucherQuery}
                             onChange={(event) => setVoucherQuery(event.target.value)}
-                            placeholder="Search by voucher code or description..."
+                            placeholder={t("notifications:voucherPicker.searchPlaceholder")}
                             className="pl-9 h-11 border-main-whiteMarble focus-visible:ring-main-primary/30"
                         />
                     </div>
 
                     <div className="max-h-[280px] overflow-y-auto border border-main-whiteMarble common-rounded divide-y divide-main-whiteMarble">
                         {vouchersLoading && (
-                            <div className="px-3 py-3 text-sm text-main-sharkGray">Loading vouchers...</div>
+                            <div className="px-3 py-3 text-sm text-main-sharkGray">
+                                {t("notifications:voucherPicker.loading")}
+                            </div>
                         )}
 
                         {!vouchersLoading && vouchers.length === 0 && (
-                            <div className="px-3 py-3 text-sm text-main-sharkGray">No vouchers found.</div>
+                            <div className="px-3 py-3 text-sm text-main-sharkGray">
+                                {t("notifications:voucherPicker.empty")}
+                            </div>
                         )}
 
                         {!vouchersLoading && vouchers.map((voucher) => (
@@ -595,22 +632,18 @@ const SendNotificationModal = ({
                                     applyVoucherCode(voucher);
                                     setVoucherModalOpen(false);
                                 }}
-                                className="w-full px-3 py-3 text-left hover:bg-main-luxuryWhite transition-colors"
+                                className="w-full px-3 py-3 text-start hover:bg-main-luxuryWhite transition-colors"
                             >
                                 <div className="flex items-start justify-between gap-3">
                                     <div>
                                         <p className="text-sm font-bold text-main-primary">{voucher.code}</p>
                                         <p className="text-xs text-main-sharkGray line-clamp-2">
-                                            {voucher.description || "No description"}
+                                            {voucher.description || t("notifications:voucherPicker.noDescription")}
                                         </p>
                                     </div>
                                     <span className="text-xs text-main-sharkGray">
                                         {voucher.valid_to
-                                            ? new Date(voucher.valid_to).toLocaleDateString("en-US", {
-                                                month: "short",
-                                                day: "numeric",
-                                                year: "numeric",
-                                            })
+                                            ? formatAppDateShort(voucher.valid_to, i18n.language, "-")
                                             : "-"}
                                     </span>
                                 </div>
@@ -621,11 +654,11 @@ const SendNotificationModal = ({
                 <CommonModalFooter>
                     <Button
                         type="button"
-                        variant="outline"
+                        variant="ghost"
                         onClick={() => setVoucherModalOpen(false)}
-                        className="h-11 px-5 border-main-whiteMarble text-main-hydrocarbon"
+                        className="h-11 px-6 text-main-sharkGray hover:bg-main-titaniumWhite font-semibold common-rounded"
                     >
-                        Close
+                        {t("common:close")}
                     </Button>
                 </CommonModalFooter>
             </CommonModal>

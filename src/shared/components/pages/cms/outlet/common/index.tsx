@@ -2,19 +2,21 @@ import type { ComponentType } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import clsx from "clsx";
 import { Blocks, CircleHelp, Smartphone } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
-const sectionTabs: { key: CommonPart; label: string; icon: ComponentType<{ size?: number }> }[] = [
-    { key: "app", label: "App", icon: Smartphone },
-    { key: "brand", label: "Brand", icon: Blocks },
-    { key: "faqs", label: "FAQs", icon: CircleHelp },
+const sectionTabs: { key: CommonPart; tabKey: "app" | "brand" | "faqs"; icon: ComponentType<{ size?: number }> }[] = [
+    { key: "app", tabKey: "app", icon: Smartphone },
+    { key: "brand", tabKey: "brand", icon: Blocks },
+    { key: "faqs", tabKey: "faqs", icon: CircleHelp },
 ];
 type CommonPart = "app" | "brand" | "faqs";
 
 const CommonPage = () => {
+    const { t } = useTranslation("cms");
     return (
         <div className="space-y-5">
             <p className="text-sm text-main-coolGray">
-                Shared marketing fragments: app download blocks, brand strip, and compact FAQs. Save each tab independently.
+                {t("common.intro")}
             </p>
             <div className="rounded-2xl border border-main-whiteMarble bg-main-white p-2 shadow-[0_12px_30px_rgba(17,24,39,0.04)]">
                 <div className="flex flex-wrap items-center gap-2">
@@ -32,7 +34,7 @@ const CommonPage = () => {
                             }
                         >
                             <tab.icon size={14} />
-                            {tab.label}
+                            {t(`common.tabs.${tab.tabKey}`)}
                         </NavLink>
                     ))}
                 </div>

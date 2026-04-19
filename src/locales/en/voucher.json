@@ -1,0 +1,89 @@
+{
+  "pageTitle": "Voucher & promo code system",
+  "pageDescription": "Create, edit, disable, and export promotional vouchers",
+  "searchPlaceholder": "Search vouchers by code or description…",
+  "filters": {
+    "allStatuses": "All statuses",
+    "active": "Active",
+    "inactive": "Inactive",
+    "suspended": "Suspended",
+    "expired": "Expired"
+  },
+  "addVoucher": "Add voucher",
+  "table": {
+    "code": "Code",
+    "description": "Description",
+    "discount": "Discount",
+    "usage": "Usage",
+    "validTo": "Valid to",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "disable": "Disable",
+  "enable": "Enable",
+  "emptyTitle": "No vouchers found",
+  "emptyDescription": "Try adjusting search or status filter.",
+  "analytics": {
+    "activeVouchers": "Active vouchers",
+    "activeVouchersDesc": "Currently running",
+    "totalRedemptions": "Total redemptions",
+    "totalRedemptionsDesc": "Across all vouchers",
+    "expiringSoon": "Expiring soon",
+    "expiringSoonDesc": "Within 30 days",
+    "totalVouchers": "Total vouchers",
+    "totalVouchersDesc": "All created vouchers"
+  },
+  "statuses": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "suspended": "Suspended",
+    "expired": "Expired"
+  },
+  "currencyEgp": "EGP",
+  "export": {
+    "title": "Export vouchers",
+    "description": "Choose a date range to export vouchers created during that period."
+  },
+  "exportDateHint": "Leave both fields empty to export all vouchers.",
+  "delete": {
+    "title": "Delete voucher?",
+    "description": "You are about to permanently delete voucher {{code}}. This action cannot be undone.",
+    "deleting": "Deleting…",
+    "confirm": "Yes, delete"
+  },
+  "form": {
+    "editTitle": "Edit voucher",
+    "addTitle": "Add voucher",
+    "editDescription": "Update voucher details",
+    "addDescription": "Create a new voucher for your customers",
+    "generateTooltip": "Click to generate code",
+    "codePlaceholder": "WELCOME10",
+    "discountType": "Discount type",
+    "selectDiscountType": "Select type",
+    "discountTypes": {
+      "percentage": "Percentage",
+      "fixed": "Fixed amount"
+    },
+    "discountValue": "Discount value",
+    "usagePerUser": "Usage per user",
+    "usageLimit": "Usage limit",
+    "optional": "(optional)",
+    "status": "Status",
+    "selectStatus": "Select status",
+    "validFrom": "Valid from",
+    "validTo": "Valid to",
+    "descriptionPlaceholder": "Brief voucher description",
+    "saving": "Saving…",
+    "create": "Create",
+    "update": "Update",
+    "errors": {
+      "codeMin": "Code must be at least 3 characters",
+      "codeMax": "Code is too long",
+      "discountMin": "Discount value must be 0 or greater",
+      "usagePerUserMin": "Usage per user must be 0 or greater",
+      "validFromRequired": "Valid from is required",
+      "validToRequired": "Valid to is required",
+      "validToAfterFrom": "Valid to must be after valid from"
+    }
+  }
+}

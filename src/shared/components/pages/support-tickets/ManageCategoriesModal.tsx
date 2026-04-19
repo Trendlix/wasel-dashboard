@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Trash2 } from "lucide-react";
 import clsx from "clsx";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ interface ManageCategoriesModalProps {
 }
 
 const ManageCategoriesModal = ({ open, onOpenChange }: ManageCategoriesModalProps) => {
+    const { t } = useTranslation("support");
     const {
         categories,
         categoriesLoading,
@@ -32,7 +34,7 @@ const ManageCategoriesModal = ({ open, onOpenChange }: ManageCategoriesModalProp
 
     useEffect(() => {
         if (open) fetchCategories();
-    }, [open]);
+    }, [open, fetchCategories]);
 
     const handleAdd = async () => {
         const name = newName.trim();
@@ -53,40 +55,39 @@ const ManageCategoriesModal = ({ open, onOpenChange }: ManageCategoriesModalProp
     return (
         <CommonModal open={open} onOpenChange={onOpenChange} maxWidth="sm:max-w-[560px]">
             <CommonModalHeader
-                title="Manage Ticket Categories"
-                description="Add or remove categories to organize your support tickets"
+                title={t("categories.title")}
+                description={t("categories.description")}
             />
 
             <CommonModalBody>
-                {/* Add new */}
                 <div className="mb-5">
-                    <p className="text-sm font-semibold text-main-mirage mb-2">Add New Category</p>
+                    <p className="text-sm font-semibold text-main-mirage mb-2">{t("categories.addLabel")}</p>
                     <div className="flex gap-2">
                         <Input
                             ref={inputRef}
                             value={newName}
                             onChange={(e) => setNewName(e.target.value)}
                             onKeyDown={handleKeyDown}
-                            placeholder="e.g., Billing Issues"
+                            placeholder={t("categories.placeholder")}
                             className="flex-1 h-11 border-main-whiteMarble focus-visible:ring-main-primary/30"
                         />
                         <Button
+                            type="button"
                             onClick={handleAdd}
                             disabled={categorySaving || !newName.trim()}
-                            className="h-11 px-5 bg-main-primary text-main-white font-semibold shrink-0"
+                            className="h-11 px-5 bg-main-primary hover:bg-main-primary/90 text-main-white font-bold common-rounded shrink-0"
                         >
-                            + Add
+                            {t("categories.addButton")}
                         </Button>
                     </div>
                     <p className="text-xs text-main-sharkGray mt-1.5">
-                        Press Enter or click Add to create a new category
+                        {t("categories.addHint")}
                     </p>
                 </div>
 
-                {/* Existing categories */}
                 <div>
                     <p className="text-sm font-semibold text-main-mirage mb-3">
-                        Existing Categories{" "}
+                        {t("categories.existing")}{" "}
                         <span className="text-main-sharkGray font-normal">
                             ({categories.length})
                         </span>
@@ -103,8 +104,8 @@ const ManageCategoriesModal = ({ open, onOpenChange }: ManageCategoriesModalProp
                         </div>
                     ) : categories.length === 0 ? (
                         <NoDataFound
-                            title="No categories found"
-                            description="We couldn't find any categories."
+                            title={t("categories.emptyTitle")}
+                            description={t("categories.emptyDescription")}
                         />
                     ) : (
                         <div className="space-y-2">
@@ -127,14 +128,20 @@ const ManageCategoriesModal = ({ open, onOpenChange }: ManageCategoriesModalProp
                                         </span>
                                         {cat.ticket_count !== undefined && (
                                             <span className="text-xs text-main-sharkGray">
-                                                ({cat.ticket_count} ticket{cat.ticket_count !== 1 ? "s" : ""})
+                                                (
+                                                {t("categories.countTickets", {
+                                                    count: cat.ticket_count,
+                                                })}
+                                                )
                                             </span>
                                         )}
                                     </div>
                                     <button
+                                        type="button"
                                         onClick={() => deleteCategory(cat.id)}
                                         className="p-1.5 text-main-remove hover:bg-main-remove/10 rounded-lg transition-colors shrink-0"
-                                        title="Delete category"
+                                        title={t("categories.deleteCategory")}
+                                        aria-label={t("categories.deleteCategory")}
                                     >
                                         <Trash2 size={15} />
                                     </button>
@@ -147,10 +154,11 @@ const ManageCategoriesModal = ({ open, onOpenChange }: ManageCategoriesModalProp
 
             <CommonModalFooter>
                 <Button
+                    type="button"
                     onClick={() => onOpenChange(false)}
-                    className="h-11 px-8 bg-main-primary text-main-white font-semibold"
+                    className="h-11 px-8 bg-main-primary hover:bg-main-primary/90 text-main-white font-bold common-rounded shadow-lg shadow-main-primary/20"
                 >
-                    Done
+                    {t("categories.done")}
                 </Button>
             </CommonModalFooter>
         </CommonModal>

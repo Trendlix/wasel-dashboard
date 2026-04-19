@@ -1,0 +1,86 @@
+{
+  "pageTitle": "Trips management",
+  "pageDescription": "Monitor and manage all platform trips",
+  "searchPlaceholder": "Search trips…",
+  "filters": {
+    "allStatuses": "All statuses",
+    "pending": "Pending",
+    "accepted": "Accepted",
+    "scheduled": "Scheduled",
+    "on_the_way": "On the way",
+    "arrived": "Arrived",
+    "picked_up": "Picked up",
+    "delivered": "Delivered",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+  "table": {
+    "bookingNumber": "Booking number",
+    "user": "User",
+    "driver": "Driver",
+    "route": "Route",
+    "price": "Price",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "row": {
+    "total": "Total: {{currency}} {{amount}}",
+    "waselShare": "Wasel % ({{currency}} {{amount}})",
+    "driverShare": "Driver % ({{currency}} {{amount}})"
+  },
+  "viewDetails": "View details",
+  "emptyTitle": "No trips found",
+  "emptyDescription": "Try adjusting your search or filters.",
+  "analytics": {
+    "totalTrips": "Total trips",
+    "activeTrips": "Active trips",
+    "completedTrips": "Completed trips",
+    "cancelledTrips": "Cancelled trips"
+  },
+  "export": {
+    "title": "Export trips",
+    "description": "Choose a date range to export trips for that period, or leave empty for all.",
+    "dateHint": "Leave both fields empty to export all trips."
+  },
+  "statuses": {
+    "pending": "Pending",
+    "accepted": "Accepted",
+    "scheduled": "Scheduled",
+    "on_the_way": "On the way",
+    "arrived": "Arrived",
+    "picked_up": "Picked up",
+    "delivered": "Delivered",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+  "details": {
+    "title": "Trip details",
+    "bookingLine": "#{{number}} — {{date}}",
+    "user": "User",
+    "userSubtitle": "Customer information",
+    "driver": "Driver",
+    "driverSubtitle": "Driver information",
+    "routeSection": "Route information",
+    "pickup": "Pickup location",
+    "dropoff": "Dropoff location",
+    "timeLabel": "Time",
+    "distance": "Distance",
+    "duration": "Duration",
+    "km": "KM",
+    "mins": "mins",
+    "vehicleGoods": "Vehicle & goods",
+    "payment": "Payment details",
+    "notes": "Notes",
+    "truckType": "Truck type",
+    "goodsType": "Goods type",
+    "weight": "Weight",
+    "tons": "{{value}} tons",
+    "totalPrice": "Total price",
+    "commission": "Commission (10%)",
+    "paymentMethod": "Payment method",
+    "close": "Close",
+    "cancelTrip": "Cancel trip",
+    "cancelling": "Cancelling…",
+    "trackTrip": "Track trip"
+  }
+}

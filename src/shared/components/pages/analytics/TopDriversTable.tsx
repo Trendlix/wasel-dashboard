@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
     Table,
     TableBody,
@@ -19,27 +20,30 @@ const rankClass = (rank: number) =>
         rank === 1 && "bg-[#F5B400] text-main-white",
         rank === 2 && "bg-[#C7CED8] text-[#4A5568]",
         rank === 3 && "bg-[#CD7F32] text-main-white",
-        rank > 3 && "bg-[#EEF1F5] text-[#6B7280]"
+        rank > 3 && "bg-[#EEF1F5] text-[#6B7280]",
     );
 
 const TopDriversTable = () => {
+    const { t, i18n } = useTranslation("analytics");
     const [currentPage, setCurrentPage] = useState(1);
     const totalPages = Math.ceil(topDrivers.length / PAGE_SIZE);
     const paginated = topDrivers.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+    const numLocale = i18n.language?.startsWith("ar") ? "ar-SA" : "en-US";
+    const egp = t("currencyEgp");
 
     return (
         <div className="w-full bg-main-white border border-main-whiteMarble common-rounded overflow-hidden">
             <div className="px-6 py-4 border-b border-main-whiteMarble">
-                <h3 className="text-main-mirage font-semibold text-base">Top Performing Drivers</h3>
+                <h3 className="text-main-mirage font-semibold text-base">{t("topDriversTitle")}</h3>
             </div>
             <Table>
                 <TableHeader>
                     <TableRow className="bg-main-luxuryWhite hover:bg-main-luxuryWhite border-b border-main-whiteMarble">
-                        <TableHead className="px-6 py-4 text-main-hydrocarbon font-semibold text-sm">Rank</TableHead>
-                        <TableHead className="px-6 py-4 text-main-hydrocarbon font-semibold text-sm">Driver</TableHead>
-                        <TableHead className="px-6 py-4 text-main-hydrocarbon font-semibold text-sm">Total Trips</TableHead>
-                        <TableHead className="px-6 py-4 text-main-hydrocarbon font-semibold text-sm">Total Earnings</TableHead>
-                        <TableHead className="px-6 py-4 text-main-hydrocarbon font-semibold text-sm">Avg. per Trip</TableHead>
+                        <TableHead className="px-6 py-4 text-main-hydrocarbon font-semibold text-sm">{t("table.rank")}</TableHead>
+                        <TableHead className="px-6 py-4 text-main-hydrocarbon font-semibold text-sm">{t("table.driver")}</TableHead>
+                        <TableHead className="px-6 py-4 text-main-hydrocarbon font-semibold text-sm">{t("table.totalTrips")}</TableHead>
+                        <TableHead className="px-6 py-4 text-main-hydrocarbon font-semibold text-sm">{t("table.totalEarnings")}</TableHead>
+                        <TableHead className="px-6 py-4 text-main-hydrocarbon font-semibold text-sm">{t("table.avgPerTrip")}</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -50,8 +54,12 @@ const TopDriversTable = () => {
                             </TableCell>
                             <TableCell className="px-6 py-4 text-main-mirage font-semibold text-sm">{driver.name}</TableCell>
                             <TableCell className="px-6 py-4 text-main-hydrocarbon text-sm">{driver.totalTrips}</TableCell>
-                            <TableCell className="px-6 py-4 text-main-vividMint font-semibold text-sm">EGP {driver.totalEarnings.toLocaleString()}</TableCell>
-                            <TableCell className="px-6 py-4 text-main-sharkGray text-sm">EGP {driver.avgPerTrip}</TableCell>
+                            <TableCell className="px-6 py-4 text-main-vividMint font-semibold text-sm">
+                                {egp} {driver.totalEarnings.toLocaleString(numLocale)}
+                            </TableCell>
+                            <TableCell className="px-6 py-4 text-main-sharkGray text-sm">
+                                {egp} {driver.avgPerTrip.toLocaleString(numLocale)}
+                            </TableCell>
                         </TableRow>
                     ))}
                 </TableBody>

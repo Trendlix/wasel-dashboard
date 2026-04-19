@@ -1,14 +1,19 @@
 import { z } from "zod";
 
-export const inviteSchema = z.object({
-    email: z.string().email("Invalid email address"),
-    role_id: z.number({ message: "Please select a role" }).min(1, "Please select a role"),
-});
+/** Single-key lookups only; avoids `t()` overload ambiguity with Zod message factories. */
+type RolesT = (key: string) => string;
 
-export const editSchema = z.object({
-    role_id: z.number().min(1, "Please select a role"),
-    status: z.enum(["active", "blocked", "twofa"]),
-});
+export const createInviteSchema = (t: RolesT) =>
+    z.object({
+        email: z.string().email(t("validation.inviteEmailInvalid")),
+        role_id: z.number({ message: t("validation.selectRole") }).min(1, t("validation.selectRole")),
+    });
 
-export type InviteFormValues = z.infer<typeof inviteSchema>;
-export type EditFormValues = z.infer<typeof editSchema>;
+export const createEditSchema = (t: RolesT) =>
+    z.object({
+        role_id: z.number().min(1, t("validation.selectRole")),
+        status: z.enum(["active", "blocked", "twofa"]),
+    });
+
+export type InviteFormValues = z.infer<ReturnType<typeof createInviteSchema>>;
+export type EditFormValues = z.infer<ReturnType<typeof createEditSchema>>;

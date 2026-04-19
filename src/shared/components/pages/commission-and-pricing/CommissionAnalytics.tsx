@@ -1,13 +1,9 @@
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { DollarSign, Percent } from "lucide-react";
 import AnalyticsCard, { AnalyticsCardSkeleton } from "../../common/AnalyticsCard";
 import useCommissionStore from "@/shared/hooks/store/useCommissionStore";
-
-const categoryLabels: Record<string, string> = {
-    trip: "Trip Commission",
-    storage: "Storage Commission",
-    advertising: "Ad Commission",
-};
+import type { TCommissionCategory } from "@/shared/hooks/store/useCommissionStore";
 
 const iconClasses = [
     "bg-main-primary/10! text-main-primary!",
@@ -16,6 +12,7 @@ const iconClasses = [
 ];
 
 const CommissionAnalytics = () => {
+    const { t } = useTranslation("commission");
     const { analytics, analyticsLoading, fetchAnalytics } = useCommissionStore();
 
     useEffect(() => {
@@ -34,7 +31,7 @@ const CommissionAnalytics = () => {
 
     const cards = analytics.map((item, index) => ({
         id: index + 1,
-        title: categoryLabels[item.category] ?? item.category,
+        title: t(`analytics.${item.category as TCommissionCategory}`),
         value: item.rate,
         icon: item.type === "fixed" ? DollarSign : Percent,
         classname: "bg-main-white border border-main-whiteMarble",

@@ -1,0 +1,16 @@
+{
+  "dashboard": "لوحة التحكم",
+  "analytics": "التحليلات",
+  "dataManagement": "إدارة البيانات",
+  "usersManagement": "إدارة المستخدمين",
+  "driversManagement": "إدارة السائقين",
+  "driversVerification": "توثيق السائقين",
+  "tripsManagement": "إدارة الرحلات",
+  "appsNotifications": "إشعارات التطبيقات",
+  "commissionAndPricing": "العمولة والتسعير",
+  "voucherAndPromo": "القسائم والعروض",
+  "supportTickets": "تذاكر الدعم",
+  "cms": "إدارة المحتوى",
+  "adminRolesPermissions": "أدوار وصلاحيات المشرفين",
+  "adminSettings": "إعدادات المشرف"
+}

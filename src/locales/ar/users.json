@@ -1,0 +1,48 @@
+{
+  "pageTitle": "المستخدمون",
+  "pageDescription": "إدارة كل المستخدمين المسجلين",
+  "searchPlaceholder": "ابحث بالاسم أو البريد أو الهاتف…",
+  "filters": {
+    "allStatuses": "كل الحالات",
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "blocked": "محظور",
+    "deleted": "محذوف"
+  },
+  "table": {
+    "user": "المستخدم",
+    "phone": "الهاتف",
+    "status": "الحالة",
+    "voucherUsage": "استخدام القسائم",
+    "joined": "تاريخ الانضمام",
+    "actions": "إجراءات"
+  },
+  "viewDetails": "عرض التفاصيل",
+  "emptyTitle": "لا يوجد مستخدمون",
+  "emptyDescription": "جرّب تعديل البحث أو عوامل التصفية.",
+  "analytics": {
+    "totalUsers": "إجمالي المستخدمين",
+    "activeUsers": "المستخدمون النشطون",
+    "blockedUsers": "المستخدمون المحظورون"
+  },
+  "modal": {
+    "title": "تفاصيل المستخدم",
+    "description": "عرض بيانات المستخدم وتحديث حالة الحساب.",
+    "phone": "الهاتف",
+    "joined": "تاريخ الانضمام",
+    "emailVerified": "البريد مُوثَّق",
+    "phoneVerified": "الهاتف مُوثَّق",
+    "voucherUsage": "استخدام القسائم",
+    "accountStatus": "حالة الحساب",
+    "saveChanges": "حفظ التغييرات",
+    "saving": "جاري الحفظ…"
+  },
+  "statuses": {
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "blocked": "محظور",
+    "deleted": "محذوف"
+  },
+  "yes": "نعم",
+  "no": "لا"
+}

@@ -127,7 +127,7 @@ function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
   return (
     <p
       id={formMessageId}
-      className={cn("text-destructive text-sm font-medium", className)}
+      className={cn("text-xs font-medium text-main-red mt-1", className)}
       {...props}
     >
       {body}
@@ -136,7 +136,6 @@ function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
 }
 
 export {
-  useFormField,
   Form,
   FormItem,
   FormLabel,

@@ -1,15 +1,15 @@
 import { Outlet } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import PageHeader from "@/shared/components/common/PageHeader";
 import PageTransition from "@/shared/components/common/PageTransition";
 import DataManagementAnalytics from "@/shared/components/pages/data-management/DataManagementAnalytics";
 import DataManagementTabs from "@/shared/components/pages/data-management/DataManagementTabs";
 
-const DataManagementLayout = () => (
+const DataManagementLayout = () => {
+    const { t } = useTranslation("dataManagement");
+    return (
     <PageTransition>
-        <PageHeader
-            title="Data Management"
-            description="Manage truck types, goods and weights used across the platform"
-        />
+        <PageHeader title={t("pageTitle")} description={t("pageDescription")} />
 
         <DataManagementAnalytics />
 
@@ -20,6 +20,7 @@ const DataManagementLayout = () => (
             </div>
         </div>
     </PageTransition>
-);
+    );
+};
 
 export default DataManagementLayout;

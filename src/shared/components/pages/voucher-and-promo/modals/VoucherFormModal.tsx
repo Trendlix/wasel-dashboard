@@ -1,7 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import type { TFunction } from "i18next";
+import { useTranslation } from "react-i18next";
 import { Info, WandSparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -27,26 +29,27 @@ import useVoucherStore, {
   type TVoucherStatus,
 } from "@/shared/hooks/store/useVoucherStore";
 
-const voucherSchema = z
-  .object({
-    code: z.string().min(3, "Code must be at least 3 characters").max(50, "Code is too long"),
-    description: z.string().optional(),
-    discount_type: z.enum(["fixed", "percentage"]),
-    discount_value: z.number().min(0, "Discount value must be >= 0"),
-    min_order: z.number().min(0).optional(),
-    max_discount: z.number().min(0).optional(),
-    usage_limit: z.number().int().min(1).optional(),
-    usage_per_user: z.number().int().min(0, "Usage per user must be >= 0"),
-    valid_from: z.string().min(1, "Valid from is required"),
-    valid_to: z.string().min(1, "Valid to is required"),
-    status: z.enum(["active", "inactive", "suspended", "expired"]),
-  })
-  .refine((data) => data.valid_to > data.valid_from, {
-    message: "Valid to must be after valid from",
-    path: ["valid_to"],
-  });
+const createVoucherSchema = (t: TFunction<"voucher">) =>
+  z
+    .object({
+      code: z.string().min(3, t("form.errors.codeMin")).max(50, t("form.errors.codeMax")),
+      description: z.string().optional(),
+      discount_type: z.enum(["fixed", "percentage"]),
+      discount_value: z.number().min(0, t("form.errors.discountMin")),
+      min_order: z.number().min(0).optional(),
+      max_discount: z.number().min(0).optional(),
+      usage_limit: z.number().int().min(1).optional(),
+      usage_per_user: z.number().int().min(0, t("form.errors.usagePerUserMin")),
+      valid_from: z.string().min(1, t("form.errors.validFromRequired")),
+      valid_to: z.string().min(1, t("form.errors.validToRequired")),
+      status: z.enum(["active", "inactive", "suspended", "expired"]),
+    })
+    .refine((data) => data.valid_to > data.valid_from, {
+      message: t("form.errors.validToAfterFrom"),
+      path: ["valid_to"],
+    });
 
-type VoucherFormValues = z.infer<typeof voucherSchema>;
+type VoucherFormValues = z.infer<ReturnType<typeof createVoucherSchema>>;
 
 interface VoucherFormModalProps {
   open: boolean;
@@ -64,10 +67,14 @@ const toDateInput = (value: string | Date) => {
 };
 
 const VoucherFormModal = ({ open, voucher, onOpenChange, onSaved }: VoucherFormModalProps) => {
+  const { t } = useTranslation(["voucher", "common"]);
   const { createVoucher, updateVoucher, generateVoucherCode, submitting } = useVoucherStore();
 
+  const schema = useMemo(() => createVoucherSchema(t), [t]);
+  const resolver = useMemo(() => zodResolver(schema), [schema]);
+
   const { control, handleSubmit, reset, setValue } = useForm<VoucherFormValues>({
-    resolver: zodResolver(voucherSchema),
+    resolver,
     defaultValues: {
       code: "",
       description: "",
@@ -147,11 +154,13 @@ const VoucherFormModal = ({ open, voucher, onOpenChange, onSaved }: VoucherFormM
     setValue("code", code, { shouldDirty: true, shouldValidate: true });
   };
 
+  const optional = t("voucher:form.optional");
+
   return (
     <CommonModal open={open} onOpenChange={onOpenChange} loading={submitting} maxWidth="sm:max-w-[720px]">
       <CommonModalHeader
-        title={voucher ? "Edit Voucher" : "Add Voucher"}
-        description={voucher ? "Update voucher details" : "Create a new voucher for your customers"}
+        title={voucher ? t("voucher:form.editTitle") : t("voucher:form.addTitle")}
+        description={voucher ? t("voucher:form.editDescription") : t("voucher:form.addDescription")}
       />
       <form onSubmit={handleSubmit(submit)}>
         <CommonModalBody className="space-y-4">
@@ -162,26 +171,27 @@ const VoucherFormModal = ({ open, voucher, onOpenChange, onSaved }: VoucherFormM
               render={({ field, fieldState }) => (
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2">
-                    <Label>Code</Label>
+                    <Label className="font-semibold text-main-mirage">{t("voucher:table.code")}</Label>
                     <div className="relative group">
                       <Info className="size-3.5 text-main-sharkGray" />
-                      <div className="pointer-events-none absolute left-1/2 top-full z-20 mt-1 w-max -translate-x-1/2 rounded-md bg-main-mirage px-2 py-1 text-[11px] text-main-white opacity-0 shadow-md transition-opacity group-hover:opacity-100">
-                        Click to generate code
+                      <div className="pointer-events-none absolute inset-s-1/2 top-full z-20 mt-1 w-max -translate-x-1/2 rounded-md bg-main-mirage px-2 py-1 text-[11px] text-main-white opacity-0 shadow-md transition-opacity group-hover:opacity-100">
+                        {t("voucher:form.generateTooltip")}
                       </div>
                     </div>
                   </div>
                   <div className="relative">
-                    <Input {...field} placeholder="WELCOME10" className="h-11 border-main-whiteMarble pr-11" />
+                    <Input {...field} placeholder={t("voucher:form.codePlaceholder")} className="h-11 border-main-whiteMarble pe-11 focus-visible:ring-main-primary/30" />
                     <button
                       type="button"
                       onClick={handleGenerateCode}
-                      className="absolute right-1 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-main-primary hover:bg-main-primary/10 transition-colors"
-                      title="Click to generate code"
+                      className="absolute inset-e-1 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-main-primary hover:bg-main-primary/10 transition-colors"
+                      title={t("voucher:form.generateTooltip")}
+                      aria-label={t("voucher:form.generateTooltip")}
                     >
                       <WandSparkles className="size-4" />
                     </button>
                   </div>
-                  {fieldState.error && <p className="text-xs text-main-remove">{fieldState.error.message}</p>}
+                  {fieldState.error && <p className="text-xs font-medium text-main-red mt-1">{fieldState.error.message}</p>}
                 </div>
               )}
             />
@@ -191,14 +201,14 @@ const VoucherFormModal = ({ open, voucher, onOpenChange, onSaved }: VoucherFormM
               control={control}
               render={({ field }) => (
                 <div className="space-y-1.5">
-                  <Label>Discount Type</Label>
+                  <Label className="font-semibold text-main-mirage">{t("voucher:form.discountType")}</Label>
                   <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className="h-11 border-main-whiteMarble">
-                      <SelectValue placeholder="Select type" />
+                    <SelectTrigger className="h-11 border-main-whiteMarble focus:ring-main-primary/30">
+                      <SelectValue placeholder={t("voucher:form.selectDiscountType")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="percentage">Percentage</SelectItem>
-                      <SelectItem value="fixed">Fixed</SelectItem>
+                      <SelectItem value="percentage">{t("voucher:form.discountTypes.percentage")}</SelectItem>
+                      <SelectItem value="fixed">{t("voucher:form.discountTypes.fixed")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -210,16 +220,16 @@ const VoucherFormModal = ({ open, voucher, onOpenChange, onSaved }: VoucherFormM
               control={control}
               render={({ field, fieldState }) => (
                 <div className="space-y-1.5">
-                  <Label>Discount Value</Label>
+                  <Label className="font-semibold text-main-mirage">{t("voucher:form.discountValue")}</Label>
                   <Input
                     type="number"
                     min={0}
                     step="0.01"
                     value={field.value ?? ""}
                     onChange={(e) => field.onChange(Number(e.target.value || 0))}
-                    className="h-11 border-main-whiteMarble"
+                    className="h-11 border-main-whiteMarble focus-visible:ring-main-primary/30"
                   />
-                  {fieldState.error && <p className="text-xs text-main-remove">{fieldState.error.message}</p>}
+                  {fieldState.error && <p className="text-xs font-medium text-main-red mt-1">{fieldState.error.message}</p>}
                 </div>
               )}
             />
@@ -229,16 +239,16 @@ const VoucherFormModal = ({ open, voucher, onOpenChange, onSaved }: VoucherFormM
               control={control}
               render={({ field, fieldState }) => (
                 <div className="space-y-1.5">
-                  <Label>Usage Per User</Label>
+                  <Label className="font-semibold text-main-mirage">{t("voucher:form.usagePerUser")}</Label>
                   <Input
                     type="number"
                     min={0}
                     step="1"
                     value={field.value ?? ""}
                     onChange={(e) => field.onChange(Number(e.target.value || 0))}
-                    className="h-11 border-main-whiteMarble"
+                    className="h-11 border-main-whiteMarble focus-visible:ring-main-primary/30"
                   />
-                  {fieldState.error && <p className="text-xs text-main-remove">{fieldState.error.message}</p>}
+                  {fieldState.error && <p className="text-xs font-medium text-main-red mt-1">{fieldState.error.message}</p>}
                 </div>
               )}
             />
@@ -248,7 +258,10 @@ const VoucherFormModal = ({ open, voucher, onOpenChange, onSaved }: VoucherFormM
               control={control}
               render={({ field }) => (
                 <div className="space-y-1.5">
-                  <Label>Usage Limit (Optional)</Label>
+                  <Label className="font-semibold text-main-mirage">
+                    {t("voucher:form.usageLimit")}{" "}
+                    <span className="font-normal text-main-sharkGray">{optional}</span>
+                  </Label>
                   <Input
                     type="number"
                     min={1}
@@ -257,7 +270,7 @@ const VoucherFormModal = ({ open, voucher, onOpenChange, onSaved }: VoucherFormM
                     onChange={(e) =>
                       setValue("usage_limit", e.target.value === "" ? undefined : Number(e.target.value))
                     }
-                    className="h-11 border-main-whiteMarble"
+                    className="h-11 border-main-whiteMarble focus-visible:ring-main-primary/30"
                   />
                 </div>
               )}
@@ -268,16 +281,16 @@ const VoucherFormModal = ({ open, voucher, onOpenChange, onSaved }: VoucherFormM
               control={control}
               render={({ field }) => (
                 <div className="space-y-1.5">
-                  <Label>Status</Label>
+                  <Label className="font-semibold text-main-mirage">{t("voucher:form.status")}</Label>
                   <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className="h-11 border-main-whiteMarble">
-                      <SelectValue placeholder="Select status" />
+                    <SelectTrigger className="h-11 border-main-whiteMarble focus:ring-main-primary/30">
+                      <SelectValue placeholder={t("voucher:form.selectStatus")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="inactive">Inactive</SelectItem>
-                      <SelectItem value="suspended">Suspended</SelectItem>
-                      <SelectItem value="expired">Expired</SelectItem>
+                      <SelectItem value="active">{t("voucher:statuses.active")}</SelectItem>
+                      <SelectItem value="inactive">{t("voucher:statuses.inactive")}</SelectItem>
+                      <SelectItem value="suspended">{t("voucher:statuses.suspended")}</SelectItem>
+                      <SelectItem value="expired">{t("voucher:statuses.expired")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -289,9 +302,9 @@ const VoucherFormModal = ({ open, voucher, onOpenChange, onSaved }: VoucherFormM
               control={control}
               render={({ field, fieldState }) => (
                 <div className="space-y-1.5">
-                  <Label>Valid From</Label>
-                  <Input type="date" {...field} className="h-11 border-main-whiteMarble" />
-                  {fieldState.error && <p className="text-xs text-main-remove">{fieldState.error.message}</p>}
+                  <Label className="font-semibold text-main-mirage">{t("voucher:form.validFrom")}</Label>
+                  <Input type="date" {...field} className="h-11 border-main-whiteMarble focus-visible:ring-main-primary/30" />
+                  {fieldState.error && <p className="text-xs font-medium text-main-red mt-1">{fieldState.error.message}</p>}
                 </div>
               )}
             />
@@ -301,9 +314,9 @@ const VoucherFormModal = ({ open, voucher, onOpenChange, onSaved }: VoucherFormM
               control={control}
               render={({ field, fieldState }) => (
                 <div className="space-y-1.5">
-                  <Label>Valid To</Label>
-                  <Input type="date" {...field} className="h-11 border-main-whiteMarble" />
-                  {fieldState.error && <p className="text-xs text-main-remove">{fieldState.error.message}</p>}
+                  <Label className="font-semibold text-main-mirage">{t("voucher:form.validTo")}</Label>
+                  <Input type="date" {...field} className="h-11 border-main-whiteMarble focus-visible:ring-main-primary/30" />
+                  {fieldState.error && <p className="text-xs font-medium text-main-red mt-1">{fieldState.error.message}</p>}
                 </div>
               )}
             />
@@ -314,8 +327,11 @@ const VoucherFormModal = ({ open, voucher, onOpenChange, onSaved }: VoucherFormM
             control={control}
             render={({ field }) => (
               <div className="space-y-1.5">
-                <Label>Description (Optional)</Label>
-                <Textarea {...field} placeholder="Brief voucher description" className="min-h-28 border-main-whiteMarble" />
+                <Label className="font-semibold text-main-mirage">
+                  {t("common:description")}{" "}
+                  <span className="font-normal text-main-sharkGray">{optional}</span>
+                </Label>
+                <Textarea {...field} placeholder={t("voucher:form.descriptionPlaceholder")} className="min-h-28 border-main-whiteMarble focus-visible:ring-main-primary/30" />
               </div>
             )}
           />
@@ -329,14 +345,14 @@ const VoucherFormModal = ({ open, voucher, onOpenChange, onSaved }: VoucherFormM
             className="h-11 px-6 text-main-sharkGray hover:bg-main-titaniumWhite"
             disabled={submitting}
           >
-            Cancel
+            {t("common:cancel")}
           </Button>
           <Button
             type="submit"
             className="h-11 px-10 bg-main-primary hover:bg-main-primary/90 text-white"
             disabled={submitting}
           >
-            {submitting ? "Saving..." : voucher ? "Update" : "Create"}
+            {submitting ? t("voucher:form.saving") : voucher ? t("voucher:form.update") : t("voucher:form.create")}
           </Button>
         </CommonModalFooter>
       </form>

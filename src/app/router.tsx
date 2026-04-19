@@ -32,10 +32,13 @@ import VoucherAndPromoPage from "@/pages/voucher-and-promo";
 import AcceptInvitationPage from "@/pages/accept-invitation";
 import SupportTicketsPage from "@/pages/support-tickets";
 import TicketReplyPage from "@/pages/support-tickets/TicketReplyPage";
-import NotificationsUser from "@/pages/notifications/user";
-import NotificationsDriver from "@/pages/notifications/driver";
-import NotificationsTrip from "@/pages/notifications/trip";
-import NotificationManagement from "@/shared/components/pages/notifications/NotificationManagement";
+import NotificationsDriverTab from "@/pages/notifications/driver";
+import NotificationsUserTab from "@/pages/notifications/user";
+import NotificationsTripTab from "@/pages/notifications/trip";
+import NotificationsOffersUpdatesTab from "@/pages/notifications/offers-updates";
+import NotificationsUserDetail from "@/pages/notifications/detail/user";
+import NotificationsDriverDetail from "@/pages/notifications/detail/driver";
+import NotificationsTripDetail from "@/pages/notifications/detail/trip";
 import HomeIndexRedirect from "./HomeIndexRedirect";
 import { lazyRouteFallback } from "./lazy-route-fallback";
 import {
@@ -85,6 +88,11 @@ import {
     ServicesHeroPage,
     ServicesPage,
     ServicesWarehousePage,
+    HomePageCms,
+    HomeHeroPage,
+    HomePlatformPage,
+    HomeTransportPage,
+    HomeMaximizingPage,
 } from "./cms-lazy";
 
 export const router = createBrowserRouter([
@@ -109,22 +117,36 @@ export const router = createBrowserRouter([
             {
                 path: "notifications",
                 element: <NotificationsPage />,
+                handle: { transitionGroup: "notifications" },
                 children: [
-                    {
-                        index: true,
-                        element: <NotificationManagement />
-                    },
-                    { path: "users/:userId", element: <NotificationsUser /> },
-                    { path: "drivers/:driverId", element: <NotificationsDriver /> },
-                    { path: "trips/:tripId", element: <NotificationsTrip /> },
+                    { index: true, element: <Navigate to="driver" replace /> },
+                    { path: "driver", element: <NotificationsDriverTab /> },
+                    { path: "user",   element: <NotificationsUserTab /> },
+                    { path: "trip",   element: <NotificationsTripTab /> },
+                    { path: "offers-updates", element: <NotificationsOffersUpdatesTab /> },
+                    { path: "users/:notificationId",   element: <NotificationsUserDetail /> },
+                    { path: "drivers/:notificationId", element: <NotificationsDriverDetail /> },
+                    { path: "trips/:notificationId",   element: <NotificationsTripDetail /> },
                 ]
             },
 
             {
                 path: "cms",
                 element: <Suspense fallback={lazyRouteFallback}><CmsPage /></Suspense>,
+                handle: { transitionGroup: "cms" },
                 children: [
-                    { index: true, element: <Navigate to="common/app" replace /> },
+                    { index: true, element: <Navigate to="home/hero" replace /> },
+                    {
+                        path: "home",
+                        element: <HomePageCms />,
+                        children: [
+                            { index: true, element: <Navigate to="hero" replace /> },
+                            { path: "hero",       element: <HomeHeroPage /> },
+                            { path: "platform",   element: <HomePlatformPage /> },
+                            { path: "transport",  element: <HomeTransportPage /> },
+                            { path: "maximizing", element: <HomeMaximizingPage /> },
+                        ],
+                    },
                     {
                         path: "common",
                         element: <CommonPage />,
@@ -241,6 +263,7 @@ export const router = createBrowserRouter([
             {
                 path: "data-management",
                 element: <DataManagementLayout />,
+                handle: { transitionGroup: "data-management" },
                 children: [
                     { index: true, element: <Navigate to="trucks" replace /> },
                     { path: "trucks", element: <TruckTypesPage /> },
@@ -254,6 +277,7 @@ export const router = createBrowserRouter([
             {
                 path: "roles-and-permissions",
                 element: <RolesAndPermissionsLayout />,
+                handle: { transitionGroup: "roles-and-permissions" },
                 children: [
                     { index: true, element: <Navigate to="roles" replace /> },
                     { path: "roles", element: <RolesPage /> },

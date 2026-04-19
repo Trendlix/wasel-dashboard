@@ -1,5 +1,6 @@
 import { useState } from "react";
 import clsx from "clsx";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
     Select,
@@ -16,6 +17,7 @@ import {
 } from "@/shared/components/common/CommonModal";
 import { driverStatusStyles, type TDriverStatus } from "@/shared/core/pages/drivers";
 import useDriverStore, { type IAppDriver } from "@/shared/hooks/store/useDriverStore";
+import { formatAppDateLong } from "@/lib/formatLocaleDate";
 
 interface DriverDetailsModalProps {
     driver: IAppDriver | null;
@@ -33,11 +35,11 @@ const STATUS_OPTIONS: TDriverStatus[] = [
 ];
 
 const DriverDetailsModal = ({ driver, open, onOpenChange }: DriverDetailsModalProps) => {
+    const { t, i18n } = useTranslation(["drivers", "common"]);
     const { updateStatus, updating } = useDriverStore();
     const [selected, setSelected] = useState<TDriverStatus>(driver?.status ?? "pending");
 
     const handleOpenChange = (v: boolean) => {
-        if (v && driver) setSelected(driver.status);
         onOpenChange(v);
     };
 
@@ -49,7 +51,7 @@ const DriverDetailsModal = ({ driver, open, onOpenChange }: DriverDetailsModalPr
 
     if (!driver) return null;
 
-    const displayName = driver.name ?? "Driver";
+    const displayName = driver.name ?? t("drivers:defaultDriverName");
     const initials = displayName
         .split(" ")
         .map((n) => n[0])
@@ -57,17 +59,13 @@ const DriverDetailsModal = ({ driver, open, onOpenChange }: DriverDetailsModalPr
         .slice(0, 2)
         .toUpperCase();
 
-    const joinDate = new Date(driver.created_at).toLocaleDateString("en-US", {
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-    });
+    const joinDate = formatAppDateLong(driver.created_at, i18n.language);
 
     return (
         <CommonModal open={open} onOpenChange={handleOpenChange} loading={updating}>
             <CommonModalHeader
-                title="Driver Details"
-                description="View driver information and update their account status."
+                title={t("drivers:modal.title")}
+                description={t("drivers:modal.description")}
             />
 
             <CommonModalBody className="space-y-6">
@@ -82,14 +80,17 @@ const DriverDetailsModal = ({ driver, open, onOpenChange }: DriverDetailsModalPr
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 py-4 border-t border-b border-main-whiteMarble">
-                    <InfoItem label="Phone" value={driver.phone} />
-                    <InfoItem label="Joined" value={joinDate} />
-                    <InfoItem label="Rating" value={driver.rating ? String(driver.rating) : "N/A"} />
-                    <InfoItem label="Status" value={driverStatusStyles[driver.status].label} />
+                    <InfoItem label={t("drivers:modal.phone")} value={driver.phone} />
+                    <InfoItem label={t("drivers:modal.joined")} value={joinDate} />
+                    <InfoItem
+                        label={t("drivers:modal.rating")}
+                        value={driver.rating ? String(driver.rating) : t("drivers:ratingNA")}
+                    />
+                    <InfoItem label={t("drivers:modal.status")} value={t(`drivers:statuses.${driver.status}`)} />
                 </div>
 
                 <div className="space-y-2">
-                    <p className="text-sm font-semibold text-main-mirage">Account Status</p>
+                    <p className="text-sm font-semibold text-main-mirage">{t("drivers:modal.accountStatus")}</p>
                     <Select value={selected} onValueChange={(v) => setSelected(v as TDriverStatus)}>
                         <SelectTrigger className="w-full h-10 border border-main-whiteMarble common-rounded px-3 text-sm">
                             <SelectValue />
@@ -100,7 +101,7 @@ const DriverDetailsModal = ({ driver, open, onOpenChange }: DriverDetailsModalPr
                                 return (
                                     <SelectItem key={s} value={s}>
                                         <span className={clsx("px-2 py-0.5 rounded-full text-xs font-medium", style.bg, style.text)}>
-                                            {style.label}
+                                            {t(`drivers:statuses.${s}`)}
                                         </span>
                                     </SelectItem>
                                 );
@@ -118,14 +119,14 @@ const DriverDetailsModal = ({ driver, open, onOpenChange }: DriverDetailsModalPr
                     onClick={() => onOpenChange(false)}
                     disabled={updating}
                 >
-                    Cancel
+                    {t("common:cancel")}
                 </Button>
                 <Button
                     onClick={handleSave}
                     disabled={updating || selected === driver.status}
                     className="bg-main-primary hover:bg-main-primary/90 text-white font-bold h-11 px-10 common-rounded"
                 >
-                    {updating ? "Saving…" : "Save Changes"}
+                    {updating ? t("drivers:modal.saving") : t("drivers:modal.saveChanges")}
                 </Button>
             </CommonModalFooter>
         </CommonModal>

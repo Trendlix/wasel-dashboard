@@ -66,7 +66,7 @@ interface DriverState {
     setQuery: (query: Partial<IDriverQuery>) => void;
     resetQuery: () => void;
     updateStatus: (id: number, status: TAppDriverStatus) => Promise<void>;
-    exportDrivers: () => Promise<void>;
+    exportDrivers: (payload?: { date_from?: string; date_to?: string }) => Promise<void>;
 }
 
 const extractErrorMessage = (error: unknown, fallback: string): string => {
@@ -159,11 +159,13 @@ const useDriverStore = create<DriverState>((set, get) => ({
         }
     },
 
-    exportDrivers: async () => {
+    exportDrivers: async (payload) => {
         set({ exporting: true, error: null });
         try {
-            const payload = { ...get().query };
-            await axiosNormalApiClient.post("/dashboard/drivers/export", payload);
+            await axiosNormalApiClient.post("/dashboard/drivers/export", {
+                ...get().query,
+                ...payload,
+            });
         } catch (error) {
             set({
                 error: extractErrorMessage(error, "Failed to export drivers"),

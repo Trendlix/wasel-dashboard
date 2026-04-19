@@ -1,0 +1,117 @@
+{
+  "pageTitle": "تذاكر الدعم",
+  "pageDescription": "إدارة تذاكر دعم العملاء والاستفسارات",
+  "analytics": {
+    "total": "إجمالي التذاكر",
+    "open": "مفتوحة",
+    "pendingReply": "بانتظار الرد",
+    "closed": "مغلقة",
+    "solved": "تم الحل"
+  },
+  "table": {
+    "searchPlaceholder": "ابحث بالعنوان أو الوصف…",
+    "manageCategories": "إدارة التصنيفات",
+    "emptyTitle": "لا توجد تذاكر",
+    "emptyDescription": "جرّب تعديل عوامل التصفية.",
+    "viewDetails": "عرض التفاصيل",
+    "headers": {
+      "ticket": "التذكرة",
+      "subject": "العنوان",
+      "customer": "العميل",
+      "type": "النوع",
+      "category": "التصنيف",
+      "priority": "الأولوية",
+      "status": "الحالة",
+      "updated": "آخر تحديث",
+      "actions": "إجراءات"
+    }
+  },
+  "filters": {
+    "allStatus": "كل الحالات",
+    "allPriority": "كل الأولويات",
+    "newestFirst": "الأحدث أولاً",
+    "oldestFirst": "الأقدم أولاً"
+  },
+  "statuses": {
+    "pending": "مفتوحة",
+    "reply": "بانتظار الرد",
+    "closed": "مغلقة",
+    "solved": "تم الحل"
+  },
+  "priorities": {
+    "low": "منخفضة",
+    "medium": "متوسطة",
+    "high": "مرتفعة"
+  },
+  "owner": {
+    "user": "مستخدم",
+    "driver": "سائق",
+    "unknown": "غير معروف",
+    "customer": "عميل",
+    "noName": "بدون اسم"
+  },
+  "details": {
+    "loading": "جاري التحميل…",
+    "ticketTitle": "تذكرة #{{id}}",
+    "description": "الوصف",
+    "replySummary_one": "رد واحد — افتح المحادثة لعرض كامل النقاش.",
+    "replySummary_other": "{{count}} ردود — افتح المحادثة لعرض كامل النقاش.",
+    "created": "تاريخ الإنشاء",
+    "lastUpdated": "آخر تحديث",
+    "close": "إغلاق",
+    "solved": "تم الحل",
+    "openChat": "فتح المحادثة",
+    "confirmCloseTitle": "إغلاق التذكرة؟",
+    "confirmSolveTitle": "تعيين كمحلولة؟",
+    "confirmCloseBody": "سيتم إغلاق التذكرة ولن يمكن إرسال ردود أخرى.",
+    "confirmSolveBody": "سيتم تعيين التذكرة كمحلولة. يمكنك إعادة فتحها لاحقاً.",
+    "processing": "جاري المعالجة…",
+    "yesClose": "نعم، أغلق",
+    "yesSolved": "نعم، تم الحل"
+  },
+  "categories": {
+    "title": "إدارة تصنيفات التذاكر",
+    "description": "أضف أو احذف التصنيفات لتنظيم تذاكر الدعم.",
+    "addLabel": "إضافة تصنيف جديد",
+    "placeholder": "مثال: مشاكل الفوترة",
+    "addButton": "إضافة",
+    "addHint": "اضغط Enter أو انقر «إضافة» لإنشاء تصنيف جديد.",
+    "existing": "التصنيفات الحالية",
+    "countTickets_one": "تذكرة واحدة",
+    "countTickets_other": "{{count}} تذاكر",
+    "emptyTitle": "لا توجد تصنيفات",
+    "emptyDescription": "لم يتم العثور على أي تصنيفات.",
+    "deleteCategory": "حذف التصنيف",
+    "done": "تم"
+  },
+  "chat": {
+    "backAria": "العودة إلى تذاكر الدعم",
+    "ticketHeading": "تذكرة #{{id}}",
+    "labels": {
+      "status": "الحالة",
+      "priority": "الأولوية",
+      "category": "التصنيف",
+      "customer": "العميل",
+      "created": "تاريخ الإنشاء"
+    },
+    "closeTicket": "إغلاق التذكرة",
+    "markSolved": "تعيين كمحلولة",
+    "dragResize": "اسحب لتغيير الحجم",
+    "resolvedNotice": "هذه التذكرة {{status}} — الردود معطلة.",
+    "placeholder": "اكتب ردك…",
+    "send": "إرسال",
+    "sending": "جاري الإرسال…",
+    "charCount": "{{current}} / {{max}}",
+    "shortcutSend": "Ctrl+Enter للإرسال",
+    "shortcutSendMac": "⌘+Enter للإرسال",
+    "you": "أنت",
+    "supportTeam": "فريق الدعم",
+    "confirmCloseTitle": "إغلاق التذكرة؟",
+    "confirmSolveTitle": "تعيين كمحلولة؟",
+    "confirmCloseBody": "سيتم إغلاق التذكرة ولن يمكن إرسال ردود أخرى.",
+    "confirmSolveBody": "سيتم تعيين التذكرة كمحلولة. يمكنك إعادة فتحها لاحقاً.",
+    "processing": "جاري المعالجة…",
+    "yesClose": "نعم، أغلق",
+    "yesSolved": "نعم، تم الحل"
+  }
+}

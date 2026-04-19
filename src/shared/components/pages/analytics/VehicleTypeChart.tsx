@@ -1,14 +1,28 @@
+import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { vehicleDistributionData } from "@/shared/core/pages/analytics";
 
 const VehicleTypeChart = () => {
+    const { t } = useTranslation("analytics");
+
+    const data = useMemo(
+        () =>
+            vehicleDistributionData.map((row) => ({
+                name: t(`vehicleTypes.${row.typeKey}`),
+                value: row.value,
+                fill: row.fill,
+            })),
+        [t],
+    );
+
     return (
         <div className="bg-main-white border border-main-whiteMarble common-rounded p-4 h-[320px]">
-            <h3 className="font-semibold text-main-mirage mb-3">Vehicle Type Distribution</h3>
+            <h3 className="font-semibold text-main-mirage mb-3">{t("vehicleDistributionTitle")}</h3>
             <ResponsiveContainer width="100%" height="90%">
                 <PieChart>
                     <Pie
-                        data={vehicleDistributionData}
+                        data={data}
                         dataKey="value"
                         nameKey="name"
                         innerRadius={0}

@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { X } from "lucide-react";
 import clsx from "clsx";
+import { useTranslation } from "react-i18next";
 import { useCmsSeoStore, type SeoPage } from "@/shared/hooks/store/useCmsSeoStore";
 import {
     BilingualField,
@@ -20,11 +21,13 @@ const TagInput = ({
     onChange,
     disabled,
     placeholder,
+    addLabel,
 }: {
     tags: string[];
     onChange: (next: string[]) => void;
     disabled?: boolean;
     placeholder?: string;
+    addLabel: string;
 }) => {
     const [input, setInput] = useState("");
     const inputRef = useRef<HTMLInputElement>(null);
@@ -82,7 +85,7 @@ const TagInput = ({
                 }}
                 onKeyDown={handleKeyDown}
                 onBlur={() => commit(input)}
-                placeholder={tags.length === 0 ? (placeholder ?? "Type a keyword and press comma or Enter…") : ""}
+                placeholder={tags.length === 0 ? (placeholder ?? "") : ""}
                 className="flex-1 min-w-[120px] bg-transparent outline-none placeholder:text-main-trueBlack/50"
                 disabled={disabled}
             />
@@ -92,7 +95,7 @@ const TagInput = ({
                     onMouseDown={(e) => { e.preventDefault(); commit(input); }}
                     className="shrink-0 rounded-md bg-main-primary px-2.5 py-1 text-xs font-semibold text-main-white transition-colors hover:bg-main-primary/90"
                 >
-                    Add
+                    {addLabel}
                 </button>
             )}
         </div>
@@ -101,11 +104,11 @@ const TagInput = ({
 
 // ─── Schema Scripts Editor ────────────────────────────────────────────────────
 
-const getLiveJsonError = (raw: string): string | null => {
+const getLiveJsonError = (raw: string, invalidJsonMessage: string): string | null => {
     const value = raw.trim();
     if (!value) return null;
     try { JSON.parse(value); return null; }
-    catch { return "Invalid JSON format. Please enter valid JSON."; }
+    catch { return invalidJsonMessage; }
 };
 
 const SchemaScriptsEditor = ({
@@ -113,11 +116,21 @@ const SchemaScriptsEditor = ({
     onChange,
     disabled,
     getError,
+    addScriptLabel,
+    removeLabel,
+    scriptLabel,
+    invalidJsonMessage,
+    jsonPlaceholder,
 }: {
     scripts: string[];
     onChange: (next: string[]) => void;
     disabled?: boolean;
     getError: (path: string) => string | undefined;
+    addScriptLabel: string;
+    removeLabel: string;
+    scriptLabel: (index: number) => string;
+    invalidJsonMessage: string;
+    jsonPlaceholder: string;
 }) => {
     const safeScripts = scripts.length > 0 ? scripts : [""];
     return (
@@ -130,14 +143,14 @@ const SchemaScriptsEditor = ({
                     disabled={disabled || safeScripts.length >= 20}
                     className="border-main-primary/30 text-main-primary hover:bg-main-primary/10 text-xs h-8 px-3"
                 >
-                    Add Script
+                    {addScriptLabel}
                 </Button>
             </div>
 
             {safeScripts.map((script, index) => (
                 <div key={`schema-script-${index}`} className="space-y-1.5 rounded-lg border border-main-whiteMarble p-3">
                     <div className="flex items-center justify-between gap-3">
-                        <p className="text-xs font-semibold text-main-lightSlate">Script #{index + 1}</p>
+                        <p className="text-xs font-semibold text-main-lightSlate">{scriptLabel(index)}</p>
                         <Button
                             type="button"
                             variant="outline"
@@ -145,11 +158,11 @@ const SchemaScriptsEditor = ({
                             disabled={disabled || safeScripts.length <= 1}
                             onClick={() => onChange(safeScripts.filter((_, i) => i !== index))}
                         >
-                            Remove
+                            {removeLabel}
                         </Button>
                     </div>
                     <Textarea
-                        placeholder='{"@context":"https://schema.org","@type":"Organization","name":"Wasel"}'
+                        placeholder={jsonPlaceholder}
                         value={script}
                         onChange={(e) => {
                             const next = [...safeScripts];
@@ -160,38 +173,12 @@ const SchemaScriptsEditor = ({
                         rows={7}
                         className="font-mono text-xs"
                     />
-                    <InputError message={getError(`schema_scripts.${index}`) ?? getLiveJsonError(script) ?? undefined} />
+                    <InputError message={getError(`schema_scripts.${index}`) ?? getLiveJsonError(script, invalidJsonMessage) ?? undefined} />
                 </div>
             ))}
             <InputError message={getError("schema_scripts")} />
         </div>
     );
-};
-
-// ─── Page Labels ──────────────────────────────────────────────────────────────
-
-const PAGE_LABELS: Record<SeoPage, string> = {
-    home:           "SEO / Home",
-    about:          "SEO / About",
-    contact:        "SEO / Contact",
-    services:       "SEO / Services",
-    blogs:          "SEO / Blogs",
-    order_tracking: "SEO / Order Tracking",
-    faqs:           "SEO / FAQs",
-    terms:          "SEO / Terms",
-    privacy:        "SEO / Privacy",
-};
-
-const PAGE_DESCRIPTIONS: Record<SeoPage, string> = {
-    home: "Controls how the homepage appears in search results and social previews for each language.",
-    about: "Meta tags and structured data for the About page. Keep titles and descriptions unique per page.",
-    contact: "SEO for the contact page. Align wording with visible contact content when possible.",
-    services: "How the services landing page is summarized in search engines.",
-    blogs: "Default SEO hints for the blogs listing; individual posts can override in the blog editor.",
-    order_tracking: "Helps customers find the order-tracking page from search. Use clear, action-oriented wording.",
-    faqs: "Improves discoverability of the FAQ hub. Reflect the main questions users ask.",
-    terms: "Legal index page SEO. Use precise language; avoid misleading claims in snippets.",
-    privacy: "Privacy hub SEO. Match the page purpose so expectations match the click.",
 };
 
 // ─── Section Page ─────────────────────────────────────────────────────────────
@@ -201,6 +188,7 @@ interface SeoSectionPageProps {
 }
 
 const SeoSectionPage = ({ page }: SeoSectionPageProps) => {
+    const { t } = useTranslation("cms");
     const {
         [page]: seoByLocale,
         loading,
@@ -221,10 +209,10 @@ const SeoSectionPage = ({ page }: SeoSectionPageProps) => {
 
     return (
         <PageShell
-            title={PAGE_LABELS[page]}
-            subtitle="SEO Section"
-            description={PAGE_DESCRIPTIONS[page]}
-            hint="These fields map to HTML meta tags and optional JSON-LD. Save after edits; invalid schema JSON blocks publish on some pages."
+            title={t(`seoEditor.pageTitle.${page}`)}
+            subtitle={t("seoEditor.subtitle")}
+            description={t(`seoEditor.pageDescription.${page}`)}
+            hint={t("seoEditor.hint")}
             onSave={() => savePage(page)}
             saving={saving}
             loading={loading}
@@ -234,11 +222,11 @@ const SeoSectionPage = ({ page }: SeoSectionPageProps) => {
 
                 {/* Meta Title */}
                 <BilingualField
-                    label="Meta Title"
-                    hint="Shown in the browser tab and often as the blue link in Google. Aim for roughly 50–60 characters."
+                    label={t("seoEditor.metaTitle")}
+                    hint={t("seoEditor.metaTitleHint")}
                     en={
                         <Input
-                            placeholder="Page title for search engines"
+                            placeholder={t("seoEditor.metaTitlePlaceholderEn")}
                             value={seoByLocale.en.title}
                             onChange={(e) => setPage(page, "en", { title: e.target.value })}
                             disabled={saving}
@@ -246,7 +234,7 @@ const SeoSectionPage = ({ page }: SeoSectionPageProps) => {
                     }
                     ar={
                         <Input
-                            placeholder="عنوان الصفحة لمحركات البحث"
+                            placeholder={t("seoEditor.metaTitlePlaceholderAr")}
                             value={seoByLocale.ar.title}
                             onChange={(e) => setPage(page, "ar", { title: e.target.value })}
                             disabled={saving}
@@ -258,11 +246,11 @@ const SeoSectionPage = ({ page }: SeoSectionPageProps) => {
 
                 {/* Meta Description */}
                 <BilingualField
-                    label="Meta Description"
-                    hint="The gray snippet under the title in search results. About 150–160 characters works well for most engines."
+                    label={t("seoEditor.metaDescription")}
+                    hint={t("seoEditor.metaDescriptionHint")}
                     en={
                         <Textarea
-                            placeholder="Brief description shown in search results"
+                            placeholder={t("seoEditor.metaDescriptionPlaceholderEn")}
                             value={seoByLocale.en.description}
                             onChange={(e) => setPage(page, "en", { description: e.target.value })}
                             disabled={saving}
@@ -271,7 +259,7 @@ const SeoSectionPage = ({ page }: SeoSectionPageProps) => {
                     }
                     ar={
                         <Textarea
-                            placeholder="وصف موجز يظهر في نتائج البحث"
+                            placeholder={t("seoEditor.metaDescriptionPlaceholderAr")}
                             value={seoByLocale.ar.description}
                             onChange={(e) => setPage(page, "ar", { description: e.target.value })}
                             disabled={saving}
@@ -284,11 +272,11 @@ const SeoSectionPage = ({ page }: SeoSectionPageProps) => {
 
                 {/* Alt Image */}
                 <BilingualField
-                    label="Alt Image Text"
-                    hint="Describes the page’s representative image for accessibility and when the image cannot load."
+                    label={t("seoEditor.altImage")}
+                    hint={t("seoEditor.altImageHint")}
                     en={
                         <Input
-                            placeholder="Descriptive alt text for the page image"
+                            placeholder={t("seoEditor.altImagePlaceholderEn")}
                             value={seoByLocale.en.alt_img}
                             onChange={(e) => setPage(page, "en", { alt_img: e.target.value })}
                             disabled={saving}
@@ -296,7 +284,7 @@ const SeoSectionPage = ({ page }: SeoSectionPageProps) => {
                     }
                     ar={
                         <Input
-                            placeholder="نص بديل لصورة الصفحة"
+                            placeholder={t("seoEditor.altImagePlaceholderAr")}
                             value={seoByLocale.ar.alt_img}
                             onChange={(e) => setPage(page, "ar", { alt_img: e.target.value })}
                             disabled={saving}
@@ -308,14 +296,15 @@ const SeoSectionPage = ({ page }: SeoSectionPageProps) => {
 
                 {/* Keywords */}
                 <BilingualField
-                    label="Keywords"
-                    hint="Type a word or phrase, then comma or Enter. Use relevant terms; avoid stuffing. Some engines ignore this, but it helps internal consistency."
+                    label={t("seoEditor.keywords")}
+                    hint={t("seoEditor.keywordsHint")}
                     en={
                         <TagInput
                             tags={seoByLocale.en.keywords}
                             onChange={(next) => setKeywords(page, "en", next)}
                             disabled={saving}
-                            placeholder="Type a keyword and press comma or Enter…"
+                            placeholder={t("seoEditor.keywordsPlaceholderEn")}
+                            addLabel={t("seoEditor.add")}
                         />
                     }
                     ar={
@@ -323,7 +312,8 @@ const SeoSectionPage = ({ page }: SeoSectionPageProps) => {
                             tags={seoByLocale.ar.keywords}
                             onChange={(next) => setKeywords(page, "ar", next)}
                             disabled={saving}
-                            placeholder="اكتب كلمة مفتاحية واضغط فاصلة أو Enter…"
+                            placeholder={t("seoEditor.keywordsPlaceholderAr")}
+                            addLabel={t("seoEditor.add")}
                         />
                     }
                     enError={getEnError("keywords")}
@@ -333,8 +323,8 @@ const SeoSectionPage = ({ page }: SeoSectionPageProps) => {
                 {/* Schema Scripts — bilingual (shown one above the other for readability) */}
                 <div className="space-y-4">
                     <CmsFieldLabel
-                        label="Schema JSON-LD Scripts"
-                        hint="Structured data objects as JSON. Must parse as valid JSON. Add multiple blocks for Article, Organization, FAQ, etc. Wrong syntax may be skipped by crawlers."
+                        label={t("seoEditor.schemaLabel")}
+                        hint={t("seoEditor.schemaHint")}
                     />
                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                         <div className="space-y-2 rounded-xl border border-main-whiteMarble bg-main-titaniumWhite/20 p-3">
@@ -344,6 +334,11 @@ const SeoSectionPage = ({ page }: SeoSectionPageProps) => {
                                 onChange={(next) => setPage(page, "en", { schema_scripts: next })}
                                 disabled={saving}
                                 getError={(path) => getEnError(path)}
+                                addScriptLabel={t("seoEditor.addScript")}
+                                removeLabel={t("seoEditor.remove")}
+                                scriptLabel={(index) => t("seoEditor.script", { n: index + 1 })}
+                                invalidJsonMessage={t("seoEditor.jsonInvalid")}
+                                jsonPlaceholder={t("seoEditor.jsonPlaceholder")}
                             />
                         </div>
                         <div className="space-y-2 rounded-xl border border-main-whiteMarble bg-main-titaniumWhite/20 p-3" dir="rtl">
@@ -353,6 +348,11 @@ const SeoSectionPage = ({ page }: SeoSectionPageProps) => {
                                 onChange={(next) => setPage(page, "ar", { schema_scripts: next })}
                                 disabled={saving}
                                 getError={(path) => getArError(path)}
+                                addScriptLabel={t("seoEditor.addScript")}
+                                removeLabel={t("seoEditor.remove")}
+                                scriptLabel={(index) => t("seoEditor.script", { n: index + 1 })}
+                                invalidJsonMessage={t("seoEditor.jsonInvalid")}
+                                jsonPlaceholder={t("seoEditor.jsonPlaceholder")}
                             />
                         </div>
                     </div>

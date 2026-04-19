@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   CarFront,
   CreditCard,
@@ -15,33 +16,13 @@ import {
 } from "@/shared/components/common/CommonModal";
 import useTripsStore, { type IAppTrip } from "@/shared/hooks/store/useTripsStore";
 import { tripStatusStyles } from "@/shared/core/pages/trips";
+import { formatAppDateShort, formatAppTime } from "@/lib/formatLocaleDate";
 
 interface TripDetailsModalProps {
   open: boolean;
   trip: IAppTrip | null;
   onOpenChange: (value: boolean) => void;
 }
-
-const formatDate = (value?: string | null) => {
-  if (!value) return "-";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-};
-
-const formatTime = (value?: string | null) => {
-  if (!value) return "-";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
 
 const initialsFromName = (name?: string | null) => {
   if (!name) return "-";
@@ -54,7 +35,11 @@ const initialsFromName = (name?: string | null) => {
 };
 
 const TripDetailsModal = ({ open, trip, onOpenChange }: TripDetailsModalProps) => {
+  const { t, i18n } = useTranslation("trips");
   const { tripDetails, tripDetailsLoading, updating, fetchTripDetails, clearTripDetails, updateStatus } = useTripsStore();
+
+  const numLocale = i18n.language?.startsWith("ar") ? "ar-SA" : "en-US";
+  const fmtNum = (n: number) => n.toLocaleString(numLocale);
 
   useEffect(() => {
     if (open && trip) {
@@ -87,12 +72,17 @@ const TripDetailsModal = ({ open, trip, onOpenChange }: TripDetailsModalProps) =
   const totalPrice = Number(trip.final_price || 0);
   const commission = Math.round(totalPrice * 0.1);
   const bookingNo = tripDetails?.booking_number ?? trip.booking_number;
-  const headerDate = formatDate(trip.created_at);
+  const headerDate = formatAppDateShort(trip.created_at, i18n.language, "-");
   const truckType = tripDetails?.request.vehicle_goods?.truck_type ?? "-";
   const goodsType = tripDetails?.request.vehicle_goods?.goods_type ?? "-";
   const weightValue = tripDetails?.request.vehicle_goods?.weight;
-  const weightLabel = weightValue === null || weightValue === undefined ? "-" : `${weightValue} Tons`;
+  const weightLabel = weightValue === null || weightValue === undefined
+    ? "-"
+    : t("trips:details.tons", { value: weightValue });
   const specialNotes = tripDetails?.request.special_notes ?? "-";
+
+  const pickupTime = formatAppTime(tripDetails?.picked_up_at ?? trip.picked_up_at, i18n.language, "-");
+  const completedTime = formatAppTime(tripDetails?.completed_at, i18n.language, "-");
 
   return (
     <CommonModal
@@ -102,15 +92,17 @@ const TripDetailsModal = ({ open, trip, onOpenChange }: TripDetailsModalProps) =
       maxWidth="sm:max-w-[1120px]"
       className="max-h-[92vh] [&_[data-slot=dialog-close]]:text-main-white [&_[data-slot=dialog-close]]:hover:text-main-white [&_[data-slot=dialog-close]]:hover:bg-main-white/15"
     >
-      <div className="bg-main-primary px-8 py-6 text-main-white">
+      <div className="bg-main-primary px-8 py-6 text-main-white -translate-y-4">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-4 font-bold">Trip Details</h2>
-            <p className="text-main-white/85 mt-1">#{bookingNo} - {headerDate}</p>
+            <h2 className="text-4 font-bold">{t("trips:details.title")}</h2>
+            <p className="text-main-white/85 mt-1">
+              {t("trips:details.bookingLine", { number: bookingNo, date: headerDate })}
+            </p>
           </div>
-          {statusStyle && (
+          {statusStyle && displayStatus && (
             <span className={clsx("px-3 py-1 rounded-full text-xs font-semibold", statusStyle.bg, statusStyle.text)}>
-              {statusStyle.label}
+              {t(`trips:statuses.${displayStatus}`)}
             </span>
           )}
         </div>
@@ -194,8 +186,8 @@ const TripDetailsModal = ({ open, trip, onOpenChange }: TripDetailsModalProps) =
                     {initialsFromName(tripDetails?.user.full_name ?? trip.user_name)}
                   </div>
                   <div>
-                    <p className="text-main-mirage font-bold">User</p>
-                    <p className="text-main-sharkGray text-sm">Customer Information</p>
+                    <p className="text-main-mirage font-bold">{t("trips:details.user")}</p>
+                    <p className="text-main-sharkGray text-sm">{t("trips:details.userSubtitle")}</p>
                   </div>
                 </div>
                 <p className="text-main-mirage font-semibold">{tripDetails?.user.full_name ?? trip.user_name}</p>
@@ -208,8 +200,8 @@ const TripDetailsModal = ({ open, trip, onOpenChange }: TripDetailsModalProps) =
                     {initialsFromName(tripDetails?.driver.name ?? trip.driver_name)}
                   </div>
                   <div>
-                    <p className="text-main-mirage font-bold">Driver</p>
-                    <p className="text-main-sharkGray text-sm">Driver Information</p>
+                    <p className="text-main-mirage font-bold">{t("trips:details.driver")}</p>
+                    <p className="text-main-sharkGray text-sm">{t("trips:details.driverSubtitle")}</p>
                   </div>
                 </div>
                 <p className="text-main-mirage font-semibold">{tripDetails?.driver.name ?? trip.driver_name ?? "-"}</p>
@@ -220,30 +212,30 @@ const TripDetailsModal = ({ open, trip, onOpenChange }: TripDetailsModalProps) =
             <div className="rounded-2xl border border-[#A7CDF7] bg-[#EEF5FF] p-4">
               <p className="text-main-mirage font-bold text-lg flex items-center gap-2">
                 <Navigation size={18} className="text-main-primary" />
-                Route Information
+                {t("trips:details.routeSection")}
               </p>
 
               <div className="mt-4">
                 <div className="flex gap-4">
                   <span className="w-3 h-3 rounded-full bg-main-vividMint mt-2 shrink-0" />
                   <div>
-                    <p className="text-main-sharkGray text-xs">Pickup Location</p>
+                    <p className="text-main-sharkGray text-xs">{t("trips:details.pickup")}</p>
                     <p className="text-main-mirage text-base font-semibold">{pickupName}</p>
                     <p className="text-main-sharkGray text-xs mt-1">
-                      Time: {formatTime(tripDetails?.picked_up_at ?? trip.picked_up_at)}
+                      {t("trips:details.timeLabel")}: {pickupTime}
                     </p>
                   </div>
                 </div>
 
-                <div className="h-8 w-0 border-l border-dashed border-main-sharkGray/35 ml-[5px] my-2" />
+                <div className="h-8 w-0 border-s border-dashed border-main-sharkGray/35 ms-[5px] my-2" />
 
                 <div className="flex gap-4">
                   <span className="w-3 h-3 rounded-full bg-main-remove mt-2 shrink-0" />
                   <div>
-                    <p className="text-main-sharkGray text-xs">Dropoff Location</p>
+                    <p className="text-main-sharkGray text-xs">{t("trips:details.dropoff")}</p>
                     <p className="text-main-mirage text-base font-semibold">{dropoffName}</p>
                     <p className="text-main-sharkGray text-xs mt-1">
-                      Time: {formatTime(tripDetails?.completed_at)}
+                      {t("trips:details.timeLabel")}: {completedTime}
                     </p>
                   </div>
                 </div>
@@ -251,15 +243,15 @@ const TripDetailsModal = ({ open, trip, onOpenChange }: TripDetailsModalProps) =
 
               <div className="mt-4 pt-4 border-t border-[#A7CDF7] grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-main-sharkGray text-xs">Distance</p>
+                  <p className="text-main-sharkGray text-xs">{t("trips:details.distance")}</p>
                   <p className="text-main-mirage text-lg font-bold">
-                    {distance ?? "-"} {distance ? "KM" : ""}
+                    {distance ?? "-"} {distance != null ? t("trips:details.km") : ""}
                   </p>
                 </div>
                 <div>
-                  <p className="text-main-sharkGray text-xs">Duration</p>
+                  <p className="text-main-sharkGray text-xs">{t("trips:details.duration")}</p>
                   <p className="text-main-mirage text-lg font-bold">
-                    {duration ?? "-"} {duration ? "mins" : ""}
+                    {duration ?? "-"} {duration != null ? t("trips:details.mins") : ""}
                   </p>
                 </div>
               </div>
@@ -267,26 +259,30 @@ const TripDetailsModal = ({ open, trip, onOpenChange }: TripDetailsModalProps) =
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="rounded-2xl border border-main-whiteMarble bg-main-luxuryWhite p-5">
-                <p className="text-main-mirage font-bold flex items-center gap-2"><CarFront size={18} /> Vehicle & Goods</p>
+                <p className="text-main-mirage font-bold flex items-center gap-2"><CarFront size={18} /> {t("trips:details.vehicleGoods")}</p>
                 <div className="mt-4 space-y-3">
-                  <InfoRow label="Truck Type" value={truckType} />
-                  <InfoRow label="Goods Type" value={goodsType} />
-                  <InfoRow label="Weight" value={weightLabel} />
+                  <InfoRow label={t("trips:details.truckType")} value={truckType} />
+                  <InfoRow label={t("trips:details.goodsType")} value={goodsType} />
+                  <InfoRow label={t("trips:details.weight")} value={weightLabel} />
                 </div>
               </div>
 
               <div className="rounded-2xl border border-main-vividMint/35 bg-main-vividMint/10 p-5">
-                <p className="text-main-mirage font-bold flex items-center gap-2"><CreditCard size={18} /> Payment Details</p>
+                <p className="text-main-mirage font-bold flex items-center gap-2"><CreditCard size={18} /> {t("trips:details.payment")}</p>
                 <div className="mt-4 space-y-3">
-                  <InfoRow label="Total Price" value={`${trip.currency} ${totalPrice.toLocaleString()}`} valueClass="text-main-vividMint" />
-                  <InfoRow label="Commission (10%)" value={`${trip.currency} ${commission.toLocaleString()}`} />
-                  <InfoRow label="Payment Method" value="-" />
+                  <InfoRow
+                    label={t("trips:details.totalPrice")}
+                    value={`${trip.currency} ${fmtNum(totalPrice)}`}
+                    valueClass="text-main-vividMint"
+                  />
+                  <InfoRow label={t("trips:details.commission")} value={`${trip.currency} ${fmtNum(commission)}`} />
+                  <InfoRow label={t("trips:details.paymentMethod")} value="-" />
                 </div>
               </div>
             </div>
 
             <div className="rounded-2xl border border-main-mustardGold/45 bg-main-mustardGold/10 p-5">
-              <p className="text-main-mirage font-bold flex items-center gap-2"><Package size={18} /> Notes</p>
+              <p className="text-main-mirage font-bold flex items-center gap-2"><Package size={18} /> {t("trips:details.notes")}</p>
               <p className="text-main-hydrocarbon mt-2 whitespace-pre-wrap break-words">{specialNotes}</p>
             </div>
           </>
@@ -301,9 +297,9 @@ const TripDetailsModal = ({ open, trip, onOpenChange }: TripDetailsModalProps) =
           onClick={() => onOpenChange(false)}
           disabled={updating}
         >
-          Close
+          {t("trips:details.close")}
         </Button>
-        <div className="ml-auto flex items-center gap-3">
+        <div className="ms-auto flex items-center gap-3">
           <Button
             type="button"
             variant="outline"
@@ -311,14 +307,14 @@ const TripDetailsModal = ({ open, trip, onOpenChange }: TripDetailsModalProps) =
             onClick={handleCancelTrip}
             disabled={updating || canCancel === false}
           >
-            {updating ? "Cancelling..." : "Cancel Trip"}
+            {updating ? t("trips:details.cancelling") : t("trips:details.cancelTrip")}
           </Button>
           <Button
             type="button"
             className="h-11 px-7 bg-main-primary text-main-white common-rounded"
             onClick={() => { }}
           >
-            Track Trip
+            {t("trips:details.trackTrip")}
           </Button>
         </div>
       </CommonModalFooter>

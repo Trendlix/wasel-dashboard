@@ -1,0 +1,88 @@
+{
+  "pageTitle": "Dashboard",
+  "pageDescription": "Overview of platform performance and key metrics",
+  "alertTitle": "System alert",
+  "alertDescription": "3 pending driver verifications require immediate attention. Last updated 2 hours ago.",
+  "charts": {
+    "revenueTrends": "Revenue trends",
+    "tripsOverTime": "Trips over time",
+    "tooltipValue": "{{label}}: {{value}}",
+    "tooltipHint": "Sample trend data for this period."
+  },
+  "pendingVerificationsTitle": "Pending verifications",
+  "recentActivitiesTitle": "Recent activities",
+  "review": "Review",
+  "roles": {
+    "driver": "Driver"
+  },
+  "metrics": {
+    "totalRevenue": {
+      "title": "Total revenue",
+      "subtitle": "↑ 12.5% from last month"
+    },
+    "totalTrips": {
+      "title": "Total trips",
+      "subtitle": "↑ 8.2% from last month"
+    },
+    "activeUsers": {
+      "title": "Active users",
+      "subtitle": "↑ 3.1% from last month"
+    },
+    "activeDrivers": {
+      "title": "Active drivers",
+      "subtitle": "↑ 5.4% from last month"
+    }
+  },
+  "activityTags": {
+    "trip": "Trip",
+    "user": "User",
+    "driver": "Driver",
+    "payment": "Payment",
+    "verification": "Verification",
+    "storage": "Storage"
+  },
+  "activities": {
+    "tripStarted": {
+      "title": "New trip started",
+      "description": "Driver Ahmed started a trip to Cairo."
+    },
+    "userRegistered": {
+      "title": "New user registered",
+      "description": "User Mohamed Ali joined the platform."
+    },
+    "driverVerified": {
+      "title": "Driver verified",
+      "description": "Driver Khaled Hassan passed verification."
+    },
+    "paymentReceived": {
+      "title": "Payment received",
+      "description": "Payment of $120 received from Omar Salem."
+    },
+    "verificationPending": {
+      "title": "Verification pending",
+      "description": "Storage owner Mona Adel submitted documents."
+    },
+    "storageAdded": {
+      "title": "Storage added",
+      "description": "New storage unit added in Alexandria."
+    },
+    "tripCompleted": {
+      "title": "Trip completed",
+      "description": "Trip #1042 completed successfully."
+    },
+    "paymentFailed": {
+      "title": "Payment failed",
+      "description": "Payment of $80 failed for user Sara Hassan."
+    }
+  },
+  "activityTimes": {
+    "hours2": "2 hours ago",
+    "hours4": "4 hours ago",
+    "hours5": "5 hours ago",
+    "hours6": "6 hours ago",
+    "hours8": "8 hours ago",
+    "hours10": "10 hours ago",
+    "hours12": "12 hours ago",
+    "day1": "1 day ago"
+  }
+}

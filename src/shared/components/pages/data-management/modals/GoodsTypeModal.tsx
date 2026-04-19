@@ -1,25 +1,31 @@
-import { useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useEffect, useMemo, useState } from "react";
+import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { CommonModal, CommonModalHeader, CommonModalBody, CommonModalFooter } from "@/shared/components/common/CommonModal";
+import { useTranslation } from "react-i18next";
+import { Check } from "lucide-react";
+import clsx from "clsx";
+import {
+    CommonModal,
+    CommonModalHeader,
+    CommonModalBody,
+    CommonModalFooter,
+} from "@/shared/components/common/CommonModal";
 import { CommonInput } from "@/shared/components/common/FormItems";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import useDataManagementStore, { IGoodsType } from "@/shared/hooks/store/useDataManagementStore";
+import { axiosRequestErrorMessage } from "@/shared/utils/networkErrors";
 
-const goodsTypeSchema = z.object({
-    name: z.string().min(1, "Name is required"),
-    name_ar: z.string().min(1, "Arabic name is required"),
-    description: z.string().min(1, "Description is required"),
-    value: z.string().min(1, "Value is required"),
-    truck_type_ids: z.array(z.number()).min(1, "Select at least one truck type"),
-    is_active: z.boolean(),
-});
-
-type GoodsTypeFormValues = z.infer<typeof goodsTypeSchema>;
+type GoodsTypeFormValues = {
+    name: string;
+    name_ar: string;
+    description: string;
+    value: string;
+    truck_type_ids: number[];
+    is_active: boolean;
+};
 
 interface GoodsTypeModalProps {
     open: boolean;
@@ -28,10 +34,26 @@ interface GoodsTypeModalProps {
 }
 
 const GoodsTypeModal = ({ open, onOpenChange, goodsType }: GoodsTypeModalProps) => {
-    const { truckTypes, fetchTruckTypes, addGoodType, updateGoodType, submitting, fetchAnalytics, fetchGoodTypes } = useDataManagementStore();
+    const { t } = useTranslation(["dataManagement", "common"]);
+    const [requestError, setRequestError] = useState<string | null>(null);
+    const { truckTypes, fetchTruckTypes, addGoodType, updateGoodType, submitting, fetchAnalytics, fetchGoodTypes } =
+        useDataManagementStore();
+
+    const goodsTypeSchema = useMemo(
+        () =>
+            z.object({
+                name: z.string().min(1, t("dataManagement:validation.nameRequired")),
+                name_ar: z.string().min(1, t("dataManagement:validation.nameArRequired")),
+                description: z.string().min(1, t("dataManagement:validation.descriptionRequired")),
+                value: z.string().min(1, t("dataManagement:validation.valueRequired")),
+                truck_type_ids: z.array(z.number()).min(1, t("dataManagement:validation.truckTypesMin")),
+                is_active: z.boolean(),
+            }),
+        [t],
+    );
 
     const { control, handleSubmit, reset, setValue, watch } = useForm<GoodsTypeFormValues>({
-        resolver: zodResolver(goodsTypeSchema),
+        resolver: zodResolver(goodsTypeSchema) as Resolver<GoodsTypeFormValues>,
         defaultValues: {
             name: "",
             name_ar: "",
@@ -43,31 +65,32 @@ const GoodsTypeModal = ({ open, onOpenChange, goodsType }: GoodsTypeModalProps) 
     });
 
     useEffect(() => {
-        if (open) {
-            fetchTruckTypes(1, 100); // Fetch all truck types for selection
-            if (goodsType) {
-                reset({
-                    name: goodsType.name,
-                    name_ar: goodsType.name_ar || "",
-                    description: goodsType.description,
-                    value: goodsType.value,
-                    truck_type_ids: goodsType.truckTypeGoods.map(tg => tg.truck_type_id),
-                    is_active: goodsType.is_active,
-                });
-            } else {
-                reset({
-                    name: "",
-                    name_ar: "",
-                    description: "",
-                    value: "",
-                    truck_type_ids: [],
-                    is_active: true,
-                });
-            }
+        if (!open) return;
+        setRequestError(null);
+        fetchTruckTypes(1, 100);
+        if (goodsType) {
+            reset({
+                name: goodsType.name,
+                name_ar: goodsType.name_ar || "",
+                description: goodsType.description,
+                value: goodsType.value,
+                truck_type_ids: goodsType.truckTypeGoods.map((tg) => tg.truck_type_id),
+                is_active: goodsType.is_active,
+            });
+        } else {
+            reset({
+                name: "",
+                name_ar: "",
+                description: "",
+                value: "",
+                truck_type_ids: [],
+                is_active: true,
+            });
         }
     }, [open, goodsType, reset, fetchTruckTypes]);
 
     const onSubmit = async (values: GoodsTypeFormValues) => {
+        setRequestError(null);
         try {
             if (goodsType) {
                 await updateGoodType(goodsType.id, values);
@@ -78,7 +101,8 @@ const GoodsTypeModal = ({ open, onOpenChange, goodsType }: GoodsTypeModalProps) 
             fetchAnalytics();
             onOpenChange(false);
         } catch (error) {
-            console.error("Failed to save goods type", error);
+            if (import.meta.env.DEV) console.error("Failed to save goods type", error);
+            setRequestError(axiosRequestErrorMessage(error));
         }
     };
 
@@ -98,27 +122,30 @@ const GoodsTypeModal = ({ open, onOpenChange, goodsType }: GoodsTypeModalProps) 
     return (
         <CommonModal open={open} onOpenChange={onOpenChange} maxWidth="sm:max-w-[500px]">
             <CommonModalHeader
-                title={goodsType ? "Edit Goods Type" : "Add Goods Type"}
-                description={goodsType ? "Update the details of this goods type" : "Create a new goods type for the platform"}
+                title={goodsType ? t("dataManagement:goodsModal.editTitle") : t("dataManagement:goodsModal.addTitle")}
+                description={
+                    goodsType ? t("dataManagement:goodsModal.editDescription") : t("dataManagement:goodsModal.addDescription")
+                }
             />
             <form onSubmit={handleSubmit(onSubmit)}>
                 <CommonModalBody className="space-y-4">
+                    {requestError ? (
+                        <p className="text-xs font-medium text-main-red" role="alert">
+                            {requestError}
+                        </p>
+                    ) : null}
                     <div className="flex items-center justify-between bg-main-titaniumWhite/30 p-4 common-rounded border border-main-whiteMarble/50 shadow-sm">
-                        <div className="space-y-0.5">
+                        <div className="space-y-0.5 min-w-0 pe-3">
                             <Label htmlFor="is_active" className="text-sm font-bold text-main-mirage">
-                                Active Status
+                                {t("dataManagement:goodsModal.activeLabel")}
                             </Label>
-                            <p className="text-[10px] text-main-sharkGray">Toggle to enable or disable this goods type</p>
+                            <p className="text-[10px] text-main-sharkGray">{t("dataManagement:goodsModal.activeHint")}</p>
                         </div>
                         <Controller
                             name="is_active"
                             control={control}
                             render={({ field }) => (
-                                <Switch
-                                    id="is_active"
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                />
+                                <Switch id="is_active" checked={field.value} onCheckedChange={field.onChange} />
                             )}
                         />
                     </div>
@@ -128,7 +155,11 @@ const GoodsTypeModal = ({ open, onOpenChange, goodsType }: GoodsTypeModalProps) 
                             name="name"
                             control={control}
                             render={({ field }) => (
-                                <CommonInput label="Name (English)" placeholder="e.g. Electronics" field={field} />
+                                <CommonInput
+                                    label={t("dataManagement:goodsModal.nameEn")}
+                                    placeholder={t("dataManagement:goodsModal.nameEnPlaceholder")}
+                                    field={field}
+                                />
                             )}
                         />
                         <Controller
@@ -136,7 +167,11 @@ const GoodsTypeModal = ({ open, onOpenChange, goodsType }: GoodsTypeModalProps) 
                             control={control}
                             render={({ field }) => (
                                 <div dir="rtl" className="text-right">
-                                    <CommonInput label="Name (Arabic)" placeholder="مثال: إلكترونيات" field={field} />
+                                    <CommonInput
+                                        label={t("dataManagement:goodsModal.nameAr")}
+                                        placeholder={t("dataManagement:goodsModal.nameArPlaceholder")}
+                                        field={field}
+                                    />
                                 </div>
                             )}
                         />
@@ -146,7 +181,11 @@ const GoodsTypeModal = ({ open, onOpenChange, goodsType }: GoodsTypeModalProps) 
                         name="value"
                         control={control}
                         render={({ field }) => (
-                            <CommonInput label="Identifier / Value" placeholder="e.g. electronics" field={field} />
+                            <CommonInput
+                                label={t("dataManagement:goodsModal.value")}
+                                placeholder={t("dataManagement:goodsModal.valuePlaceholder")}
+                                field={field}
+                            />
                         )}
                     />
 
@@ -154,31 +193,63 @@ const GoodsTypeModal = ({ open, onOpenChange, goodsType }: GoodsTypeModalProps) 
                         name="description"
                         control={control}
                         render={({ field }) => (
-                            <CommonInput label="Description" placeholder="Provide more details about this goods type" type="textarea" field={field} />
+                            <CommonInput
+                                label={t("dataManagement:goodsModal.description")}
+                                placeholder={t("dataManagement:goodsModal.descriptionPlaceholder")}
+                                type="textarea"
+                                field={field}
+                            />
                         )}
                     />
 
-                    <div className="space-y-3">
-                        <Label className="text-sm font-medium text-main-sharkGray block">Allowed Truck Types</Label>
-                        <div className="grid grid-cols-2 gap-3 bg-main-titaniumWhite/50 p-4 common-rounded">
-                            {truckTypes.map((truck) => (
-                                <div key={truck.id} className="flex items-center space-x-2">
-                                    <Checkbox
-                                        id={`truck-${truck.id}`}
-                                        checked={selectedTruckIds.includes(truck.id)}
-                                        onCheckedChange={() => toggleTruckId(truck.id)}
-                                    />
-                                    <label
-                                        htmlFor={`truck-${truck.id}`}
-                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                    <div className="space-y-2.5">
+                        <div className="flex items-center justify-between gap-2">
+                            <Label className="text-sm font-semibold text-main-mirage">
+                                {t("dataManagement:goodsModal.allowedTrucks")}
+                            </Label>
+                            {selectedTruckIds.length > 0 ? (
+                                <span className="text-xs font-medium text-main-primary bg-main-primary/10 px-2 py-0.5 rounded-full shrink-0">
+                                    {t("dataManagement:goodsModal.selectedCount", { count: selectedTruckIds.length })}
+                                </span>
+                            ) : null}
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                            {truckTypes.map((truck) => {
+                                const isChecked = selectedTruckIds.includes(truck.id);
+                                return (
+                                    <button
+                                        key={truck.id}
+                                        type="button"
+                                        onClick={() => toggleTruckId(truck.id)}
+                                        className={clsx(
+                                            "flex items-center gap-2.5 px-3 py-2.5 rounded-xl border text-start transition-all duration-150 cursor-pointer select-none",
+                                            isChecked
+                                                ? "bg-main-primary/[0.04] border-main-primary/30 shadow-sm"
+                                                : "bg-main-titaniumWhite/60 border-main-whiteMarble hover:border-main-sharkGray/20 hover:bg-main-titaniumWhite",
+                                        )}
                                     >
-                                        {truck.name}
-                                    </label>
-                                </div>
-                            ))}
-                            {truckTypes.length === 0 && (
-                                <p className="text-xs text-main-red col-span-2">No truck types found. Please add a truck type first.</p>
-                            )}
+                                        <div
+                                            className={clsx(
+                                                "w-5 h-5 rounded-full flex items-center justify-center shrink-0 transition-all duration-150",
+                                                isChecked ? "bg-main-primary" : "border border-main-whiteMarble",
+                                            )}
+                                        >
+                                            {isChecked ? <Check className="w-3 h-3 text-white stroke-3" /> : null}
+                                        </div>
+                                        <span
+                                            className={clsx(
+                                                "text-sm font-medium leading-tight transition-colors",
+                                                isChecked ? "text-main-primary" : "text-main-mirage/80",
+                                            )}
+                                        >
+                                            {truck.name}
+                                        </span>
+                                    </button>
+                                );
+                            })}
+                            {truckTypes.length === 0 ? (
+                                <p className="text-xs text-main-remove col-span-2 py-2">{t("dataManagement:goodsModal.noTruckTypes")}</p>
+                            ) : null}
                         </div>
                     </div>
                 </CommonModalBody>
@@ -189,14 +260,18 @@ const GoodsTypeModal = ({ open, onOpenChange, goodsType }: GoodsTypeModalProps) 
                         onClick={() => onOpenChange(false)}
                         className="font-bold text-main-sharkGray h-11 px-6 common-rounded hover:bg-main-titaniumWhite"
                     >
-                        Cancel
+                        {t("common:cancel")}
                     </Button>
                     <Button
                         type="submit"
                         disabled={submitting || truckTypes.length === 0}
                         className="bg-main-primary hover:bg-main-primary/90 text-white font-bold h-11 px-10 common-rounded shadow-lg shadow-main-primary/20"
                     >
-                        {submitting ? "Saving..." : goodsType ? "Update" : "Add"}
+                        {submitting
+                            ? t("dataManagement:goodsModal.saving")
+                            : goodsType
+                              ? t("dataManagement:goodsModal.saveUpdate")
+                              : t("dataManagement:goodsModal.saveAdd")}
                     </Button>
                 </CommonModalFooter>
             </form>

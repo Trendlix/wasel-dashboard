@@ -1,5 +1,7 @@
 import clsx from "clsx";
 import { useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import { formatAppDateTime } from "@/lib/formatLocaleDate";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -28,7 +30,11 @@ import {
 import NoDataFound from "@/shared/components/common/NoDataFound";
 import { formInputWrapperClass, formSelectTriggerClass } from "@/shared/components/common/formStyles";
 import SendNotificationModal from "./SendNotificationModal";
-import { notificationManagementTabs, type TNotificationDeliveryStatus } from "@/shared/core/pages/notifications";
+import {
+    notificationManagementTabs,
+    type TNotificationDeliveryStatus,
+    type TNotificationManagementTab,
+} from "@/shared/core/pages/notifications";
 import { useNavigate } from "react-router-dom";
 import PageHeader from "../../common/PageHeader";
 import useNotificationManagementStore, {
@@ -42,19 +48,25 @@ const statusStyles: Record<TNotificationDeliveryStatus, string> = {
     failed: "bg-main-lightCoral/20 text-main-lightCoral",
 };
 
-const formatDate = (value: string) => {
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return "-";
-    return date.toLocaleString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-    });
+const managementTabI18nKey: Record<TNotificationManagementTab, "tabDriver" | "tabUser" | "tabTrip" | "tabOffersUpdates"> = {
+    "driver-admin": "tabDriver",
+    "user-admin": "tabUser",
+    "trip-admin": "tabTrip",
+    "offers-updates": "tabOffersUpdates",
+};
+
+const deliveryStatusI18nKey: Record<TNotificationDeliveryStatus, "deliveryStatusSent" | "deliveryStatusScheduled" | "deliveryStatusFailed"> = {
+    sent: "deliveryStatusSent",
+    scheduled: "deliveryStatusScheduled",
+    failed: "deliveryStatusFailed",
 };
 
 const NotificationManagement = () => {
+    const { t, i18n } = useTranslation(["notifications", "common"]);
+
+    const formatDate = (value: string) =>
+        formatAppDateTime(value, i18n.language, "-");
+
     const {
         rowsByTab,
         loading,
@@ -149,7 +161,7 @@ const NotificationManagement = () => {
 
     return (
         <>
-            <PageHeader title="Notifications" description="Manage, filter, and send notifications across all admin channels." />
+            <PageHeader title={t("notifications:managementTitle")} description={t("notifications:managementDescription")} />
             <div className="space-y-6">
                 {/* Tabs + Actions */}
                 <div className="flex items-center justify-between gap-4">
@@ -166,9 +178,9 @@ const NotificationManagement = () => {
                                         active ? "bg-main-primary text-main-white" : "text-main-sharkGray hover:text-main-mirage hover:bg-main-white",
                                     )}
                                 >
-                                    <span>{tab.label}</span>
+                                    <span>{t(`notifications:${managementTabI18nKey[tab.value]}`)}</span>
                                     <span className={clsx(
-                                        "ml-2 inline-flex min-w-6 h-6 items-center justify-center rounded-full px-1 text-xs font-bold",
+                                        "ms-2 inline-flex min-w-6 h-6 items-center justify-center rounded-full px-1 text-xs font-bold",
                                         active ? "bg-main-white/20 text-main-white" : "bg-main-white text-main-primary",
                                     )}>
                                         {tabCounts[tab.value]}
@@ -187,7 +199,7 @@ const NotificationManagement = () => {
                                 disabled={markAllLoading}
                             >
                                 <CheckCheck size={16} />
-                                {markAllLoading ? "Marking..." : "Mark All as Read"}
+                                {markAllLoading ? t("common:marking") : t("common:markAllRead")}
                             </Button>
                         )}
                         <Button
@@ -198,7 +210,7 @@ const NotificationManagement = () => {
                             }}
                         >
                             <Send size={16} />
-                            Send New Notification
+                            {t("notifications:sendNewNotification")}
                         </Button>
                     </div>
                 </div>
@@ -212,43 +224,43 @@ const NotificationManagement = () => {
                                 type="search"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                placeholder="Search by title or content..."
+                                placeholder={t("notifications:searchByTitleOrContent")}
                                 className="border-0 shadow-none h-full p-0 placeholder:text-main-trueBlack/50 focus-visible:ring-0 bg-transparent"
                             />
                         </div>
 
                         <Select value={readFilter} onValueChange={(v) => setReadFilter(v as typeof readFilter)}>
                             <SelectTrigger className={`${formSelectTriggerClass} w-fit`}>
-                                <SelectValue placeholder="Read status" />
+                                <SelectValue placeholder={t("common:readStatus")} />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="all">All</SelectItem>
-                                <SelectItem value="unread">Unread</SelectItem>
-                                <SelectItem value="read">Read</SelectItem>
+                                <SelectItem value="all">{t("common:all")}</SelectItem>
+                                <SelectItem value="unread">{t("common:unread")}</SelectItem>
+                                <SelectItem value="read">{t("common:read")}</SelectItem>
                             </SelectContent>
                         </Select>
 
                         <Select value={dateFilter} onValueChange={(v) => setDateFilter(v as typeof dateFilter)}>
                             <SelectTrigger className={`${formSelectTriggerClass} w-fit`}>
-                                <SelectValue placeholder="Date" />
+                                <SelectValue placeholder={t("notifications:dateFilterPlaceholder")} />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="all">All dates</SelectItem>
-                                <SelectItem value="today">Today</SelectItem>
-                                <SelectItem value="last7">Last 7 days</SelectItem>
-                                <SelectItem value="last30">Last 30 days</SelectItem>
+                                <SelectItem value="all">{t("common:allDates")}</SelectItem>
+                                <SelectItem value="today">{t("common:today")}</SelectItem>
+                                <SelectItem value="last7">{t("common:last7Days")}</SelectItem>
+                                <SelectItem value="last30">{t("common:last30Days")}</SelectItem>
                             </SelectContent>
                         </Select>
 
                         <Select value={sortValue} onValueChange={(v) => setSortValue(v as typeof sortValue)}>
                             <SelectTrigger className={`${formSelectTriggerClass} w-fit`}>
-                                <SelectValue placeholder="Sort by" />
+                                <SelectValue placeholder={t("common:sortBy")} />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="created-desc">Newest first</SelectItem>
-                                <SelectItem value="created-asc">Oldest first</SelectItem>
-                                <SelectItem value="title-asc">Title A-Z</SelectItem>
-                                <SelectItem value="title-desc">Title Z-A</SelectItem>
+                                <SelectItem value="created-desc">{t("common:newestFirst")}</SelectItem>
+                                <SelectItem value="created-asc">{t("common:oldestFirst")}</SelectItem>
+                                <SelectItem value="title-asc">{t("common:titleAZ")}</SelectItem>
+                                <SelectItem value="title-desc">{t("common:titleZA")}</SelectItem>
                             </SelectContent>
                         </Select>
 
@@ -258,7 +270,6 @@ const NotificationManagement = () => {
                             className="h-11 px-4 border-main-whiteMarble text-main-hydrocarbon"
                         >
                             <RotateCcw size={16} />
-                            Reset
                         </Button>
                     </div>
                 </div>
@@ -269,13 +280,13 @@ const NotificationManagement = () => {
                         <Table>
                             <TableHeader>
                                 <TableRow className="bg-main-luxuryWhite border-b border-main-whiteMarble hover:bg-main-luxuryWhite">
-                                    <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">Notification Title</TableHead>
-                                    <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">Message Preview</TableHead>
-                                    <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">Target Audience</TableHead>
-                                    <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">Sent By</TableHead>
-                                    <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">Created At</TableHead>
-                                    <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">Status</TableHead>
-                                    <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6 text-right">Actions</TableHead>
+                                    <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">{t("notifications:colNotificationTitle")}</TableHead>
+                                    <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">{t("notifications:messagePreview")}</TableHead>
+                                    <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">{t("notifications:colTargetAudience")}</TableHead>
+                                    <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">{t("notifications:sentBy")}</TableHead>
+                                    <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">{t("common:createdAt")}</TableHead>
+                                    <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6">{t("common:status")}</TableHead>
+                                    <TableHead className="text-main-hydrocarbon font-semibold text-sm py-4 px-6 text-end">{t("common:actions")}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -287,7 +298,7 @@ const NotificationManagement = () => {
                                         <TableCell className="py-4 px-6"><div className="h-3.5 w-20 rounded bg-main-whiteMarble" /></TableCell>
                                         <TableCell className="py-4 px-6"><div className="h-3.5 w-30 rounded bg-main-whiteMarble" /></TableCell>
                                         <TableCell className="py-4 px-6"><div className="h-6 w-16 rounded-full bg-main-whiteMarble" /></TableCell>
-                                        <TableCell className="py-4 px-6 text-right"><div className="h-3.5 w-24 rounded bg-main-whiteMarble ml-auto" /></TableCell>
+                                        <TableCell className="py-4 px-6 text-end"><div className="h-3.5 w-24 rounded bg-main-whiteMarble ms-auto" /></TableCell>
                                     </TableRow>
                                 ))}
 
@@ -304,7 +315,7 @@ const NotificationManagement = () => {
                                         <TableCell className="py-4 px-6 text-sm text-main-sharkGray">{formatDate(row.created_at)}</TableCell>
                                         <TableCell className="py-4 px-6">
                                             <span className={clsx("px-3 py-1 rounded-full text-xs font-semibold capitalize", statusStyles[row.status])}>
-                                                {row.status}
+                                                {t(`notifications:${deliveryStatusI18nKey[row.status]}`)}
                                             </span>
                                         </TableCell>
                                         <TableCell className="py-4 px-6">
@@ -314,7 +325,7 @@ const NotificationManagement = () => {
                                                     className="h-8 px-2.5 common-rounded text-main-primary hover:bg-main-primary/10 text-xs font-semibold"
                                                     onClick={() => setViewItem(row)}
                                                 >
-                                                    <span className="inline-flex items-center gap-1"><Eye size={13} />View</span>
+                                                    <span className="inline-flex items-center gap-1"><Eye size={13} />{t("common:view")}</span>
                                                 </button>
                                                 {!row.is_read && (row.source === "user" || row.source === "driver" || row.source === "trip") && (
                                                     <button
@@ -325,7 +336,7 @@ const NotificationManagement = () => {
                                                     >
                                                         <span className="inline-flex items-center gap-1">
                                                             <CheckCheck size={13} />
-                                                            {itemActionLoading === row.row_key ? "..." : "Mark Read"}
+                                                            {itemActionLoading === row.row_key ? "…" : t("common:markRead")}
                                                         </span>
                                                     </button>
                                                 )}
@@ -337,7 +348,7 @@ const NotificationManagement = () => {
                                 {!loading && paginatedRows.length === 0 && (
                                     <TableRow>
                                         <TableCell colSpan={7} className="p-2">
-                                            <NoDataFound title="No notifications found" description="Try adjusting your search or filters." />
+                                            <NoDataFound title={t("notifications:noNotificationsFound")} description={t("notifications:adjustFilters")} />
                                         </TableCell>
                                     </TableRow>
                                 )}
@@ -361,33 +372,33 @@ const NotificationManagement = () => {
             />
 
             <CommonModal open={Boolean(viewItem)} onOpenChange={(open) => !open && setViewItem(null)} maxWidth="sm:max-w-[620px]">
-                <CommonModalHeader title="Notification Details" description="Full message and metadata." />
+                <CommonModalHeader title={t("notifications:notificationDetails")} description={t("notifications:detailsDescription")} />
                 <CommonModalBody className="space-y-4 pb-6">
                     <div className="space-y-1">
-                        <p className="text-xs uppercase tracking-wide text-main-sharkGray">Title</p>
+                        <p className="text-xs uppercase tracking-wide text-main-sharkGray">{t("common:title")}</p>
                         <p className="text-main-mirage font-semibold">{viewItem?.title}</p>
                     </div>
                     <div className="space-y-1">
-                        <p className="text-xs uppercase tracking-wide text-main-sharkGray">Message</p>
+                        <p className="text-xs uppercase tracking-wide text-main-sharkGray">{t("common:description")}</p>
                         <p className="text-main-hydrocarbon leading-6 whitespace-pre-wrap">{viewItem?.description}</p>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <p className="text-xs uppercase tracking-wide text-main-sharkGray">Target Audience</p>
+                            <p className="text-xs uppercase tracking-wide text-main-sharkGray">{t("notifications:colTargetAudience")}</p>
                             <p className="text-sm text-main-hydrocarbon">{viewItem?.target_audience}</p>
                         </div>
                         <div>
-                            <p className="text-xs uppercase tracking-wide text-main-sharkGray">Sent By</p>
+                            <p className="text-xs uppercase tracking-wide text-main-sharkGray">{t("notifications:sentBy")}</p>
                             <p className="text-sm text-main-hydrocarbon">{viewItem?.sent_by}</p>
                         </div>
                         <div>
-                            <p className="text-xs uppercase tracking-wide text-main-sharkGray">Created At</p>
+                            <p className="text-xs uppercase tracking-wide text-main-sharkGray">{t("common:createdAt")}</p>
                             <p className="text-sm text-main-hydrocarbon">{viewItem ? formatDate(viewItem.created_at) : "-"}</p>
                         </div>
                         <div>
-                            <p className="text-xs uppercase tracking-wide text-main-sharkGray">Status</p>
+                            <p className="text-xs uppercase tracking-wide text-main-sharkGray">{t("common:status")}</p>
                             <span className={clsx("inline-flex px-3 py-1 rounded-full text-xs font-semibold capitalize", viewItem ? statusStyles[viewItem.status] : statusStyles.sent)}>
-                                {viewItem?.status ?? "sent"}
+                                {viewItem ? t(`notifications:${deliveryStatusI18nKey[viewItem.status]}`) : t("notifications:deliveryStatusSent")}
                             </span>
                         </div>
                     </div>
@@ -398,7 +409,7 @@ const NotificationManagement = () => {
                         className="h-11 px-5 border-main-whiteMarble text-main-hydrocarbon"
                         onClick={() => setViewItem(null)}
                     >
-                        Close
+                        {t("common:close")}
                     </Button>
                     {
                         !viewItem?.source.includes("offer") && <Button
@@ -407,7 +418,7 @@ const NotificationManagement = () => {
                                 if (viewItem) redirectToSinglePage(viewItem.source, viewItem.id);
                             }}
                         >
-                            Open
+                            {t("common:open")}
                         </Button>
                     }
                     {/* {viewItem && !viewItem.is_read && (

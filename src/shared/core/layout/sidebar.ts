@@ -1,107 +1,101 @@
 import { Bell, ChartColumn, CircleCheckBig, Database, LayoutDashboard, MapPin, Percent, PenTool, Settings, Shield, Tag, Ticket, Truck, Users, type LucideIcon } from "lucide-react";
 
+export type SidebarBadgeKey = "notifications" | "support";
+
 export interface ISidebarItem {
     id: number;
-    name: string;
+    /** Translation key under the `sidebar` namespace */
+    nameKey: string;
     icon: LucideIcon;
     to: string;
+    badgeKey?: SidebarBadgeKey;
 }
 
 export const sidebarItems: ISidebarItem[] = [
     {
         id: 1,
-        name: "dashboard",
+        nameKey: "dashboard",
         icon: LayoutDashboard,
-        to: "/"
+        to: "/",
     },
     {
         id: 2,
-        name: "users",
-        icon: Users,
-        to: "/users"
+        nameKey: "analytics",
+        icon: ChartColumn,
+        to: "/analytics",
     },
     {
         id: 3,
-        name: "drivers",
-        icon: Truck,
-        to: "/drivers"
+        nameKey: "dataManagement",
+        icon: Database,
+        to: "/data-management",
     },
-    /*    {
-            id: 4,
-            name: "storage owners",
-            icon: Warehouse,
-            to: "/storage-owners"
-        },*/
+    {
+        id: 4,
+        nameKey: "usersManagement",
+        icon: Users,
+        to: "/users",
+    },
     {
         id: 5,
-        name: "Verfication",
-        icon: CircleCheckBig,
-        to: "/verification"
+        nameKey: "driversManagement",
+        icon: Truck,
+        to: "/drivers",
     },
     {
         id: 6,
-        name: "trips",
-        icon: MapPin,
-        to: "/trips"
+        nameKey: "driversVerification",
+        icon: CircleCheckBig,
+        to: "/verification",
     },
-    // {
-    //     id: 7,
-    //     name: "wallet/finance",
-    //     icon: Wallet,
-    //     to: "/wallet-and-finance"
-    // },
+    {
+        id: 7,
+        nameKey: "tripsManagement",
+        icon: MapPin,
+        to: "/trips",
+    },
     {
         id: 8,
-        name: "analytics",
-        icon: ChartColumn,
-        to: "/analytics"
+        nameKey: "appsNotifications",
+        icon: Bell,
+        to: "/notifications",
+        badgeKey: "notifications",
     },
     {
         id: 9,
-        name: "notifications",
-        icon: Bell,
-        to: "/notifications"
+        nameKey: "commissionAndPricing",
+        icon: Percent,
+        to: "/commission-and-pricing",
     },
     {
         id: 10,
-        name: "settings",
-        icon: Settings,
-        to: "/settings"
+        nameKey: "voucherAndPromo",
+        icon: Tag,
+        to: "/voucher-and-promo",
     },
     {
         id: 11,
-        name: "cms",
-        icon: PenTool,
-        to: "/cms"
+        nameKey: "supportTickets",
+        icon: Ticket,
+        to: "/support-tickets",
+        badgeKey: "support",
     },
     {
         id: 12,
-        name: "roles & permissions",
-        icon: Shield,
-        to: "/roles-and-permissions"
+        nameKey: "cms",
+        icon: PenTool,
+        to: "/cms",
     },
     {
         id: 13,
-        name: "commission & pricing",
-        icon: Percent,
-        to: "/commission-and-pricing"
+        nameKey: "adminRolesPermissions",
+        icon: Shield,
+        to: "/roles-and-permissions",
     },
     {
         id: 14,
-        name: "voucher & promo",
-        icon: Tag,
-        to: "/voucher-and-promo"
+        nameKey: "adminSettings",
+        icon: Settings,
+        to: "/settings",
     },
-    {
-        id: 15,
-        name: "Data Management",
-        icon: Database,
-        to: "/data-management"
-    },
-    {
-        id: 16,
-        name: "Support Tickets",
-        icon: Ticket,
-        to: "/support-tickets"
-    },
-]
+];

@@ -1,5 +1,6 @@
 import clsx from "clsx";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
     Table,
     TableBody,
@@ -26,49 +27,11 @@ import {
     type TTicketPriority,
     type TTicketStatus,
 } from "@/shared/core/pages/supportTickets";
-
-// ─── Filter options ───────────────────────────────────────────────────────────
-
-const STATUS_OPTIONS = [
-    { value: "all", label: "All Status" },
-    { value: "pending", label: "Open" },
-    { value: "reply", label: "Pending Reply" },
-    { value: "closed", label: "Closed" },
-    { value: "solved", label: "Solved" },
-];
-
-const PRIORITY_OPTIONS = [
-    { value: "all", label: "All Priority" },
-    { value: "low", label: "Low" },
-    { value: "medium", label: "Medium" },
-    { value: "high", label: "High" },
-];
-
-const statusStylesForSelect: Record<string, { label: string; bg: string; text: string }> = {
-    ...ticketStatusStyles,
-    all: { label: "All Status", bg: "", text: "" },
-};
-
-const priorityStylesForSelect: Record<string, { label: string; bg: string; text: string }> = {
-    ...ticketPriorityStyles,
-    all: { label: "All Priority", bg: "", text: "" },
-};
-
-const ORDER_OPTIONS = [
-    { value: "desc", label: "Newest First" },
-    { value: "asc", label: "Oldest First" },
-];
-
-const orderStylesForSelect: Record<string, { label: string; bg: string; text: string }> = {
-    desc: { label: "Newest First", bg: "", text: "" },
-    asc:  { label: "Oldest First", bg: "", text: "" },
-};
-
-// ─── Skeleton row ─────────────────────────────────────────────────────────────
+import { formatAppDateShort } from "@/lib/formatLocaleDate";
 
 const SkeletonRow = () => (
     <TableRow className="border-b border-main-whiteMarble animate-pulse">
-        {Array.from({ length: 8 }).map((_, i) => (
+        {Array.from({ length: 9 }).map((_, i) => (
             <TableCell key={i} className="py-4 px-5">
                 <div className="h-3.5 rounded bg-main-whiteMarble w-20" />
             </TableCell>
@@ -76,9 +39,8 @@ const SkeletonRow = () => (
     </TableRow>
 );
 
-// ─── Main ─────────────────────────────────────────────────────────────────────
-
 const TicketsTable = () => {
+    const { t, i18n } = useTranslation(["support", "common"]);
     const {
         tickets,
         meta,
@@ -90,6 +52,75 @@ const TicketsTable = () => {
         resetQuery,
         fetchTicketDetail,
     } = useTicketStore();
+
+    const statusOptions = useMemo(
+        () => [
+            { value: "all", label: t("support:filters.allStatus") },
+            { value: "pending", label: t("support:statuses.pending") },
+            { value: "reply", label: t("support:statuses.reply") },
+            { value: "closed", label: t("support:statuses.closed") },
+            { value: "solved", label: t("support:statuses.solved") },
+        ],
+        [t],
+    );
+
+    const priorityOptions = useMemo(
+        () => [
+            { value: "all", label: t("support:filters.allPriority") },
+            { value: "low", label: t("support:priorities.low") },
+            { value: "medium", label: t("support:priorities.medium") },
+            { value: "high", label: t("support:priorities.high") },
+        ],
+        [t],
+    );
+
+    const orderOptions = useMemo(
+        () => [
+            { value: "desc", label: t("support:filters.newestFirst") },
+            { value: "asc", label: t("support:filters.oldestFirst") },
+        ],
+        [t],
+    );
+
+    const statusStylesForSelect = useMemo(
+        () => ({
+            ...ticketStatusStyles,
+            all: { bg: "", text: "" },
+        }),
+        [],
+    );
+
+    const priorityStylesForSelect = useMemo(
+        () => ({
+            ...ticketPriorityStyles,
+            all: { bg: "", text: "" },
+        }),
+        [],
+    );
+
+    const orderStylesForSelect = useMemo(
+        () => ({
+            desc: { bg: "", text: "" },
+            asc: { bg: "", text: "" },
+        }),
+        [],
+    );
+
+    const tableHeaderKeys = useMemo(
+        () =>
+            [
+                "table.headers.ticket",
+                "table.headers.subject",
+                "table.headers.customer",
+                "table.headers.type",
+                "table.headers.category",
+                "table.headers.priority",
+                "table.headers.status",
+                "table.headers.updated",
+                "table.headers.actions",
+            ] as const,
+        [],
+    );
 
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
@@ -103,15 +134,14 @@ const TicketsTable = () => {
     useEffect(() => {
         fetchTickets();
         fetchCategories();
-    }, []);
+    }, [fetchTickets, fetchCategories]);
 
-    // Debounced search
     useEffect(() => {
         const timer = setTimeout(() => {
             setQuery({ partial_matching: search.trim() || undefined });
         }, 400);
         return () => clearTimeout(timer);
-    }, [search]);
+    }, [search, setQuery]);
 
     const handleStatusFilter = (value: string) => {
         setStatusFilter(value);
@@ -148,9 +178,7 @@ const TicketsTable = () => {
 
     return (
         <div className="space-y-6">
-            {/* Toolbar */}
             <div className="bg-main-white border border-main-whiteMarble common-rounded p-4 flex flex-wrap items-center gap-3">
-                {/* Search */}
                 <div
                     className={clsx(
                         "flex items-center gap-2 flex-1 min-w-50 cursor-text",
@@ -164,73 +192,67 @@ const TicketsTable = () => {
                         type="search"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Search by subject or description…"
+                        placeholder={t("support:table.searchPlaceholder")}
                         className="border-0 shadow-none h-full p-0 placeholder:text-main-trueBlack/50 focus-visible:ring-0 bg-transparent"
                     />
                 </div>
 
-                {/* Status filter */}
                 <StatusSelect
                     value={statusFilter}
                     onChange={handleStatusFilter}
-                    options={STATUS_OPTIONS}
+                    options={statusOptions}
                     statusStyles={statusStylesForSelect}
-                    placeholder="All Status"
+                    placeholder={t("support:filters.allStatus")}
                 />
 
-                {/* Priority filter */}
                 <StatusSelect
                     value={priorityFilter}
                     onChange={handlePriorityFilter}
-                    options={PRIORITY_OPTIONS}
+                    options={priorityOptions}
                     statusStyles={priorityStylesForSelect}
-                    placeholder="All Priority"
+                    placeholder={t("support:filters.allPriority")}
                 />
 
-                {/* Order filter */}
                 <StatusSelect
                     value={orderFilter}
                     onChange={handleOrderFilter}
-                    options={ORDER_OPTIONS}
+                    options={orderOptions}
                     statusStyles={orderStylesForSelect}
-                    placeholder="Newest First"
+                    placeholder={t("support:filters.newestFirst")}
                 />
 
-                {/* Manage Categories */}
                 <Button
                     variant="outline"
                     onClick={() => setCategoriesModalOpen(true)}
                     className="h-11 px-5 border-main-whiteMarble text-main-hydrocarbon font-semibold shrink-0"
                 >
                     <Settings2 size={15} />
-                    Manage Categories
+                    {t("support:table.manageCategories")}
                 </Button>
 
-                {/* Reset */}
                 <Button
+                    type="button"
                     variant="outline"
                     onClick={handleReset}
                     className="h-11 px-4 border-main-whiteMarble text-main-hydrocarbon shrink-0"
+                    aria-label={t("common:resetFilters")}
                 >
                     <RotateCcw size={15} />
                 </Button>
             </div>
 
-            {/* Table */}
             <div className="bg-main-white border border-main-whiteMarble common-rounded overflow-hidden">
                 <Table>
                     <TableHeader>
                         <TableRow className="bg-main-luxuryWhite border-b border-main-whiteMarble hover:bg-main-luxuryWhite">
-                            {["Ticket", "Subject", "Customer", "Type", "Category", "Priority", "Status", "Updated", "Actions"].map(
-                                (h) => (
-                                    <TableHead
-                                        key={h}
-                                        className="text-main-hydrocarbon font-semibold text-sm py-4 px-5"
-                                    >
-                                        {h}
-                                    </TableHead>
-                                )
-                            )}
+                            {tableHeaderKeys.map((key) => (
+                                <TableHead
+                                    key={key}
+                                    className="text-main-hydrocarbon font-semibold text-sm py-4 px-5"
+                                >
+                                    {t(`support:${key}`)}
+                                </TableHead>
+                            ))}
                         </TableRow>
                     </TableHeader>
 
@@ -241,6 +263,7 @@ const TicketsTable = () => {
                                 <TicketRow
                                     key={ticket.id}
                                     ticket={ticket}
+                                    lang={i18n.language}
                                     onViewDetails={handleViewDetails}
                                 />
                             ))}
@@ -249,8 +272,8 @@ const TicketsTable = () => {
                             <TableRow>
                                 <TableCell colSpan={9} className="p-2">
                                     <NoDataFound
-                                        title="No tickets found"
-                                        description="Try adjusting your filters."
+                                        title={t("support:table.emptyTitle")}
+                                        description={t("support:table.emptyDescription")}
                                     />
                                 </TableCell>
                             </TableRow>
@@ -280,23 +303,27 @@ const TicketsTable = () => {
     );
 };
 
-// ─── Row ──────────────────────────────────────────────────────────────────────
-
 const TicketRow = ({
     ticket,
+    lang,
     onViewDetails,
 }: {
     ticket: ITicket;
+    lang: string;
     onViewDetails: (t: ITicket) => void;
 }) => {
+    const { t } = useTranslation("support");
     const owner = ticket.user ?? ticket.driver;
-    const ownerType = ticket.user ? "User" : ticket.driver ? "Driver" : "—";
+    const ownerType = ticket.user
+        ? t("owner.user")
+        : ticket.driver
+          ? t("owner.driver")
+          : "—";
 
-    const updatedDate = new Date(ticket.updated_at).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-    });
+    const rawName = owner ? getOwnerDisplayName(owner) : "";
+    const displayName = owner ? (rawName || t("owner.noName")) : "—";
+
+    const updatedDate = formatAppDateShort(ticket.updated_at, lang);
 
     return (
         <TableRow className="border-b border-main-whiteMarble hover:bg-main-luxuryWhite/50 transition-colors">
@@ -310,7 +337,7 @@ const TicketRow = ({
                 {owner ? (
                     <div className="flex flex-col">
                         <span className="text-main-mirage font-semibold text-sm">
-                            {getOwnerDisplayName(owner)}
+                            {displayName}
                         </span>
                         {owner.email && (
                             <span className="text-main-sharkGray text-xs">{owner.email}</span>
@@ -324,11 +351,11 @@ const TicketRow = ({
                 <span
                     className={clsx(
                         "px-2.5 py-1 rounded-full text-xs font-medium",
-                        ownerType === "User"
+                        ticket.user
                             ? "bg-main-primary/10 text-main-primary"
-                            : ownerType === "Driver"
-                            ? "bg-main-vividSubmarine/15 text-main-vividSubmarine"
-                            : "bg-main-sharkGray/15 text-main-sharkGray"
+                            : ticket.driver
+                              ? "bg-main-vividSubmarine/15 text-main-vividSubmarine"
+                              : "bg-main-sharkGray/15 text-main-sharkGray"
                     )}
                 >
                     {ownerType}
@@ -348,32 +375,33 @@ const TicketRow = ({
             </TableCell>
             <TableCell className="py-4 px-5">
                 <button
+                    type="button"
                     onClick={() => onViewDetails(ticket)}
                     className="text-main-primary font-semibold text-sm hover:underline whitespace-nowrap"
                 >
-                    View Details
+                    {t("table.viewDetails")}
                 </button>
             </TableCell>
         </TableRow>
     );
 };
 
-// ─── Badges ───────────────────────────────────────────────────────────────────
-
 const StatusBadge = ({ status }: { status: TTicketStatus }) => {
+    const { t } = useTranslation("support");
     const s = ticketStatusStyles[status] ?? ticketStatusStyles.pending;
     return (
         <span className={clsx("px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap", s.bg, s.text)}>
-            {s.label}
+            {t(`statuses.${status}`)}
         </span>
     );
 };
 
 const PriorityBadge = ({ priority }: { priority: TTicketPriority }) => {
+    const { t } = useTranslation("support");
     const p = ticketPriorityStyles[priority] ?? ticketPriorityStyles.low;
     return (
         <span className={clsx("px-3 py-1 rounded-full text-xs font-medium", p.bg, p.text)}>
-            {p.label}
+            {t(`priorities.${priority}`)}
         </span>
     );
 };

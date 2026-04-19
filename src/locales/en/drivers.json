@@ -1,0 +1,56 @@
+{
+  "pageTitle": "Drivers",
+  "pageDescription": "Manage all registered drivers",
+  "searchPlaceholder": "Search by name, email or phone…",
+  "defaultDriverName": "Driver",
+  "ratingNA": "N/A",
+  "filters": {
+    "allStatuses": "All statuses",
+    "pending": "Pending",
+    "approved": "Approved",
+    "suspended": "Suspended",
+    "blocked": "Blocked",
+    "rejected": "Rejected",
+    "deleted": "Deleted"
+  },
+  "table": {
+    "driver": "Driver",
+    "phone": "Phone",
+    "status": "Status",
+    "rating": "Rating",
+    "joined": "Joined",
+    "actions": "Actions"
+  },
+  "viewDetails": "View details",
+  "emptyTitle": "No drivers found",
+  "emptyDescription": "Try adjusting your search or filters.",
+  "analytics": {
+    "totalDrivers": "Total drivers",
+    "approvedDrivers": "Approved drivers",
+    "pendingDrivers": "Pending drivers"
+  },
+  "export": {
+    "title": "Export drivers",
+    "description": "Choose a date range to export drivers registered during that period, or leave empty for all.",
+    "dateHint": "Leave both fields empty to export all drivers."
+  },
+  "modal": {
+    "title": "Driver details",
+    "description": "View driver information and update their account status.",
+    "phone": "Phone",
+    "joined": "Joined",
+    "rating": "Rating",
+    "status": "Status",
+    "accountStatus": "Account status",
+    "saveChanges": "Save changes",
+    "saving": "Saving…"
+  },
+  "statuses": {
+    "pending": "Pending",
+    "approved": "Approved",
+    "suspended": "Suspended",
+    "blocked": "Blocked",
+    "rejected": "Rejected",
+    "deleted": "Deleted"
+  }
+}

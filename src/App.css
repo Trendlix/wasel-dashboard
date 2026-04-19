@@ -126,5 +126,10 @@
     }
   html {
     @apply font-sans;
+    font-family: var(--font-sans, "Geist Variable", sans-serif);
     }
+}
+
+html.rtl-font {
+  font-family: "Cairo", var(--font-sans, "Geist Variable", sans-serif);
 }

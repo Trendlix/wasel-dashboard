@@ -1,7 +1,9 @@
 import { Pencil, Trash2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import type { AdminUser } from "@/shared/hooks/store/useUserManagementStore";
 import { RoleBadge, TwoFABadge, StatusBadge } from "./UserBadges";
 import { getTokenStoredInCookie } from "@/shared/utils/cookieUtils";
+import { formatAppDateTime } from "@/lib/formatLocaleDate";
 
 interface UserRowProps {
     user: AdminUser;
@@ -11,14 +13,18 @@ interface UserRowProps {
 }
 
 const UserRow = ({ user, currentUser, onEdit, onRemove }: UserRowProps) => {
+    const { t, i18n } = useTranslation("roles");
     const tokenData = getTokenStoredInCookie("wasel_admin_access_token") as { admin_id: string };
     const isMe = String(tokenData?.admin_id) === String(user.id);
 
     const isCurrentSuperAdmin = currentUser?.role?.slug === "super-admin";
     const isTargetSuperAdmin = user.role?.slug === "super-admin";
 
-    // Non-super-admins cannot manage super-admins
     const canManage = isCurrentSuperAdmin || !isTargetSuperAdmin;
+
+    const lastLoginDisplay = user.last_login
+        ? formatAppDateTime(user.last_login, i18n.language)
+        : t("users.neverLoggedIn");
 
     return (
         <tr className="border-b border-main-whiteMarble hover:bg-main-luxuryWhite/50 transition-colors">
@@ -27,15 +33,9 @@ const UserRow = ({ user, currentUser, onEdit, onRemove }: UserRowProps) => {
                 <p className="text-main-sharkGray text-xs mt-0.5">{user.email}</p>
             </td>
             <td className="py-4 px-6">
-                <RoleBadge
-                    role={user.role?.name ?? "—"}
-                    roleBg="bg-main-mirage"
-                    roleText="text-main-white"
-                />
+                <RoleBadge role={user.role?.name ?? "—"} roleBg="bg-main-mirage" roleText="text-main-white" />
             </td>
-            <td className="py-4 px-6 text-main-sharkGray text-sm">
-                {user.last_login ? new Date(user.last_login).toLocaleString() : "Never"}
-            </td>
+            <td className="py-4 px-6 text-main-sharkGray text-sm">{lastLoginDisplay}</td>
             <td className="py-4 px-6">
                 <TwoFABadge enabled={user.twofa_enabled} />
             </td>
@@ -47,23 +47,27 @@ const UserRow = ({ user, currentUser, onEdit, onRemove }: UserRowProps) => {
                     canManage ? (
                         <div className="flex items-center gap-3">
                             <button
+                                type="button"
                                 onClick={() => onEdit(user)}
                                 className="text-main-primary hover:opacity-70 transition-opacity"
+                                aria-label={t("users.editAria")}
                             >
                                 <Pencil className="w-4 h-4" />
                             </button>
                             <button
+                                type="button"
                                 onClick={() => onRemove(user)}
                                 className="text-main-remove hover:opacity-70 transition-opacity"
+                                aria-label={t("users.removeAria")}
                             >
                                 <Trash2 className="w-4 h-4" />
                             </button>
                         </div>
                     ) : (
-                        <StatusBadge status="blocked" title="Protected" />
+                        <StatusBadge status="blocked" title={t("users.badgeProtected")} />
                     )
                 ) : (
-                    <StatusBadge status="blocked" title="You" />
+                    <StatusBadge status="blocked" title={t("users.badgeYou")} />
                 )}
             </td>
         </tr>

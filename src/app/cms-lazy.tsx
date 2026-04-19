@@ -1,6 +1,11 @@
 import { lazy } from "react";
 
 export const CmsPage = lazy(() => import("@/pages/cms"));
+export const HomePageCms = lazy(() => import("@/shared/components/pages/cms/outlet/home"));
+export const HomeHeroPage = lazy(() => import("@/shared/components/pages/cms/outlet/home/hero"));
+export const HomePlatformPage = lazy(() => import("@/shared/components/pages/cms/outlet/home/platform"));
+export const HomeTransportPage = lazy(() => import("@/shared/components/pages/cms/outlet/home/transport"));
+export const HomeMaximizingPage = lazy(() => import("@/shared/components/pages/cms/outlet/home/maximizing"));
 export const CommonPage = lazy(() => import("@/shared/components/pages/cms/outlet/common"));
 export const AboutPage = lazy(() => import("@/shared/components/pages/cms/outlet/about"));
 export const CommonAppPage = lazy(() => import("@/shared/components/pages/cms/outlet/common/app"));

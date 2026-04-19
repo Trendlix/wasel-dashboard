@@ -12,24 +12,37 @@ import {
     FileText,
     Shield,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
-const sectionTabs: { key: string; label: string; icon: ComponentType<{ size?: number }> }[] = [
-    { key: "home",           label: "Home",           icon: Home         },
-    { key: "about",          label: "About",          icon: Info         },
-    { key: "contact",        label: "Contact",        icon: Phone        },
-    { key: "services",       label: "Services",       icon: ConciergeBell },
-    { key: "blogs",          label: "Blogs",          icon: BookOpen     },
-    { key: "order-tracking", label: "Order Tracking", icon: MapPin     },
-    { key: "faqs",           label: "FAQs",           icon: CircleHelp   },
-    { key: "terms",          label: "Terms",          icon: FileText     },
-    { key: "privacy",        label: "Privacy",        icon: Shield       },
+type SeoTabKey =
+    | "home"
+    | "about"
+    | "contact"
+    | "services"
+    | "blogs"
+    | "order_tracking"
+    | "faqs"
+    | "terms"
+    | "privacy";
+
+const sectionTabs: { key: string; tabKey: SeoTabKey; icon: ComponentType<{ size?: number }> }[] = [
+    { key: "home", tabKey: "home", icon: Home },
+    { key: "about", tabKey: "about", icon: Info },
+    { key: "contact", tabKey: "contact", icon: Phone },
+    { key: "services", tabKey: "services", icon: ConciergeBell },
+    { key: "blogs", tabKey: "blogs", icon: BookOpen },
+    { key: "order-tracking", tabKey: "order_tracking", icon: MapPin },
+    { key: "faqs", tabKey: "faqs", icon: CircleHelp },
+    { key: "terms", tabKey: "terms", icon: FileText },
+    { key: "privacy", tabKey: "privacy", icon: Shield },
 ];
 
 const SeoPage = () => {
+    const { t } = useTranslation("cms");
     return (
         <div className="space-y-5">
             <p className="text-sm text-main-coolGray">
-                Per-route meta tags and JSON-LD. Pick a page tab, edit EN/AR fields, then save. Invalid schema JSON is flagged before publish.
+                {t("seo.intro")}
             </p>
             <div className="rounded-2xl border border-main-whiteMarble bg-main-white p-2 shadow-[0_12px_30px_rgba(17,24,39,0.04)]">
                 <div className="flex flex-wrap items-center gap-2">
@@ -47,7 +60,7 @@ const SeoPage = () => {
                             }
                         >
                             <tab.icon size={14} />
-                            {tab.label}
+                            {t(`seo.tabs.${tab.tabKey}`)}
                         </NavLink>
                     ))}
                 </div>

@@ -1,41 +1,25 @@
 import clsx from "clsx";
 import { useEffect } from "react";
-import { CheckCircle2, FileText, XCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { verificationAnalyticsConfig } from "@/shared/core/pages/verification";
 import useVerificationStore from "@/shared/hooks/store/useVerificationStore";
 
+const countKeyByTitleKey: Record<
+  "pendingReviews" | "approved" | "rejected",
+  "pending" | "approved" | "rejected"
+> = {
+  pendingReviews: "pending",
+  approved: "approved",
+  rejected: "rejected",
+};
+
 const Analytics = () => {
+  const { t } = useTranslation("verification");
   const { counts, countsLoading, fetchVerificationCounts } = useVerificationStore();
 
   useEffect(() => {
     fetchVerificationCounts();
   }, []);
-
-  const cards = [
-    {
-      id: 1,
-      label: "Pending Reviews",
-      value: String(counts.pending),
-      icon: FileText,
-      iconBg: "bg-main-mustardGold/10",
-      iconColor: "text-main-mustardGold",
-    },
-    {
-      id: 2,
-      label: "Approved",
-      value: String(counts.approved),
-      icon: CheckCircle2,
-      iconBg: "bg-main-vividMint/10",
-      iconColor: "text-main-vividMint",
-    },
-    {
-      id: 3,
-      label: "Rejected",
-      value: String(counts.rejected),
-      icon: XCircle,
-      iconBg: "bg-main-primary/10",
-      iconColor: "text-main-primary",
-    },
-  ];
 
   if (countsLoading) {
     return (
@@ -58,15 +42,17 @@ const Analytics = () => {
 
   return (
     <div className="grid grid-cols-3 gap-4">
-      {cards.map((card) => {
+      {verificationAnalyticsConfig.map((card) => {
         const Icon = card.icon;
+        const countKey = countKeyByTitleKey[card.titleKey];
+        const value = String(counts[countKey]);
         return (
           <div key={card.id} className="bg-main-white border border-main-whiteMarble common-rounded p-4 flex items-center justify-between">
             <div>
-              <p className="text-main-sharkGray text-sm">{card.label}</p>
-              <p className="text-main-mirage text-4xl font-bold">{card.value}</p>
+              <p className="text-main-sharkGray text-sm">{t(`analytics.${card.titleKey}`)}</p>
+              <p className="text-main-mirage text-4xl font-bold">{value}</p>
             </div>
-            <div className={clsx("w-10 h-10 rounded-lg flex items-center justify-center", card.iconBg, card.iconColor)}>
+            <div className={clsx("w-10 h-10 rounded-lg flex items-center justify-center", card.iconWrapper)}>
               <Icon size={18} />
             </div>
           </div>

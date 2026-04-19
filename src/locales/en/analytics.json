@@ -1,0 +1,37 @@
+{
+  "pageTitle": "Analytics",
+  "pageDescription": "Platform performance insights and reports",
+  "cards": {
+    "avgTripValue": "Avg. trip value",
+    "activeRate": "Active rate",
+    "userGrowth": "User growth",
+    "driverRetention": "Driver retention"
+  },
+  "tripsRevenueTitle": "Trips & revenue trends",
+  "vehicleDistributionTitle": "Vehicle type distribution",
+  "legendTrips": "Trips",
+  "legendRevenue": "Revenue (EGP)",
+  "topDriversTitle": "Top performing drivers",
+  "table": {
+    "rank": "Rank",
+    "driver": "Driver",
+    "totalTrips": "Total trips",
+    "totalEarnings": "Total earnings",
+    "avgPerTrip": "Avg. per trip"
+  },
+  "currencyEgp": "EGP",
+  "months": {
+    "jan": "Jan",
+    "feb": "Feb",
+    "mar": "Mar",
+    "apr": "Apr",
+    "may": "May",
+    "jun": "Jun"
+  },
+  "vehicleTypes": {
+    "pickup": "Pickup",
+    "van": "Van",
+    "smallTruck": "Small truck",
+    "largeTruck": "Large truck"
+  }
+}

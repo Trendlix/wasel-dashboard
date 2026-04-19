@@ -6,8 +6,7 @@ import useCmsMarketingTermsStore from "@/shared/hooks/store/useCmsMarketingTerms
 const MarketingTermsLayout = () => (
     <MarketingLegalLayoutShared
         useStore={useCmsMarketingTermsStore}
-        title="Marketing Terms"
-        description="Configure the public terms page with bilingual alert, hero content, and grouped sections."
+        variant="terms"
         heroPath="/cms/legal-help/marketing-terms/hero"
         faqsPath="/cms/legal-help/marketing-terms/faqs"
     />

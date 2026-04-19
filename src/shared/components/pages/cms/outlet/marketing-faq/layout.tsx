@@ -2,18 +2,19 @@ import { useEffect, useRef } from "react";
 import { NavLink, Navigate, Outlet } from "react-router-dom";
 import clsx from "clsx";
 import { LayoutPanelTop, ListOrdered } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import useCmsMarketingFaqStore from "@/shared/hooks/store/useCmsMarketingFaqStore";
 
 const tabs = [
     {
         key: "hero",
-        label: "Hero",
+        tabKey: "hero" as const,
         to: "/cms/legal-help/marketing-faq/hero",
         icon: LayoutPanelTop,
     },
     {
         key: "faqs",
-        label: "FAQs",
+        tabKey: "faqs" as const,
         to: "/cms/legal-help/marketing-faq/faqs",
         icon: ListOrdered,
     },
@@ -48,6 +49,7 @@ const MarketingFaqLoadingSkeleton = () => (
 );
 
 const MarketingFaqLayout = () => {
+    const { t } = useTranslation("cms");
     const { draft, loading, error, clearError, fetchMarketingFaq, addGroup } = useCmsMarketingFaqStore();
     const initialEmptyHandled = useRef(false);
 
@@ -74,12 +76,11 @@ const MarketingFaqLayout = () => {
         <div className="space-y-5">
             <div className="rounded-2xl border border-main-whiteMarble bg-linear-to-r from-main-white to-main-titaniumWhite/70 p-5">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-main-lightSlate">
-                    CMS / Legal & Help
+                    {t("legalMarketing.eyebrow")}
                 </p>
-                <h2 className="mt-1 text-xl font-bold text-main-mirage">Marketing FAQ</h2>
+                <h2 className="mt-1 text-xl font-bold text-main-mirage">{t("legalMarketing.faq.title")}</h2>
                 <p className="mt-1 text-sm text-main-coolGray">
-                    Configure the public FAQ page with bilingual hero content and grouped questions
-                    with localized answers.
+                    {t("legalMarketing.faq.description")}
                 </p>
             </div>
 
@@ -99,7 +100,7 @@ const MarketingFaqLayout = () => {
                             }
                         >
                             <tab.icon size={16} className="opacity-90 group-hover:opacity-100" />
-                            {tab.label}
+                            {t(`legalMarketing.faq.tabs.${tab.tabKey}`)}
                         </NavLink>
                     ))}
                 </div>
@@ -109,7 +110,7 @@ const MarketingFaqLayout = () => {
                 <div className="flex items-center justify-between gap-3 rounded-2xl border border-main-remove/20 bg-main-remove/10 px-4 py-3 text-sm text-main-remove">
                     <span>{error}</span>
                     <button type="button" className="font-semibold underline" onClick={clearError}>
-                        Dismiss
+                        {t("legalMarketing.dismiss")}
                     </button>
                 </div>
             ) : null}

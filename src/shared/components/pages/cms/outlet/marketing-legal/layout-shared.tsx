@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { NavLink, Navigate, Outlet } from "react-router-dom";
 import clsx from "clsx";
 import { LayoutPanelTop, FileStack } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import type { CmsMarketingLegalState } from "@/shared/hooks/store/createCmsMarketingLegalStore";
 
 interface UseMarketingLegalStore {
@@ -10,8 +11,7 @@ interface UseMarketingLegalStore {
 
 interface MarketingLegalLayoutSharedProps {
     useStore: UseMarketingLegalStore;
-    title: string;
-    description: string;
+    variant: "terms" | "privacy";
     heroPath: string;
     faqsPath: string;
 }
@@ -45,11 +45,11 @@ const MarketingLegalLoadingSkeleton = () => (
 
 const MarketingLegalLayoutShared = ({
     useStore,
-    title,
-    description,
+    variant,
     heroPath,
     faqsPath,
 }: MarketingLegalLayoutSharedProps) => {
+    const { t } = useTranslation("cms");
     const { draft, loading, error, clearError, fetch, addGroup } = useStore();
     const initialEmptyHandled = useRef(false);
 
@@ -76,10 +76,14 @@ const MarketingLegalLayoutShared = ({
         <div className="space-y-5">
             <div className="rounded-2xl border border-main-whiteMarble bg-linear-to-r from-main-white to-main-titaniumWhite/70 p-5">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-main-lightSlate">
-                    CMS / Legal & Help
+                    {t("legalMarketing.eyebrow")}
                 </p>
-                <h2 className="mt-1 text-xl font-bold text-main-mirage">{title}</h2>
-                <p className="mt-1 text-sm text-main-coolGray">{description}</p>
+                <h2 className="mt-1 text-xl font-bold text-main-mirage">
+                    {t(`legalMarketing.${variant}.title`)}
+                </h2>
+                <p className="mt-1 text-sm text-main-coolGray">
+                    {t(`legalMarketing.${variant}.description`)}
+                </p>
             </div>
 
             <div className="rounded-2xl border border-main-whiteMarble bg-main-white p-2 shadow-[0_12px_30px_rgba(17,24,39,0.04)]">
@@ -96,7 +100,7 @@ const MarketingLegalLayoutShared = ({
                         }
                     >
                         <LayoutPanelTop size={16} className="opacity-90 group-hover:opacity-100" />
-                        Hero
+                        {t("legalMarketing.sharedTabs.hero")}
                     </NavLink>
                     <NavLink
                         to={faqsPath}
@@ -110,7 +114,7 @@ const MarketingLegalLayoutShared = ({
                         }
                     >
                         <FileStack size={16} className="opacity-90 group-hover:opacity-100" />
-                        Content
+                        {t("legalMarketing.sharedTabs.content")}
                     </NavLink>
                 </div>
             </div>
@@ -119,7 +123,7 @@ const MarketingLegalLayoutShared = ({
                 <div className="flex items-center justify-between gap-3 rounded-2xl border border-main-remove/20 bg-main-remove/10 px-4 py-3 text-sm text-main-remove">
                     <span>{error}</span>
                     <button type="button" className="font-semibold underline" onClick={clearError}>
-                        Dismiss
+                        {t("legalMarketing.dismiss")}
                     </button>
                 </div>
             ) : null}

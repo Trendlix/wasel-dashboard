@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import clsx from "clsx";
+import { useTranslation } from "react-i18next";
 import { useCmsContactStore } from "@/shared/hooks/store/useCmsContactStore";
 import {
     PageShell,
@@ -10,6 +11,7 @@ import {
 } from "../about/_shared";
 
 const ContactPage = () => {
+    const { t } = useTranslation("cms");
     const {
         contact,
         loading,
@@ -27,10 +29,10 @@ const ContactPage = () => {
 
     return (
         <PageShell
-            title="Contact"
-            subtitle="Contact Section"
-            description="Public contact page: phones, primary inbox, department routing, address, and hours."
-            hint="Values are validated (E.164-style phone, emails). Shown on the marketing contact page and may feed apps."
+            title={t("contactEditor.pageTitle")}
+            subtitle={t("contactEditor.subtitle")}
+            description={t("contactEditor.description")}
+            hint={t("contactEditor.hint")}
             onSave={saveContact}
             saving={saving}
             loading={loading}
@@ -40,11 +42,11 @@ const ContactPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
                         <CmsFieldLabel
-                            label="Mobile"
-                            hint="Primary mobile line in international format (e.g. +20 1xx xxx xxxx)."
+                            label={t("contactEditor.mobile")}
+                            hint={t("contactEditor.mobileHint")}
                         />
                         <Input
-                            placeholder="+20 100 000 0000"
+                            placeholder={t("contactEditor.mobilePlaceholder")}
                             value={contact.mobile}
                             onChange={(e) => setContact({ mobile: e.target.value })}
                             disabled={saving}
@@ -54,11 +56,11 @@ const ContactPage = () => {
 
                     <div className="space-y-1.5">
                         <CmsFieldLabel
-                            label="Landline"
-                            hint="Office landline; include country and area code. National leading 0 may be required by validation."
+                            label={t("contactEditor.landline")}
+                            hint={t("contactEditor.landlineHint")}
                         />
                         <Input
-                            placeholder="+20 2 0000 0000"
+                            placeholder={t("contactEditor.landlinePlaceholder")}
                             value={contact.landline}
                             onChange={(e) => setContact({ landline: e.target.value })}
                             disabled={saving}
@@ -69,12 +71,12 @@ const ContactPage = () => {
 
                 <div className="space-y-1.5">
                     <CmsFieldLabel
-                        label="Primary email"
-                        hint="Main contact address shown prominently (e.g. hello@domain)."
+                        label={t("contactEditor.primaryEmail")}
+                        hint={t("contactEditor.primaryEmailHint")}
                     />
                     <Input
                         type="email"
-                        placeholder="contact@example.com"
+                        placeholder={t("contactEditor.primaryEmailPlaceholder")}
                         value={contact.email}
                         onChange={(e) => setContact({ email: e.target.value })}
                         disabled={saving}
@@ -84,13 +86,13 @@ const ContactPage = () => {
 
                 <div className="space-y-1.5">
                     <CmsFieldLabel
-                        label="Department emails"
-                        hint="Optional routed inboxes for support, legal, privacy, and partnerships. Each must be a valid email."
+                        label={t("contactEditor.departments")}
+                        hint={t("contactEditor.departmentsHint")}
                     />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1.5">
                             <label className="text-xs font-medium text-main-mirage">
-                                General support
+                                {t("contactEditor.generalSupport")}
                             </label>
                             <Input
                                 type="email"
@@ -109,7 +111,7 @@ const ContactPage = () => {
                         </div>
                         <div className="space-y-1.5">
                             <label className="text-xs font-medium text-main-mirage">
-                                Legal inquiries
+                                {t("contactEditor.legalInquiries")}
                             </label>
                             <Input
                                 type="email"
@@ -126,7 +128,7 @@ const ContactPage = () => {
                         </div>
                         <div className="space-y-1.5">
                             <label className="text-xs font-medium text-main-mirage">
-                                Privacy concerns
+                                {t("contactEditor.privacyConcerns")}
                             </label>
                             <Input
                                 type="email"
@@ -143,7 +145,7 @@ const ContactPage = () => {
                         </div>
                         <div className="space-y-1.5">
                             <label className="text-xs font-medium text-main-mirage">
-                                Business partnerships
+                                {t("contactEditor.businessPartnerships")}
                             </label>
                             <Input
                                 type="email"
@@ -167,11 +169,11 @@ const ContactPage = () => {
 
                 <div className="space-y-1.5">
                     <CmsFieldLabel
-                        label="Address"
-                        hint="Single-line postal address as displayed to visitors (street, city, country)."
+                        label={t("contactEditor.address")}
+                        hint={t("contactEditor.addressHint")}
                     />
                     <Input
-                        placeholder="123 Main St, City, Country"
+                        placeholder={t("contactEditor.addressPlaceholder")}
                         value={contact.address}
                         onChange={(e) => setContact({ address: e.target.value })}
                         disabled={saving}
@@ -181,11 +183,11 @@ const ContactPage = () => {
 
                 <div className="space-y-1.5">
                     <CmsFieldLabel
-                        label="Business Hours"
-                        hint="Human-readable hours string (e.g. Sun–Thu 9:00–17:00). No structured format required."
+                        label={t("contactEditor.businessHours")}
+                        hint={t("contactEditor.businessHoursHint")}
                     />
                     <Input
-                        placeholder="Sun – Thu, 9 AM – 5 PM"
+                        placeholder={t("contactEditor.businessHoursPlaceholder")}
                         value={contact.business_hours}
                         onChange={(e) => setContact({ business_hours: e.target.value })}
                         disabled={saving}

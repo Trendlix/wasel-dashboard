@@ -74,7 +74,7 @@ const Account = () => {
                 setScreen("twofa-verify");
             }
         } catch (err: unknown) {
-            console.error(err);
+            if (import.meta.env.DEV) console.error(err);
         } finally {
             if (name) {
                 signupForm.reset();
@@ -92,7 +92,7 @@ const Account = () => {
             await verifyTwoFa(data.totp, setLoading);
             await redirectToFirstAllowedPage();
         } catch (err: unknown) {
-            console.error(err);
+            if (import.meta.env.DEV) console.error(err);
         } finally {
             totpForm.reset();
         }
@@ -179,7 +179,7 @@ const Account = () => {
                     )}
                     {screen === "form" && (
                         <>
-                            <div className="flex gap-3 bg-main-primary/10 p-1.5 common-rounded">
+                            <div dir="ltr" className="flex gap-3 bg-main-primary/10 p-1.5 common-rounded">
                                 <button
                                     type="button"
                                     onClick={() => handleModeSwitch("login")}

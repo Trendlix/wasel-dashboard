@@ -1,60 +1,36 @@
-import { Blocks, CreativeCommons, LucideIcon, ConciergeBell, Phone, SearchCheck, BookOpen, FileText } from "lucide-react";
+import { Blocks, CreativeCommons, LucideIcon, ConciergeBell, Phone, SearchCheck, BookOpen, FileText, House } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import clsx from "clsx";
+import { useTranslation } from "react-i18next";
 
 interface ITabItem {
     id: number;
-    name: string;
+    nameKey:
+        | "home"
+        | "about"
+        | "services"
+        | "contact"
+        | "seo"
+        | "blogs"
+        | "legalHelp"
+        | "common";
     icon: LucideIcon;
     to: string;
 }
 
 const tabs: ITabItem[] = [
-    {
-        id: 1,
-        name: "Common",
-        icon: CreativeCommons,
-        to: "/cms/common"
-    },
-    {
-        id: 2,
-        name: "About",
-        icon: Blocks,
-        to: "/cms/about"
-    },
-    {
-        id: 3,
-        name: "Services",
-        icon: ConciergeBell,
-        to: "/cms/services"
-    },
-    {
-        id: 4,
-        name: "Contact",
-        icon: Phone,
-        to: "/cms/contact"
-    },
-    {
-        id: 5,
-        name: "SEO",
-        icon: SearchCheck,
-        to: "/cms/seo"
-    },
-    {
-        id: 6,
-        name: "Blogs",
-        icon: BookOpen,
-        to: "/cms/blogs"
-    },
-    {
-        id: 7,
-        name: "Legal & Help",
-        icon: FileText,
-        to: "/cms/legal-help"
-    },
+    { id: 0, nameKey: "home", icon: House, to: "/cms/home" },
+    { id: 1, nameKey: "about", icon: Blocks, to: "/cms/about" },
+    { id: 2, nameKey: "services", icon: ConciergeBell, to: "/cms/services" },
+    { id: 3, nameKey: "contact", icon: Phone, to: "/cms/contact" },
+    { id: 4, nameKey: "seo", icon: SearchCheck, to: "/cms/seo" },
+    { id: 5, nameKey: "blogs", icon: BookOpen, to: "/cms/blogs" },
+    { id: 6, nameKey: "legalHelp", icon: FileText, to: "/cms/legal-help" },
+    { id: 7, nameKey: "common", icon: CreativeCommons, to: "/cms/common" },
 ];
 
 const Tabs = () => {
+    const { t } = useTranslation("cms");
     return (
         <div className="mb-6 rounded-2xl border border-main-whiteMarble bg-main-white p-2 shadow-[0_12px_30px_rgba(17,24,39,0.04)]">
             <div className="flex flex-wrap items-center gap-2">
@@ -73,7 +49,7 @@ const Tabs = () => {
                         }
                     >
                         <tab.icon size={16} className="opacity-90 group-hover:opacity-100" />
-                        {tab.name}
+                        {t(`mainTabs.${tab.nameKey}`)}
                     </NavLink>
                 ))}
             </div>

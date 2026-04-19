@@ -1,34 +1,21 @@
 import { useEffect } from "react";
-import { useParams } from "react-router-dom";
 import PageTransition from "@/shared/components/common/PageTransition";
-import useDetailedOpenedNotification, {
-    type IDetailedTripNotification,
-} from "@/shared/hooks/store/useDetailedOpenedNotification";
-import NotificationDetailPage from "@/shared/components/pages/notifications/NotificationDetailPage";
+import NotificationsAdminTabContent from "@/shared/components/pages/notifications/NotificationsAdminTabContent";
+import useTripAdminNotificationsStore from "@/shared/hooks/store/useTripAdminNotificationsStore";
 
-const NotificationsTripPage = () => {
-    const { tripId } = useParams<{ tripId: string }>();
-    const fetch = useDetailedOpenedNotification((s) => s.fetch);
-    const reset = useDetailedOpenedNotification((s) => s.reset);
-    const data = useDetailedOpenedNotification((s) => s.data);
-    const loading = useDetailedOpenedNotification((s) => s.loading);
-    const error = useDetailedOpenedNotification((s) => s.error);
+const NotificationsTripTab = () => {
+    const store = useTripAdminNotificationsStore();
+    const { fetchNotifications, search, readFilter, sortValue, page } = store;
 
     useEffect(() => {
-        if (tripId) fetch("trip", Number(tripId));
-        return () => reset();
-    }, [tripId, fetch, reset]);
+        fetchNotifications();
+    }, [search, readFilter, sortValue, page]);
 
     return (
         <PageTransition>
-            <NotificationDetailPage
-                type="trip"
-                loading={loading}
-                error={error}
-                notification={data as IDetailedTripNotification | null}
-            />
+            <NotificationsAdminTabContent type="trip" store={store} />
         </PageTransition>
     );
 };
 
-export default NotificationsTripPage;
+export default NotificationsTripTab;

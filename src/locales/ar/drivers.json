@@ -1,0 +1,56 @@
+{
+  "pageTitle": "السائقون",
+  "pageDescription": "إدارة كل السائقين المسجلين",
+  "searchPlaceholder": "ابحث بالاسم أو البريد أو الهاتف…",
+  "defaultDriverName": "سائق",
+  "ratingNA": "غير متوفر",
+  "filters": {
+    "allStatuses": "كل الحالات",
+    "pending": "قيد المراجعة",
+    "approved": "مقبول",
+    "suspended": "معلّق",
+    "blocked": "محظور",
+    "rejected": "مرفوض",
+    "deleted": "محذوف"
+  },
+  "table": {
+    "driver": "السائق",
+    "phone": "الهاتف",
+    "status": "الحالة",
+    "rating": "التقييم",
+    "joined": "تاريخ الانضمام",
+    "actions": "إجراءات"
+  },
+  "viewDetails": "عرض التفاصيل",
+  "emptyTitle": "لا يوجد سائقون",
+  "emptyDescription": "جرّب تعديل البحث أو عوامل التصفية.",
+  "analytics": {
+    "totalDrivers": "إجمالي السائقين",
+    "approvedDrivers": "السائقون المقبولون",
+    "pendingDrivers": "السائقون قيد المراجعة"
+  },
+  "export": {
+    "title": "تصدير السائقين",
+    "description": "اختر نطاق تاريخ لتصدير السائقين المسجلين خلاله، أو اترك الحقول فارغة للكل.",
+    "dateHint": "اترك الحقلين فارغين لتصدير كل السائقين."
+  },
+  "modal": {
+    "title": "تفاصيل السائق",
+    "description": "عرض بيانات السائق وتحديث حالة الحساب.",
+    "phone": "الهاتف",
+    "joined": "تاريخ الانضمام",
+    "rating": "التقييم",
+    "status": "الحالة",
+    "accountStatus": "حالة الحساب",
+    "saveChanges": "حفظ التغييرات",
+    "saving": "جاري الحفظ…"
+  },
+  "statuses": {
+    "pending": "قيد المراجعة",
+    "approved": "مقبول",
+    "suspended": "معلّق",
+    "blocked": "محظور",
+    "rejected": "مرفوض",
+    "deleted": "محذوف"
+  }
+}

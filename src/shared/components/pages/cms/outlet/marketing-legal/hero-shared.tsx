@@ -4,6 +4,7 @@ import { formInputClass } from "@/shared/components/common/formStyles";
 import { BilingualField, BilingualStringArrayEditor } from "../about/_shared";
 import SectionCard from "../marketing-faq/SectionCard";
 import type { CmsMarketingLegalState } from "@/shared/hooks/store/createCmsMarketingLegalStore";
+import { useTranslation } from "react-i18next";
 
 interface UseMarketingLegalStore {
     (): CmsMarketingLegalState;
@@ -24,6 +25,7 @@ const MarketingLegalHeroShared = ({
     hint,
     saveButtonLabel,
 }: MarketingLegalHeroSharedProps) => {
+    const { t } = useTranslation("cms");
     const { draft, saving, saveHero, setDraft } = useStore();
 
     return (
@@ -38,15 +40,15 @@ const MarketingLegalHeroShared = ({
                     onClick={() => void saveHero()}
                     disabled={saving}
                 >
-                    {saving ? "Saving..." : saveButtonLabel}
+                    {saving ? t("marketingNested.saving") : saveButtonLabel}
                 </Button>
             }
         >
             <div className="space-y-5">
                 <BilingualStringArrayEditor
-                    label="Hero title lines"
-                    hint="At least two lines are required because the public hero uses a split headline style."
-                    placeholder="Title line"
+                    label={t("marketingNested.heroTitleLines")}
+                    hint={t("marketingNested.heroTitleLinesHint")}
+                    placeholder={t("marketingNested.heroTitlePlaceholder")}
                     minRows={2}
                     itemClassName={formInputClass}
                     enValues={draft.en.titles}
@@ -56,8 +58,8 @@ const MarketingLegalHeroShared = ({
                 />
 
                 <BilingualField
-                    label="Intro description"
-                    hint="This short intro appears under the hero title on the public page."
+                    label={t("marketingNested.introDescription")}
+                    hint={t("marketingNested.introDescriptionHint")}
                     required
                     en={
                         <Textarea
@@ -68,7 +70,7 @@ const MarketingLegalHeroShared = ({
                                     en: { ...draft.en, description: e.target.value },
                                 })
                             }
-                            placeholder="English introduction"
+                            placeholder={t("marketingNested.introDescriptionPlaceholderEn")}
                         />
                     }
                     ar={
@@ -80,7 +82,7 @@ const MarketingLegalHeroShared = ({
                                     ar: { ...draft.ar, description: e.target.value },
                                 })
                             }
-                            placeholder="المقدمة بالعربية"
+                            placeholder={t("marketingNested.introDescriptionPlaceholderAr")}
                         />
                     }
                 />

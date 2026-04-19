@@ -1,0 +1,23 @@
+{
+  "pageTitle": "الإعدادات",
+  "pageDescription": "ضبط إعدادات المنصة والتفضيلات",
+  "generalSettings": "الإعدادات العامة",
+  "platformName": "اسم المنصة",
+  "platformNamePlaceholder": "مثال: وصل",
+  "supportEmail": "بريد الدعم",
+  "supportPhone": "هاتف الدعم",
+  "hotlineNumber": "خط ساخن",
+  "whatsappChatbot": "رقم واتساب للبوت",
+  "defaultPlatformLanguage": "لغة المنصة الافتراضية",
+  "notificationPreferencesHeader": "تفضيلات الإشعارات",
+  "rolesPermissionsHeader": "الأدوار والصلاحيات",
+  "pref_email_notifications_for_users": "إشعارات البريد للمستخدمين الجدد",
+  "pref_email_notifications_for_drivers": "إشعارات البريد للسائقين الجدد",
+  "pref_email_notifications_for_drivers_Pending_verifications": "إشعارات البريد لطلبات توثيق السائقين المعلقة",
+  "pref_daily_revenue_reports": "تقارير الإيراد اليومية",
+  "pref_weekly_analytics_summary": "ملخص التحليلات الأسبوعي",
+  "noRolesTitle": "لا توجد أدوار",
+  "noRolesDescription": "لم يُنشأ أي أدوار مشرفين بعد. أضف الأدوار من صفحة الأدوار والصلاحيات.",
+  "userSingular": "مستخدم",
+  "usersPlural": "مستخدمين"
+}

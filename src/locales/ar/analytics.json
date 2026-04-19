@@ -1,0 +1,37 @@
+{
+  "pageTitle": "التحليلات",
+  "pageDescription": "رؤى أداء المنصة والتقارير",
+  "cards": {
+    "avgTripValue": "متوسط قيمة الرحلة",
+    "activeRate": "معدل النشاط",
+    "userGrowth": "نمو المستخدمين",
+    "driverRetention": "احتفاظ السائقين"
+  },
+  "tripsRevenueTitle": "اتجاهات الرحلات والإيرادات",
+  "vehicleDistributionTitle": "توزيع أنواع المركبات",
+  "legendTrips": "الرحلات",
+  "legendRevenue": "الإيراد (جنيه)",
+  "topDriversTitle": "أفضل السائقين أداءً",
+  "table": {
+    "rank": "الترتيب",
+    "driver": "السائق",
+    "totalTrips": "إجمالي الرحلات",
+    "totalEarnings": "إجمالي الأرباح",
+    "avgPerTrip": "المتوسط لكل رحلة"
+  },
+  "currencyEgp": "ج.م",
+  "months": {
+    "jan": "يناير",
+    "feb": "فبراير",
+    "mar": "مارس",
+    "apr": "أبريل",
+    "may": "مايو",
+    "jun": "يونيو"
+  },
+  "vehicleTypes": {
+    "pickup": "بيك أب",
+    "van": "فان",
+    "smallTruck": "شاحنة صغيرة",
+    "largeTruck": "شاحنة كبيرة"
+  }
+}

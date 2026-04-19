@@ -38,9 +38,9 @@ export const dataManagementAnalytics: IAnalyticsCard[] = [
 
 export type TItemStatus = "active" | "inactive";
 
-export const itemStatusStyles: Record<TItemStatus, { bg: string; text: string; label: string }> = {
-    active: { bg: "bg-main-vividMint/10", text: "text-main-vividMint", label: "Active" },
-    inactive: { bg: "bg-main-sharkGray/10", text: "text-main-sharkGray", label: "Inactive" },
+export const itemStatusStyles: Record<TItemStatus, { bg: string; text: string }> = {
+    active: { bg: "bg-main-vividMint/10", text: "text-main-vividMint" },
+    inactive: { bg: "bg-main-sharkGray/10", text: "text-main-sharkGray" },
 };
 
 // ─── Truck types ──────────────────────────────────────────────────────────────

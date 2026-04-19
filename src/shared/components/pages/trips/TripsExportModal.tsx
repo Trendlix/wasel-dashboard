@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { FileDown, CalendarRange } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -25,6 +27,7 @@ const TripsExportModal = ({
   onOpenChange,
   onConfirm,
 }: TripsExportModalProps) => {
+  const { t } = useTranslation(["trips", "common"]);
   const [dateFrom, setDateFrom] = useState(initialDateFrom ?? "");
   const [dateTo, setDateTo] = useState(initialDateTo ?? "");
   const now = new Date();
@@ -54,40 +57,50 @@ const TripsExportModal = ({
   return (
     <CommonModal open={open} onOpenChange={onOpenChange} loading={loading} maxWidth="sm:max-w-[520px]">
       <CommonModalHeader
-        title="Export Trips"
-        description="Choose a date range if you want to export trips for a specific period."
+        title={t("trips:export.title")}
+        description={t("trips:export.description")}
       />
 
       <CommonModalBody className="space-y-4">
+        <div className="flex items-center gap-3 px-4 py-3 bg-main-primary/5 border border-main-primary/15 rounded-xl">
+          <div className="w-9 h-9 bg-main-primary/10 rounded-lg flex items-center justify-center shrink-0">
+            <CalendarRange className="w-4 h-4 text-main-primary" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-main-mirage">{t("common:exportDateRange.title")}</p>
+            <p className="text-xs text-main-sharkGray">{t("trips:export.dateHint")}</p>
+          </div>
+          <FileDown className="w-4 h-4 text-main-primary/50 ms-auto shrink-0" />
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <p className="text-sm font-semibold text-main-mirage">From</p>
+          <div className="space-y-1.5">
+            <p className="text-sm font-semibold text-main-mirage">{t("common:exportDateRange.from")}</p>
             <Input
               type="date"
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
               max={today}
-              className="h-11 border border-main-whiteMarble common-rounded"
+              className="h-11 border-main-whiteMarble common-rounded focus-visible:ring-main-primary/30"
             />
           </div>
 
-          <div className="space-y-2">
-            <p className="text-sm font-semibold text-main-mirage">To</p>
+          <div className="space-y-1.5">
+            <p className="text-sm font-semibold text-main-mirage">{t("common:exportDateRange.to")}</p>
             <Input
               type="date"
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
               min={dateFrom || undefined}
               max={today}
-              className="h-11 border border-main-whiteMarble common-rounded"
+              className="h-11 border-main-whiteMarble common-rounded focus-visible:ring-main-primary/30"
             />
           </div>
         </div>
         {(hasInvalidRange || hasFutureDate) && (
-          <p className="text-xs text-main-remove">
+          <p className="text-xs font-medium text-main-red mt-1">
             {hasInvalidRange
-              ? "From date must be before or equal to To date."
-              : "Date range cannot exceed today."}
+              ? t("common:exportDateRange.invalidRange")
+              : t("common:exportDateRange.futureDate")}
           </p>
         )}
       </CommonModalBody>
@@ -96,18 +109,19 @@ const TripsExportModal = ({
         <Button
           type="button"
           variant="ghost"
-          className="text-main-sharkGray hover:text-main-mirage hover:bg-main-titaniumWhite px-6 h-11 common-rounded"
+          className="text-main-sharkGray hover:text-main-mirage hover:bg-main-titaniumWhite px-6 h-11 common-rounded font-semibold"
           onClick={() => onOpenChange(false)}
           disabled={loading}
         >
-          Cancel
+          {t("common:cancel")}
         </Button>
         <Button
           onClick={handleConfirm}
           disabled={disableConfirm}
-          className="bg-main-primary hover:bg-main-primary/90 text-white font-bold h-11 px-10 common-rounded"
+          className="bg-main-primary hover:bg-main-primary/90 text-white font-bold h-11 px-10 common-rounded shadow-lg shadow-main-primary/20 inline-flex items-center gap-2"
         >
-          {loading ? "Exporting..." : "Confirm Export"}
+          <FileDown className="w-4 h-4" />
+          {loading ? t("common:exporting") : t("common:export")}
         </Button>
       </CommonModalFooter>
     </CommonModal>

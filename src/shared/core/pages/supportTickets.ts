@@ -3,52 +3,39 @@
 export type TTicketStatus = "pending" | "reply" | "closed" | "solved";
 export type TTicketPriority = "low" | "medium" | "high";
 
-// ─── Status styles ────────────────────────────────────────────────────────────
+// ─── Status styles (labels via i18n: `support:statuses.<status>`) ─────────────
 
-export const ticketStatusStyles: Record<
-    TTicketStatus,
-    { label: string; bg: string; text: string }
-> = {
+export const ticketStatusStyles: Record<TTicketStatus, { bg: string; text: string }> = {
     pending: {
-        label: "Open",
         bg: "bg-main-vividMint/15",
         text: "text-main-vividMint",
     },
     reply: {
-        label: "Pending Reply",
         bg: "bg-main-mustardGold/15",
         text: "text-main-mustardGold",
     },
     closed: {
-        label: "Closed",
         bg: "bg-main-sharkGray/15",
         text: "text-main-sharkGray",
     },
     solved: {
-        label: "Solved",
         bg: "bg-main-vividMint/15",
         text: "text-main-vividMint",
     },
 };
 
-// ─── Priority styles ──────────────────────────────────────────────────────────
+// ─── Priority styles (labels via i18n: `support:priorities.<priority>`) ───────
 
-export const ticketPriorityStyles: Record<
-    TTicketPriority,
-    { label: string; bg: string; text: string }
-> = {
+export const ticketPriorityStyles: Record<TTicketPriority, { bg: string; text: string }> = {
     low: {
-        label: "Low",
         bg: "bg-main-sharkGray/15",
         text: "text-main-sharkGray",
     },
     medium: {
-        label: "Medium",
         bg: "bg-main-mustardGold/15",
         text: "text-main-mustardGold",
     },
     high: {
-        label: "High",
         bg: "bg-main-remove/15",
         text: "text-main-remove",
     },
@@ -64,9 +51,9 @@ export interface ITicketOwner {
     phone: string | null;
 }
 
-/** Returns the display name for a ticket owner (user or driver) */
+/** Display name from ticket owner; empty string if none set (use i18n fallback in UI). */
 export const getOwnerDisplayName = (owner: ITicketOwner): string =>
-    owner.full_name ?? owner.name ?? "Unknown";
+    (owner.full_name?.trim() || owner.name?.trim() || "");
 
 export interface ITicketCategory {
     id: number;

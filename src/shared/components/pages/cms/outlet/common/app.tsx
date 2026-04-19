@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import clsx from "clsx";
 import { Trash2 } from "lucide-react";
 import useCmsCommonStore from "@/shared/hooks/store/useCmsCommonStore";
+import { useTranslation } from "react-i18next";
 import {
     BilingualField,
     InputError,
@@ -15,6 +16,7 @@ import {
 import CmsHelpHint from "../../cms-help-hint";
 
 const AppPage = () => {
+    const { t } = useTranslation("cms");
     const {
         common,
         loading,
@@ -56,13 +58,13 @@ const AppPage = () => {
         <div className="rounded-2xl border border-main-whiteMarble bg-main-white p-6 space-y-5 shadow-[0_16px_40px_rgba(17,24,39,0.04)]">
             <div className="flex items-center justify-between gap-4">
                 <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-main-lightSlate">Common Layout</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-main-lightSlate">{t("commonEditor.layout")}</p>
                     <div className="mt-1 flex flex-wrap items-center gap-2">
-                        <h3 className="text-lg font-bold text-main-mirage">Common / App Section</h3>
-                        <CmsHelpHint text="Download CTAs for user and driver apps: one image and store URLs per app, titles in EN/AR." />
+                        <h3 className="text-lg font-bold text-main-mirage">{t("commonEditor.app.title")}</h3>
+                        <CmsHelpHint text={t("commonEditor.app.hint")} />
                     </div>
                     <p className="mt-1 max-w-3xl text-sm text-main-coolGray">
-                        Marketing blocks that link to App Store and Play Store. Images are shared; titles are bilingual.
+                        {t("commonEditor.app.description")}
                     </p>
                 </div>
                 <Button
@@ -71,7 +73,7 @@ const AppPage = () => {
                     disabled={savingPart === "app" || loading}
                     className="bg-main-primary hover:bg-main-primary/90 text-main-white min-w-[140px]"
                 >
-                    {savingPart === "app" ? "Saving..." : "Save Section"}
+                    {savingPart === "app" ? t("commonEditor.saving") : t("commonEditor.saveSection")}
                 </Button>
             </div>
 
@@ -89,13 +91,13 @@ const AppPage = () => {
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                     {/* ── User App ── */}
                     <div className={clsx(sectionCardClass, "space-y-4")}>
-                        <p className="font-semibold text-main-mirage">User App</p>
+                        <p className="font-semibold text-main-mirage">{t("commonEditor.app.userApp")}</p>
 
                         {/* Image preview (shared) */}
                         <div className="space-y-2">
                             <CmsFieldLabel
-                                label="User App Image (shared)"
-                                hint="Screenshot or artwork for the passenger app promo. Same file for all locales."
+                                label={t("commonEditor.app.imageShared")}
+                                hint={t("commonEditor.app.hint")}
                             />
                             <div className="h-[320px] w-[320px] max-w-full overflow-hidden rounded-xl border border-main-whiteMarble bg-main-titaniumWhite/30">
                                 {userDraftPreview ? (
@@ -104,20 +106,20 @@ const AppPage = () => {
                                     <img src={cmsImageUrl(common.en.app.user.img)} alt="User app" className="h-full w-full object-contain" />
                                 ) : (
                                     <div className="flex h-full w-full items-center justify-center px-4 text-center text-sm text-main-coolGray">
-                                        No image uploaded yet
+                                        {t("commonEditor.app.imageEmpty")}
                                     </div>
                                 )}
                             </div>
                             {userDraftPreview && (
-                                <p className="text-xs text-main-primary">New image selected. It will upload on Save.</p>
+                                <p className="text-xs text-main-primary">{t("commonEditor.app.imageSelected")}</p>
                             )}
                         </div>
                         <div className="rounded-xl border border-main-whiteMarble bg-main-titaniumWhite/30 p-3">
                             <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                                 <div className="flex-1 space-y-2">
                                     <CmsFieldLabel
-                                        label="Upload User App Image"
-                                        hint="Replaces the stored user-app image after Save."
+                                        label={t("commonEditor.app.uploadImage")}
+                                        hint={t("commonEditor.app.hint")}
                                     />
                                     <Input
                                         type="file"
@@ -131,7 +133,7 @@ const AppPage = () => {
                                 </div>
                                 {(common.en.app.user.img || appDraftImages.user) && (
                                     <Button type="button" variant="outline" className={destructiveButtonClass} onClick={() => clearAppImage("user")} disabled={savingPart === "app"}>
-                                        <Trash2 size={14} /> Remove Image
+                                        <Trash2 size={14} /> {t("commonEditor.app.removeImage")}
                                     </Button>
                                 )}
                             </div>
@@ -140,18 +142,18 @@ const AppPage = () => {
 
                         {/* Bilingual title */}
                         <BilingualField
-                            label="User App Title"
-                            hint="Headline next to the user-app image (e.g. Ship with Wasel)."
+                            label={t("commonEditor.app.appTitle")}
+                            hint={t("commonEditor.app.hint")}
                             en={
                                 <Input
-                                    placeholder="Title"
+                                    placeholder={t("commonEditor.app.appTitlePlaceholderEn")}
                                     value={common.en.app.user.title}
                                     onChange={(e) => setApp("en", { user: { ...common.en.app.user, title: e.target.value } })}
                                 />
                             }
                             ar={
                                 <Input
-                                    placeholder="العنوان"
+                                    placeholder={t("commonEditor.app.appTitlePlaceholderAr")}
                                     value={common.ar.app.user.title}
                                     onChange={(e) => setApp("ar", { user: { ...common.ar.app.user, title: e.target.value } })}
                                 />
@@ -163,13 +165,13 @@ const AppPage = () => {
                         {/* Store links (shared) */}
                         <div className="space-y-3 pt-1">
                             <CmsFieldLabel
-                                label="User App Store Links (shared)"
-                                hint="Official store listing URLs. Use HTTPS links from Apple and Google consoles."
+                                label={t("commonEditor.app.storeLinks")}
+                                hint={t("commonEditor.app.hint")}
                             />
                             <div className="space-y-2">
-                                <label className="text-xs text-main-sharkGray">App Store</label>
+                                <label className="text-xs text-main-sharkGray">{t("commonEditor.app.appStore")}</label>
                                 <Input
-                                    placeholder="App Store URL"
+                                    placeholder={t("commonEditor.app.appStorePlaceholder")}
                                     value={common.en.app.user.links.app_store}
                                     onChange={(e) => {
                                         setApp("en", { user: { ...common.en.app.user, links: { ...common.en.app.user.links, app_store: e.target.value } } });
@@ -179,9 +181,9 @@ const AppPage = () => {
                                 <InputError message={getEnError("user.links.app_store")} />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-xs text-main-sharkGray">Play Store</label>
+                                <label className="text-xs text-main-sharkGray">{t("commonEditor.app.playStore")}</label>
                                 <Input
-                                    placeholder="Play Store URL"
+                                    placeholder={t("commonEditor.app.playStorePlaceholder")}
                                     value={common.en.app.user.links.play_store}
                                     onChange={(e) => {
                                         setApp("en", { user: { ...common.en.app.user, links: { ...common.en.app.user.links, play_store: e.target.value } } });
@@ -195,13 +197,13 @@ const AppPage = () => {
 
                     {/* ── Driver App ── */}
                     <div className={clsx(sectionCardClass, "space-y-4")}>
-                        <p className="font-semibold text-main-mirage">Driver App</p>
+                        <p className="font-semibold text-main-mirage">{t("commonEditor.app.driverApp")}</p>
 
                         {/* Image preview (shared) */}
                         <div className="space-y-2">
                             <CmsFieldLabel
-                                label="Driver App Image (shared)"
-                                hint="Visual for the driver acquisition block. Shared across languages."
+                                label={t("commonEditor.app.imageShared")}
+                                hint={t("commonEditor.app.hint")}
                             />
                             <div className="h-[320px] w-[320px] max-w-full overflow-hidden rounded-xl border border-main-whiteMarble bg-main-titaniumWhite/30">
                                 {driverDraftPreview ? (
@@ -210,20 +212,20 @@ const AppPage = () => {
                                     <img src={cmsImageUrl(common.en.app.driver.img)} alt="Driver app" className="h-full w-full object-contain" />
                                 ) : (
                                     <div className="flex h-full w-full items-center justify-center px-4 text-center text-sm text-main-coolGray">
-                                        No image uploaded yet
+                                        {t("commonEditor.app.imageEmpty")}
                                     </div>
                                 )}
                             </div>
                             {driverDraftPreview && (
-                                <p className="text-xs text-main-primary">New image selected. It will upload on Save.</p>
+                                <p className="text-xs text-main-primary">{t("commonEditor.app.imageSelected")}</p>
                             )}
                         </div>
                         <div className="rounded-xl border border-main-whiteMarble bg-main-titaniumWhite/30 p-3">
                             <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                                 <div className="flex-1 space-y-2">
                                     <CmsFieldLabel
-                                        label="Upload Driver App Image"
-                                        hint="Replaces the driver-app image after Save."
+                                        label={t("commonEditor.app.uploadImage")}
+                                        hint={t("commonEditor.app.hint")}
                                     />
                                     <Input
                                         type="file"
@@ -237,7 +239,7 @@ const AppPage = () => {
                                 </div>
                                 {(common.en.app.driver.img || appDraftImages.driver) && (
                                     <Button type="button" variant="outline" className={destructiveButtonClass} onClick={() => clearAppImage("driver")} disabled={savingPart === "app"}>
-                                        <Trash2 size={14} /> Remove Image
+                                        <Trash2 size={14} /> {t("commonEditor.app.removeImage")}
                                     </Button>
                                 )}
                             </div>
@@ -246,18 +248,18 @@ const AppPage = () => {
 
                         {/* Bilingual title */}
                         <BilingualField
-                            label="Driver App Title"
-                            hint="Headline for the driver download section."
+                            label={t("commonEditor.app.appTitle")}
+                            hint={t("commonEditor.app.hint")}
                             en={
                                 <Input
-                                    placeholder="Title"
+                                    placeholder={t("commonEditor.app.appTitlePlaceholderEn")}
                                     value={common.en.app.driver.title}
                                     onChange={(e) => setApp("en", { driver: { ...common.en.app.driver, title: e.target.value } })}
                                 />
                             }
                             ar={
                                 <Input
-                                    placeholder="العنوان"
+                                    placeholder={t("commonEditor.app.appTitlePlaceholderAr")}
                                     value={common.ar.app.driver.title}
                                     onChange={(e) => setApp("ar", { driver: { ...common.ar.app.driver, title: e.target.value } })}
                                 />
@@ -269,13 +271,13 @@ const AppPage = () => {
                         {/* Store links (shared) */}
                         <div className="space-y-3 pt-1">
                             <CmsFieldLabel
-                                label="Driver App Store Links (shared)"
-                                hint="Driver app listing URLs on App Store and Play Store."
+                                label={t("commonEditor.app.storeLinks")}
+                                hint={t("commonEditor.app.hint")}
                             />
                             <div className="space-y-2">
-                                <label className="text-xs text-main-sharkGray">App Store</label>
+                                <label className="text-xs text-main-sharkGray">{t("commonEditor.app.appStore")}</label>
                                 <Input
-                                    placeholder="App Store URL"
+                                    placeholder={t("commonEditor.app.appStorePlaceholder")}
                                     value={common.en.app.driver.links.app_store}
                                     onChange={(e) => {
                                         setApp("en", { driver: { ...common.en.app.driver, links: { ...common.en.app.driver.links, app_store: e.target.value } } });
@@ -285,9 +287,9 @@ const AppPage = () => {
                                 <InputError message={getEnError("driver.links.app_store")} />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-xs text-main-sharkGray">Play Store</label>
+                                <label className="text-xs text-main-sharkGray">{t("commonEditor.app.playStore")}</label>
                                 <Input
-                                    placeholder="Play Store URL"
+                                    placeholder={t("commonEditor.app.playStorePlaceholder")}
                                     value={common.en.app.driver.links.play_store}
                                     onChange={(e) => {
                                         setApp("en", { driver: { ...common.en.app.driver, links: { ...common.en.app.driver.links, play_store: e.target.value } } });

@@ -1,24 +1,30 @@
+export type TAnalyticsCardKey = "avgTripValue" | "activeRate" | "userGrowth" | "driverRetention";
+
 export const analyticsCards = [
-    { id: 1, title: "Avg. Trip Value", value: "EGP 920", icon: "dollar" },
-    { id: 2, title: "Active Rate", value: "89%", icon: "trend" },
-    { id: 3, title: "User Growth", value: "+12.5%", icon: "users" },
-    { id: 4, title: "Driver Retention", value: "94%", icon: "truck" },
+    { id: 1, cardKey: "avgTripValue" as const, value: "EGP 920", icon: "dollar" },
+    { id: 2, cardKey: "activeRate" as const, value: "89%", icon: "trend" },
+    { id: 3, cardKey: "userGrowth" as const, value: "+12.5%", icon: "users" },
+    { id: 4, cardKey: "driverRetention" as const, value: "94%", icon: "truck" },
 ];
+
+export type TMonthKey = "jan" | "feb" | "mar" | "apr" | "may" | "jun";
 
 export const tripsRevenueData = [
-    { month: "Jan", trips: 38000, revenue: 50000 },
-    { month: "Feb", trips: 43000, revenue: 56000 },
-    { month: "Mar", trips: 42000, revenue: 50000 },
-    { month: "Apr", trips: 51000, revenue: 66000 },
-    { month: "May", trips: 55000, revenue: 63000 },
-    { month: "Jun", trips: 68000, revenue: 74000 },
+    { monthKey: "jan" as const, trips: 38000, revenue: 50000 },
+    { monthKey: "feb" as const, trips: 43000, revenue: 56000 },
+    { monthKey: "mar" as const, trips: 42000, revenue: 50000 },
+    { monthKey: "apr" as const, trips: 51000, revenue: 66000 },
+    { monthKey: "may" as const, trips: 55000, revenue: 63000 },
+    { monthKey: "jun" as const, trips: 68000, revenue: 74000 },
 ];
 
+export type TVehicleTypeKey = "pickup" | "van" | "smallTruck" | "largeTruck";
+
 export const vehicleDistributionData = [
-    { name: "Pickup", value: 32, fill: "#004AAD" },
-    { name: "Van", value: 24, fill: "#D81B60" },
-    { name: "Small Truck", value: 14, fill: "#F4AE00" },
-    { name: "Large Truck", value: 18, fill: "#8158DF" },
+    { typeKey: "pickup" as const, value: 32, fill: "#004AAD" },
+    { typeKey: "van" as const, value: 24, fill: "#D81B60" },
+    { typeKey: "smallTruck" as const, value: 14, fill: "#F4AE00" },
+    { typeKey: "largeTruck" as const, value: 18, fill: "#8158DF" },
 ];
 
 export interface ITopDriver {

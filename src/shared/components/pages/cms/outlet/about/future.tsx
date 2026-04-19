@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Trash2 } from "lucide-react";
 import clsx from "clsx";
+import { useTranslation } from "react-i18next";
 import useCmsAboutStore from "@/shared/hooks/store/useCmsAboutStore";
 import {
     PageShell,
@@ -16,6 +17,7 @@ import {
 } from "./_shared";
 
 const AboutFuturePage = () => {
+    const { t } = useTranslation("cms");
     const {
         future,
         loading,
@@ -49,10 +51,10 @@ const AboutFuturePage = () => {
 
     return (
         <PageShell
-            title="About / Future"
-            subtitle="About Section"
-            description="Future-focused cards: image plus bilingual title lines and description lines per card."
-            hint="Each card owns its own image. Title/description are string lists so you can match multi-line layouts."
+            title={t("aboutEditor.future.pageTitle")}
+            subtitle={t("aboutEditor.future.subtitle")}
+            description={t("aboutEditor.future.description")}
+            hint={t("aboutEditor.future.hint")}
             onSave={() => savePart("future")}
             saving={savingPart === "future"}
             loading={loading}
@@ -62,8 +64,8 @@ const AboutFuturePage = () => {
                 <div className={clsx(sectionCardClass, "space-y-3")}>
                     <div className="space-y-2">
                         <CmsFieldLabel
-                            label="Section visibility"
-                            hint="When hidden, Future cards are not shown on the live About page."
+                            label={t("aboutEditor.future.visibility")}
+                            hint={t("aboutEditor.future.visibilityHint")}
                         />
                         <SectionVisibilityToggle
                             checked={future.en.hide}
@@ -80,7 +82,7 @@ const AboutFuturePage = () => {
                     <div key={`future-card-${index}`} className={clsx(sectionCardClass, "space-y-4")}>
                         <div className="flex items-center justify-between">
                             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-main-lightSlate">
-                                Future Card #{index + 1}
+                                {t("aboutEditor.future.cardLabel", { n: index + 1 })}
                             </p>
                             <Button
                                 type="button"
@@ -89,29 +91,29 @@ const AboutFuturePage = () => {
                                 onClick={() => removeFutureCard(index)}
                             >
                                 <Trash2 size={14} />
-                                Remove Card
+                                {t("aboutEditor.future.removeCard")}
                             </Button>
                         </div>
 
                         {/* Shared image */}
                         <div className="space-y-2">
                             <CmsFieldLabel
-                                label="Future Card Image (shared)"
-                                hint="Visual for this future pillar. Shared across EN/AR like other About cards."
+                                label={t("aboutEditor.future.cardImage")}
+                                hint={t("aboutEditor.future.cardImageHint")}
                             />
                             <div className="h-[280px] w-[280px] max-w-full overflow-hidden rounded-xl border border-main-whiteMarble bg-main-titaniumWhite/30">
                                 {futureDraftPreviews[index] ? (
-                                    <img src={futureDraftPreviews[index]} alt={`Future card ${index + 1} preview`} className="h-full w-full object-contain" />
+                                    <img src={futureDraftPreviews[index]} alt={t("aboutEditor.future.cardImage")} className="h-full w-full object-contain" />
                                 ) : future.en.cards[index]?.img ? (
-                                    <img src={cmsImageUrl(future.en.cards[index].img)} alt={`Future card ${index + 1}`} className="h-full w-full object-contain" />
+                                    <img src={cmsImageUrl(future.en.cards[index].img)} alt={t("aboutEditor.future.cardImage")} className="h-full w-full object-contain" />
                                 ) : (
                                     <div className="flex h-full w-full items-center justify-center px-4 text-center text-sm text-main-coolGray">
-                                        No image uploaded yet
+                                        {t("aboutEditor.future.cardImageEmpty")}
                                     </div>
                                 )}
                             </div>
                             {futureDraftPreviews[index] && (
-                                <p className="text-xs text-main-primary">New image selected. It will upload on Save.</p>
+                                <p className="text-xs text-main-primary">{t("aboutEditor.future.cardImageSelected")}</p>
                             )}
                         </div>
 
@@ -119,8 +121,8 @@ const AboutFuturePage = () => {
                             <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                                 <div className="flex-1 space-y-2">
                                     <CmsFieldLabel
-                                        label="Upload Card Image"
-                                        hint="Upload replaces the stored image for this card index after Save."
+                                        label={t("aboutEditor.future.uploadCardImage")}
+                                        hint={t("aboutEditor.future.uploadCardImageHint")}
                                     />
                                     <Input
                                         type="file"
@@ -142,7 +144,7 @@ const AboutFuturePage = () => {
                                         disabled={savingPart === "future"}
                                     >
                                         <Trash2 size={14} />
-                                        Remove Image
+                                        {t("aboutEditor.future.removeImage")}
                                     </Button>
                                 )}
                             </div>
@@ -151,11 +153,11 @@ const AboutFuturePage = () => {
 
                         {/* Bilingual text arrays */}
                         <BilingualStringArrayEditor
-                            label="Card Titles"
-                            hint="Stacked headline fragments for this card. Add rows to match the design."
+                            label={t("aboutEditor.future.cardTitles")}
+                            hint={t("aboutEditor.future.cardTitlesHint")}
                             enValues={future.en.cards[index]?.titles ?? []}
                             arValues={future.ar.cards[index]?.titles ?? []}
-                            placeholder="Card title"
+                            placeholder={t("aboutEditor.future.titlePlaceholder")}
                             onEnChange={(titles) => updateFutureCard("en", index, { titles })}
                             onArChange={(titles) => updateFutureCard("ar", index, { titles })}
                             enTopError={getEnError(`cards.${index}.titles`)}
@@ -165,11 +167,11 @@ const AboutFuturePage = () => {
                         />
 
                         <BilingualStringArrayEditor
-                            label="Card Descriptions"
-                            hint="Body copy lines under the titles. Use one row per paragraph if needed."
+                            label={t("aboutEditor.future.cardDescriptions")}
+                            hint={t("aboutEditor.future.cardDescriptionsHint")}
                             enValues={future.en.cards[index]?.descriptions ?? []}
                             arValues={future.ar.cards[index]?.descriptions ?? []}
-                            placeholder="Card description"
+                            placeholder={t("aboutEditor.future.descriptionPlaceholder")}
                             multiline
                             onEnChange={(descriptions) => updateFutureCard("en", index, { descriptions })}
                             onArChange={(descriptions) => updateFutureCard("ar", index, { descriptions })}
@@ -183,7 +185,7 @@ const AboutFuturePage = () => {
 
                 {future.en.cards.length === 0 && (
                     <div className="rounded-xl border border-dashed border-main-whiteMarble bg-main-titaniumWhite/25 px-4 py-5 text-sm text-main-coolGray">
-                        No future cards yet. Add cards to highlight future goals and benefits.
+                        {t("aboutEditor.future.emptyCards")}
                     </div>
                 )}
 
@@ -193,7 +195,7 @@ const AboutFuturePage = () => {
                     className="border-main-primary/30 text-main-primary hover:bg-main-primary/10"
                     onClick={addFutureCard}
                 >
-                    Add Future Card
+                    {t("aboutEditor.future.addCard")}
                 </Button>
             </div>
         </PageShell>

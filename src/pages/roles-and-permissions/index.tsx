@@ -1,15 +1,15 @@
 import { Outlet } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import PageHeader from "@/shared/components/common/PageHeader";
 import PageTransition from "@/shared/components/common/PageTransition";
 import RolesAnalytics from "@/shared/components/pages/roles-and-permissions/RolesAnalytics";
 import RolesTabs from "@/shared/components/pages/roles-and-permissions/RolesTabs";
 
-const RolesAndPermissionsLayout = () => (
+const RolesAndPermissionsLayout = () => {
+    const { t } = useTranslation("roles");
+    return (
     <PageTransition>
-        <PageHeader
-            title="Roles & Permissions"
-            description="Manage user roles and access control across the admin panel"
-        />
+        <PageHeader title={t("pageTitle")} description={t("pageDescription")} />
 
         <RolesAnalytics />
 
@@ -20,6 +20,7 @@ const RolesAndPermissionsLayout = () => (
             </div>
         </div>
     </PageTransition>
-);
+    );
+};
 
 export default RolesAndPermissionsLayout;

@@ -6,94 +6,24 @@ import {
     CartesianGrid,
     Tooltip,
     Legend,
-} from 'recharts';
-import type { TooltipContentProps, TooltipIndex } from 'recharts';
-import ChartHeader from './ChartHeader';
-import clsx from 'clsx';
+} from "recharts";
+import type { TooltipContentProps, TooltipIndex, TooltipValueType } from "recharts";
 
-// #region Sample data
+/** Matches Recharts `NameType` (not exported from package root). */
+type TooltipName = number | string;
+import ChartHeader from "./ChartHeader";
+import clsx from "clsx";
+import { useTranslation } from "react-i18next";
+
 const data = [
-    {
-        name: 'Page A',
-        uv: 4000,
-        pv: 2400,
-        amt: 2400,
-    },
-    {
-        name: 'Page B',
-        uv: 3000,
-        pv: 1398,
-        amt: 2210,
-    },
-    {
-        name: 'Page C',
-        uv: 2000,
-        pv: 9800,
-        amt: 2290,
-    },
-    {
-        name: 'Page D',
-        uv: 2780,
-        pv: 3908,
-        amt: 2000,
-    },
-    {
-        name: 'Page E',
-        uv: 1890,
-        pv: 4800,
-        amt: 2181,
-    },
-    {
-        name: 'Page F',
-        uv: 2390,
-        pv: 3800,
-        amt: 2500,
-    },
-    {
-        name: 'Page G',
-        uv: 3490,
-        pv: 4300,
-        amt: 2100,
-    },
+    { name: "Page A", uv: 4000, pv: 2400, amt: 2400 },
+    { name: "Page B", uv: 3000, pv: 1398, amt: 2210 },
+    { name: "Page C", uv: 2000, pv: 9800, amt: 2290 },
+    { name: "Page D", uv: 2780, pv: 3908, amt: 2000 },
+    { name: "Page E", uv: 1890, pv: 4800, amt: 2181 },
+    { name: "Page F", uv: 2390, pv: 3800, amt: 2500 },
+    { name: "Page G", uv: 3490, pv: 4300, amt: 2100 },
 ];
-
-// #endregion
-const getIntroOfPage = (label: string | number | undefined) => {
-    if (label === 'Page A') {
-        return "Page A is about men's clothing";
-    }
-    if (label === 'Page B') {
-        return "Page B is about women's dress";
-    }
-    if (label === 'Page C') {
-        return "Page C is about women's bag";
-    }
-    if (label === 'Page D') {
-        return 'Page D is about household goods';
-    }
-    if (label === 'Page E') {
-        return 'Page E is about food';
-    }
-    if (label === 'Page F') {
-        return 'Page F is about baby food';
-    }
-    return '';
-};
-
-const CustomTooltip = ({ active, payload, label }: TooltipContentProps) => {
-    const isVisible = active && payload && payload.length;
-    return (
-        <div className="custom-tooltip" style={{ visibility: isVisible ? 'visible' : 'hidden' }}>
-            {isVisible && (
-                <>
-                    <p className="label">{`${label} : ${payload[0].value}`}</p>
-                    <p className="intro">{getIntroOfPage(label)}</p>
-                    <p className="desc">Anything you want can be displayed here.</p>
-                </>
-            )}
-        </div>
-    );
-};
 
 const TripsChart = ({
     isAnimationActive,
@@ -102,11 +32,29 @@ const TripsChart = ({
     isAnimationActive?: boolean;
     defaultIndex?: TooltipIndex;
 }) => {
+    const { t } = useTranslation("dashboard");
+
+    const renderTooltip = (props: TooltipContentProps<TooltipValueType, TooltipName>) => {
+        const { active, payload, label } = props;
+        const isVisible = active && payload && payload.length;
+        const val = payload?.[0]?.value;
+        return (
+            <div className="custom-tooltip" style={{ visibility: isVisible ? "visible" : "hidden" }}>
+                {isVisible && (
+                    <>
+                        <p className="label">{t("charts.tooltipValue", { label, value: val != null ? String(val) : "" })}</p>
+                        <p className="intro text-main-sharkGray text-xs">{t("charts.tooltipHint")}</p>
+                    </>
+                )}
+            </div>
+        );
+    };
+
     return (
         <div className={clsx("space-y-4", "bg-main-white border border-main-whiteMarble common-rounded p-6 overflow-hidden")}>
-            <ChartHeader title="Trips Over Time" />
+            <ChartHeader title={t("charts.tripsOverTime")} />
             <BarChart
-                style={{ width: '100%', maxHeight: '350px', aspectRatio: 1.618 }}
+                style={{ width: "100%", maxHeight: "350px", aspectRatio: 1.618 }}
                 responsive
                 data={data}
                 margin={{
@@ -119,7 +67,7 @@ const TripsChart = ({
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--main-sharkGray)" />
                 <XAxis dataKey="name" stroke="var(--main-sharkGray)" tickCount={5} niceTicks="snap125" />
                 <YAxis width="auto" stroke="var(--main-sharkGray)" niceTicks="snap125" />
-                <Tooltip content={CustomTooltip} isAnimationActive={isAnimationActive} defaultIndex={defaultIndex} />
+                <Tooltip content={renderTooltip} isAnimationActive={isAnimationActive} defaultIndex={defaultIndex} />
                 <Legend />
                 <Bar dataKey="pv" barSize={87} fill="var(--main-primary)" radius={10} isAnimationActive={isAnimationActive} />
             </BarChart>

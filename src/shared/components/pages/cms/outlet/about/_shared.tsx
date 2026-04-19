@@ -5,6 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { Trash2 } from "lucide-react";
 import clsx from "clsx";
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import CmsHelpHint from "../../cms-help-hint";
 
 export type CmsLocale = "en" | "ar";
@@ -39,31 +40,34 @@ export const BilingualField = ({
     ar: ReactNode;
     enError?: string;
     arError?: string;
-}) => (
-    <div className="space-y-2">
-        <div className="flex flex-wrap items-center gap-2 overflow-visible">
-            <p className={fieldLabelClass}>{label}</p>
-            {required ? (
-                <span className="text-xs font-semibold uppercase tracking-widest text-main-remove">
-                    Required
-                </span>
-            ) : null}
-            {hint ? <CmsHelpHint text={hint} /> : null}
-        </div>
-        <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
-            <div className="space-y-1.5">
-                <LocaleBadge locale="en" />
-                {en}
-                {enError && <InputError message={enError} />}
+}) => {
+    const { t } = useTranslation("cms");
+    return (
+        <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2 overflow-visible">
+                <p className={fieldLabelClass}>{label}</p>
+                {required ? (
+                    <span className="text-xs font-semibold uppercase tracking-widest text-main-remove">
+                        {t("sharedEditor.required")}
+                    </span>
+                ) : null}
+                {hint ? <CmsHelpHint text={hint} /> : null}
             </div>
-            <div className="space-y-1.5" dir="rtl">
-                <LocaleBadge locale="ar" />
-                {ar}
-                {arError && <InputError message={arError} />}
+            <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
+                <div className="space-y-1.5">
+                    <LocaleBadge locale="en" />
+                    {en}
+                    {enError && <InputError message={enError} />}
+                </div>
+                <div className="space-y-1.5" dir="rtl">
+                    <LocaleBadge locale="ar" />
+                    {ar}
+                    {arError && <InputError message={arError} />}
+                </div>
             </div>
         </div>
-    </div>
-);
+    );
+};
 
 /**
  * Like StringArrayEditor but shows EN and AR arrays side-by-side.
@@ -101,6 +105,7 @@ export const BilingualStringArrayEditor = ({
     enItemErrorAt?: (i: number) => string | undefined;
     arItemErrorAt?: (i: number) => string | undefined;
 }) => {
+    const { t } = useTranslation("cms");
     const renderList = (
         values: string[],
         onChange: (next: string[]) => void,
@@ -154,7 +159,7 @@ export const BilingualStringArrayEditor = ({
                     className="h-8 border-main-primary/30 px-3 text-xs text-main-primary hover:bg-main-primary/10"
                     onClick={() => onChange([...display, ""])}
                 >
-                    Add Item
+                    {t("sharedEditor.addItem")}
                 </Button>
             </div>
         );
@@ -234,7 +239,7 @@ const hideToggleClass =
     "flex items-center gap-2 rounded-xl border border-main-whiteMarble bg-main-titaniumWhite/35 px-3 py-2 text-sm font-medium text-main-mirage";
 
 export const InputError = ({ message }: { message?: string }) =>
-    message ? <p className="text-xs text-main-remove mt-1">{message}</p> : null;
+    message ? <p className="text-xs font-medium text-main-red mt-1">{message}</p> : null;
 
 export const SectionVisibilityToggle = ({
     checked,
@@ -242,12 +247,15 @@ export const SectionVisibilityToggle = ({
 }: {
     checked: boolean;
     onCheckedChange: (checked: boolean) => void;
-}) => (
-    <div className={hideToggleClass}>
-        <Switch checked={checked} onCheckedChange={onCheckedChange} />
-        <span>{checked ? "Section Hidden" : "Section Visible"}</span>
-    </div>
-);
+}) => {
+    const { t } = useTranslation("cms");
+    return (
+        <div className={hideToggleClass}>
+            <Switch checked={checked} onCheckedChange={onCheckedChange} />
+            <span>{checked ? t("sharedEditor.sectionHidden") : t("sharedEditor.sectionVisible")}</span>
+        </div>
+    );
+};
 
 export const StringArrayEditor = ({
     label,
@@ -268,6 +276,7 @@ export const StringArrayEditor = ({
     topError?: string;
     itemErrorAt?: (index: number) => string | undefined;
 }) => {
+    const { t } = useTranslation("cms");
     const displayValues = values.length > 0 ? values : [""];
 
     return (
@@ -308,7 +317,7 @@ export const StringArrayEditor = ({
                             disabled={displayValues.length === 1}
                         >
                             <Trash2 size={14} />
-                            Remove
+                            {t("sharedEditor.remove")}
                         </Button>
                     </div>
                     <InputError message={itemErrorAt?.(index)} />
@@ -320,7 +329,7 @@ export const StringArrayEditor = ({
                 className="border-main-primary/30 text-main-primary hover:bg-main-primary/10"
                 onClick={() => onChange([...displayValues, ""])}
             >
-                Add Item
+                {t("sharedEditor.addItem")}
             </Button>
             <InputError message={topError} />
         </div>
@@ -349,45 +358,48 @@ export const PageShell = ({
     loading: boolean;
     error?: string | null;
     children: React.ReactNode;
-}) => (
-    <div className="w-full overflow-visible rounded-2xl border border-main-whiteMarble bg-main-white p-6 space-y-5 shadow-[0_12px_32px_rgba(17,24,39,0.04)]">
-        <div className="flex items-center justify-between gap-4 overflow-visible">
-            <div className="min-w-0 flex-1 space-y-1 overflow-visible">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-main-lightSlate">
-                    {subtitle ?? "About Section"}
-                </p>
-                <div className="flex flex-wrap items-center gap-2 overflow-visible">
-                    <h2 className="text-xl font-bold text-main-mirage">{title}</h2>
-                    {hint ? <CmsHelpHint text={hint} /> : null}
+}) => {
+    const { t } = useTranslation("cms");
+    return (
+        <div className="w-full overflow-visible rounded-2xl border border-main-whiteMarble bg-main-white p-6 space-y-5 shadow-[0_12px_32px_rgba(17,24,39,0.04)]">
+            <div className="flex items-center justify-between gap-4 overflow-visible">
+                <div className="min-w-0 flex-1 space-y-1 overflow-visible">
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-main-lightSlate">
+                        {subtitle ?? t("sharedEditor.aboutSection")}
+                    </p>
+                    <div className="flex flex-wrap items-center gap-2 overflow-visible">
+                        <h2 className="text-xl font-bold text-main-mirage">{title}</h2>
+                        {hint ? <CmsHelpHint text={hint} /> : null}
+                    </div>
+                    {description ? (
+                        <p className="mt-1 max-w-3xl text-sm text-main-coolGray">{description}</p>
+                    ) : null}
                 </div>
-                {description ? (
-                    <p className="mt-1 max-w-3xl text-sm text-main-coolGray">{description}</p>
-                ) : null}
+                <Button
+                    type="button"
+                    onClick={onSave}
+                    disabled={loading || saving}
+                    className="bg-main-primary hover:bg-main-primary/90 text-main-white"
+                >
+                    {saving ? t("sharedEditor.saving") : t("sharedEditor.saveSection")}
+                </Button>
             </div>
-            <Button
-                type="button"
-                onClick={onSave}
-                disabled={loading || saving}
-                className="bg-main-primary hover:bg-main-primary/90 text-main-white"
-            >
-                {saving ? "Saving..." : "Save Section"}
-            </Button>
+
+            {error && (
+                <div className="text-sm text-main-remove bg-main-remove/10 rounded-lg px-3 py-2">
+                    {error}
+                </div>
+            )}
+
+            {loading ? (
+                <div className="space-y-4 animate-pulse">
+                    <div className="h-10 rounded-lg bg-main-titaniumWhite" />
+                    <div className="h-10 rounded-lg bg-main-titaniumWhite" />
+                    <div className="h-24 rounded-lg bg-main-titaniumWhite" />
+                </div>
+            ) : (
+                children
+            )}
         </div>
-
-        {error && (
-            <div className="text-sm text-main-remove bg-main-remove/10 rounded-lg px-3 py-2">
-                {error}
-            </div>
-        )}
-
-        {loading ? (
-            <div className="space-y-4 animate-pulse">
-                <div className="h-10 rounded-lg bg-main-titaniumWhite" />
-                <div className="h-10 rounded-lg bg-main-titaniumWhite" />
-                <div className="h-24 rounded-lg bg-main-titaniumWhite" />
-            </div>
-        ) : (
-            children
-        )}
-    </div>
-);
+    );
+};

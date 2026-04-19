@@ -1,13 +1,15 @@
 import { FilePlus2, Files } from "lucide-react";
 import { NavLink, Navigate, Outlet } from "react-router-dom";
 import clsx from "clsx";
+import { useTranslation } from "react-i18next";
 
 const tabs = [
-    { key: "all", label: "All Blogs", to: "/cms/blogs/blog-items", icon: Files, end: true },
-    { key: "new", label: "Add Blog", to: "/cms/blogs/blog-items/new", icon: FilePlus2, end: false },
+    { key: "all", tabKey: "all" as const, to: "/cms/blogs/blog-items", icon: Files, end: true },
+    { key: "new", tabKey: "new" as const, to: "/cms/blogs/blog-items/new", icon: FilePlus2, end: false },
 ];
 
 const CmsBlogsItemsLayout = () => {
+    const { t } = useTranslation("cms");
     return (
         <div className="space-y-4">
             <div className="rounded-2xl border border-main-whiteMarble bg-main-white p-2 shadow-[0_10px_28px_rgba(17,24,39,0.04)]">
@@ -27,7 +29,7 @@ const CmsBlogsItemsLayout = () => {
                             }
                         >
                             <tab.icon size={15} className="opacity-90 group-hover:opacity-100" />
-                            {tab.label}
+                            {t(`blogItemsNav.${tab.tabKey}`)}
                         </NavLink>
                     ))}
                 </div>

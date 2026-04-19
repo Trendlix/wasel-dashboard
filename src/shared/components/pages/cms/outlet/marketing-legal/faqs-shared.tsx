@@ -22,6 +22,7 @@ import { BilingualField } from "../about/_shared";
 import SectionCard from "../marketing-faq/SectionCard";
 import Field from "../marketing-faq/Field";
 import type { CmsMarketingLegalState } from "@/shared/hooks/store/createCmsMarketingLegalStore";
+import { useTranslation } from "react-i18next";
 
 type CategoryModalTab = "add" | "all";
 type CategoryAudienceFilter = "all" | "user" | "driver";
@@ -41,6 +42,7 @@ const MarketingLegalFaqsShared = ({
     alertTitle,
     alertDescription,
 }: MarketingLegalFaqsSharedProps) => {
+    const { t } = useTranslation("cms");
     const {
         draft,
         saving,
@@ -114,6 +116,17 @@ const MarketingLegalFaqsShared = ({
         return typeof selected?.index === "number" ? selected.index : null;
     }, [effectiveCategoryKey, categories]);
 
+    const getAudienceLabel = (audience: CategoryAudienceFilter) => {
+        switch (audience) {
+            case "user":
+                return t("marketingNested.usersOnly");
+            case "driver":
+                return t("marketingNested.driversOnly");
+            default:
+                return t("marketingNested.allAudiences");
+        }
+    };
+
     const resetNewCategoryForm = () => {
         setNewCategoryEn("");
         setNewCategoryAr("");
@@ -157,8 +170,8 @@ const MarketingLegalFaqsShared = ({
                 stickyHeader
             >
                 <BilingualField
-                    label="Alert banner"
-                    hint="Optional rich text notice displayed at the top of the public page."
+                    label={t("marketingNested.alertBanner")}
+                    hint={t("marketingNested.alertBannerHint")}
                     en={
                         <RichTextEditor
                             value={draft.alert.en}
@@ -177,9 +190,9 @@ const MarketingLegalFaqsShared = ({
             </SectionCard>
 
             <SectionCard
-                title="Categories and questions"
-                description="Every category, question, and answer must exist in English and Arabic."
-                hint="Category key is generated automatically from English category name to link EN/AR groups."
+                title={t("marketingNested.categoriesAndQuestions")}
+                description={t("marketingNested.categoriesAndQuestionsDescription")}
+                hint={t("marketingNested.categoriesAndQuestionsHint")}
                 actions={
                     <div className="flex flex-wrap items-center gap-2">
                         <Button
@@ -189,16 +202,16 @@ const MarketingLegalFaqsShared = ({
                             onClick={() => setIsCategoryModalOpen(true)}
                         >
                             <Plus className="mr-1 h-4 w-4" />
-                            Categories
+                            {t("marketingNested.categories")}
                         </Button>
                     </div>
                 }
             >
                 <div className="space-y-4">
                     <div className="rounded-xl border border-main-whiteMarble bg-main-white p-4">
-                        <p className="mb-3 text-sm font-semibold text-main-mirage">Add item to category</p>
+                        <p className="mb-3 text-sm font-semibold text-main-mirage">{t("marketingNested.addItemToCategory")}</p>
                         <div className="grid gap-3 lg:grid-cols-[220px_1fr_auto]">
-                            <Field label="Audience filter" hint="Filter categories by audience first.">
+                            <Field label={t("marketingNested.audienceFilter")} hint={t("marketingNested.audienceFilterHint")}>
                                 <Select
                                     value={addFaqAudienceFilter}
                                     onValueChange={(value) => {
@@ -210,26 +223,26 @@ const MarketingLegalFaqsShared = ({
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="all">All audiences</SelectItem>
-                                        <SelectItem value="user">Users only</SelectItem>
-                                        <SelectItem value="driver">Drivers only</SelectItem>
+                                        <SelectItem value="all">{t("marketingNested.allAudiences")}</SelectItem>
+                                        <SelectItem value="user">{t("marketingNested.usersOnly")}</SelectItem>
+                                        <SelectItem value="driver">{t("marketingNested.driversOnly")}</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </Field>
 
                             <Field
-                                label="Category"
-                                hint="Choose category to append a new bilingual content item."
+                                label={t("marketingNested.category")}
+                                hint={t("marketingNested.categoryHint")}
                                 required
                             >
                                 <Select value={effectiveCategoryKey} onValueChange={setAddFaqCategoryKey}>
                                     <SelectTrigger className={`${formSelectTriggerClass} h-10 min-h-10`}>
-                                        <SelectValue placeholder="Select category" />
+                                        <SelectValue placeholder={t("marketingNested.selectCategory")} />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {addFaqFilteredCategories.map((category) => (
                                             <SelectItem key={category.key} value={category.key}>
-                                                {(category.enName || "Untitled")} / {category.arName || "بدون اسم"}
+                                                {(category.enName || t("marketingNested.untitled"))} / {category.arName || t("marketingNested.untitledAr")}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
@@ -244,7 +257,7 @@ const MarketingLegalFaqsShared = ({
                                     onClick={handleAddFaqItemToSelectedCategory}
                                 >
                                     <Plus className="mr-1 h-4 w-4" />
-                                    Add item
+                                    {t("marketingNested.addItem")}
                                 </Button>
                             </div>
                         </div>
@@ -253,8 +266,8 @@ const MarketingLegalFaqsShared = ({
                     {selectedCategoryIndex === null ? (
                         <div className="rounded-xl border border-dashed border-main-whiteMarble bg-main-white px-4 py-8 text-center">
                             <NoDataFound
-                                title="Select a category first"
-                                description="Choose a category from the selector above to display and edit its items."
+                                title={t("marketingNested.selectCategoryFirst")}
+                                description={t("marketingNested.selectCategoryFirstDesc")}
                             />
                         </div>
                     ) : (
@@ -271,10 +284,12 @@ const MarketingLegalFaqsShared = ({
                                     <div className="flex items-center justify-between rounded-xl border border-main-whiteMarble bg-main-white px-4 py-3">
                                         <div>
                                             <p className="text-sm font-bold text-main-mirage">
-                                                {enGroup.category || "Untitled category"} / {arGroup.category || "بدون اسم"}
+                                                {enGroup.category || t("marketingNested.untitled")} / {arGroup.category || t("marketingNested.untitledAr")}
                                             </p>
                                             <p className="text-xs text-main-coolGray">
-                                                Audience: {enGroup.audience ?? "all"}
+                                                {t("marketingNested.audience", {
+                                                    value: getAudienceLabel((enGroup.audience ?? "all") as CategoryAudienceFilter),
+                                                })}
                                             </p>
                                         </div>
                                     </div>
@@ -290,7 +305,7 @@ const MarketingLegalFaqsShared = ({
                                                 >
                                                     <div className="flex items-center justify-between">
                                                         <p className="text-sm font-bold text-main-mirage">
-                                                            Item #{itemIndex + 1}
+                                                            {t("marketingNested.item", { n: itemIndex + 1 })}
                                                         </p>
                                                         <Button
                                                             type="button"
@@ -299,12 +314,12 @@ const MarketingLegalFaqsShared = ({
                                                             onClick={() => removePairedItem(groupIndex, itemIndex)}
                                                         >
                                                             <Trash2 className="mr-1 h-4 w-4" />
-                                                            Remove
+                                                            {t("marketingNested.remove")}
                                                         </Button>
                                                     </div>
 
                                                     <BilingualField
-                                                        label="Question"
+                                                        label={t("marketingNested.question")}
                                                         required
                                                         en={
                                                             <Input
@@ -319,7 +334,7 @@ const MarketingLegalFaqsShared = ({
                                                                         e.target.value,
                                                                     )
                                                                 }
-                                                                placeholder="English question"
+                                                                placeholder={t("marketingNested.questionPlaceholderEn")}
                                                             />
                                                         }
                                                         ar={
@@ -335,14 +350,14 @@ const MarketingLegalFaqsShared = ({
                                                                         e.target.value,
                                                                     )
                                                                 }
-                                                                placeholder="السؤال بالعربية"
+                                                                placeholder={t("marketingNested.questionPlaceholderAr")}
                                                             />
                                                         }
                                                     />
 
                                                     <BilingualField
-                                                        label="Answer"
-                                                        hint="Rich text supports formatting and media uploads."
+                                                        label={t("marketingNested.answer")}
+                                                        hint={t("marketingNested.answerHint")}
                                                         required
                                                         en={
                                                             <RichTextEditor
@@ -391,7 +406,7 @@ const MarketingLegalFaqsShared = ({
                         onClick={() => void handleSaveAllContent()}
                         disabled={saving}
                     >
-                        {saving ? "Saving..." : "Save"}
+                        {saving ? t("marketingNested.saving") : t("marketingNested.save")}
                     </Button>
                 </div>
             </SectionCard>
@@ -402,8 +417,8 @@ const MarketingLegalFaqsShared = ({
                 maxWidth="sm:max-w-[1120px]"
             >
                 <CommonModalHeader
-                    title="Manage categories"
-                    description="Create categories in Arabic and English, or view and delete existing categories."
+                    title={t("marketingNested.manageCategories")}
+                    description={t("marketingNested.manageCategoriesDescription")}
                     className="border-b border-main-whiteMarble bg-main-titaniumWhite/35"
                 />
 
@@ -417,7 +432,7 @@ const MarketingLegalFaqsShared = ({
                                 }`}
                             onClick={() => setCategoryModalTab("add")}
                         >
-                            Add category
+                            {t("marketingNested.addCategoryTab")}
                         </button>
                         <button
                             type="button"
@@ -427,29 +442,31 @@ const MarketingLegalFaqsShared = ({
                                 }`}
                             onClick={() => setCategoryModalTab("all")}
                         >
-                            All categories
+                            {t("marketingNested.allCategoriesTab")}
                         </button>
                     </div>
 
                     {categoryModalTab === "add" ? (
                         <div className="rounded-2xl border border-main-whiteMarble bg-main-titaniumWhite/30 p-5">
                             <div className="mb-4 rounded-xl border border-main-whiteMarble bg-main-white px-4 py-3">
-                                <p className="text-sm font-semibold text-main-mirage">New category details</p>
+                                <p className="text-sm font-semibold text-main-mirage">
+                                    {t("marketingNested.categoryModal.newDetailsTitle")}
+                                </p>
                                 <p className="text-xs text-main-coolGray">
-                                    Fill both language names. Category key is generated automatically from English.
+                                    {t("marketingNested.categoryModal.newDetailsDescription")}
                                 </p>
                             </div>
 
                             <BilingualField
-                                label="Category name"
-                                hint="Category key is generated automatically from the English name."
+                                label={t("marketingNested.categoryModal.categoryNameLabel")}
+                                hint={t("marketingNested.categoryModal.categoryNameHint")}
                                 required
                                 en={
                                     <Input
                                         className={formInputClass}
                                         value={newCategoryEn}
                                         onChange={(e) => setNewCategoryEn(e.target.value)}
-                                        placeholder="e.g. Account and security"
+                                        placeholder={t("marketingNested.categoryModal.categoryNamePlaceholderEn")}
                                     />
                                 }
                                 ar={
@@ -457,13 +474,17 @@ const MarketingLegalFaqsShared = ({
                                         className={formInputClass}
                                         value={newCategoryAr}
                                         onChange={(e) => setNewCategoryAr(e.target.value)}
-                                        placeholder="مثال: الحساب والأمان"
+                                        placeholder={t("marketingNested.categoryModal.categoryNamePlaceholderAr")}
                                     />
                                 }
                             />
 
                             <div className="mt-4 grid gap-4 lg:grid-cols-[260px_1fr]">
-                                <Field label="Audience" hint="Who sees this category on the public page." required>
+                                <Field
+                                    label={t("marketingNested.categoryModal.audienceLabel")}
+                                    hint={t("marketingNested.categoryModal.audienceHintPublic")}
+                                    required
+                                >
                                     <Select
                                         value={newCategoryAudience}
                                         onValueChange={(value) =>
@@ -474,9 +495,9 @@ const MarketingLegalFaqsShared = ({
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="all">All</SelectItem>
-                                            <SelectItem value="user">User</SelectItem>
-                                            <SelectItem value="driver">Driver</SelectItem>
+                                            <SelectItem value="all">{t("marketingNested.categoryModal.audienceAll")}</SelectItem>
+                                            <SelectItem value="user">{t("marketingNested.categoryModal.audienceUser")}</SelectItem>
+                                            <SelectItem value="driver">{t("marketingNested.categoryModal.audienceDriver")}</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </Field>
@@ -486,9 +507,11 @@ const MarketingLegalFaqsShared = ({
                         <div className="rounded-2xl border border-main-whiteMarble bg-main-titaniumWhite/30 p-5">
                             <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-main-whiteMarble bg-main-white px-4 py-3">
                                 <div>
-                                    <p className="text-sm font-semibold text-main-mirage">Existing categories</p>
+                                    <p className="text-sm font-semibold text-main-mirage">
+                                        {t("marketingNested.categoryModal.existingCategoriesTitle")}
+                                    </p>
                                     <p className="text-xs text-main-coolGray">
-                                        Deleting a category will delete all items inside it.
+                                        {t("marketingNested.categoryModal.existingCategoriesDescriptionShared")}
                                     </p>
                                 </div>
                                 <Select
@@ -501,9 +524,9 @@ const MarketingLegalFaqsShared = ({
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="all">All audiences</SelectItem>
-                                        <SelectItem value="user">Users only</SelectItem>
-                                        <SelectItem value="driver">Drivers only</SelectItem>
+                                        <SelectItem value="all">{t("marketingNested.allAudiences")}</SelectItem>
+                                        <SelectItem value="user">{t("marketingNested.usersOnly")}</SelectItem>
+                                        <SelectItem value="driver">{t("marketingNested.driversOnly")}</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -512,8 +535,8 @@ const MarketingLegalFaqsShared = ({
                                 {filteredCategories.length === 0 ? (
                                     <div className="rounded-xl border border-dashed border-main-whiteMarble bg-main-white px-4 py-8 text-center">
                                         <NoDataFound
-                                            title="No categories found"
-                                            description="We couldn't find categories for the selected audience."
+                                            title={t("marketingNested.categoryModal.noCategoriesFoundTitle")}
+                                            description={t("marketingNested.categoryModal.noCategoriesFoundDescription")}
                                         />
                                     </div>
                                 ) : (
@@ -524,8 +547,19 @@ const MarketingLegalFaqsShared = ({
                                         >
                                             <div className="space-y-1">
                                                 <p className="font-semibold text-main-mirage">
-                                                    {category.enName || "Untitled"} / {category.arName || "بدون اسم"}
+                                                    {category.enName || t("marketingNested.untitled")} /{" "}
+                                                    {category.arName || t("marketingNested.untitledAr")}
                                                 </p>
+                                                <div className="flex flex-wrap items-center gap-2 text-xs text-main-coolGray">
+                                                    <span className="rounded-full bg-main-titaniumWhite px-2 py-0.5">
+                                                        {t("marketingNested.audience", {
+                                                            value: getAudienceLabel(category.audience as CategoryAudienceFilter),
+                                                        })}
+                                                    </span>
+                                                    <span className="rounded-full bg-main-titaniumWhite px-2 py-0.5">
+                                                        {t("marketingNested.faqItemsCount", { count: category.itemsCount })}
+                                                    </span>
+                                                </div>
                                             </div>
                                             <Button
                                                 type="button"
@@ -534,12 +568,15 @@ const MarketingLegalFaqsShared = ({
                                                 onClick={() =>
                                                     setPendingDeleteCategory({
                                                         key: category.key,
-                                                        name: category.enName || category.arName || "this category",
+                                                        name:
+                                                            category.enName ||
+                                                            category.arName ||
+                                                            t("marketingNested.fallbackThisCategory"),
                                                     })
                                                 }
                                             >
                                                 <Trash2 className="mr-1 h-4 w-4" />
-                                                Delete
+                                                {t("common:delete")}
                                             </Button>
                                         </div>
                                     ))
@@ -556,7 +593,7 @@ const MarketingLegalFaqsShared = ({
                         className="h-11 common-rounded px-6 text-main-sharkGray hover:bg-main-titaniumWhite hover:text-main-mirage"
                         onClick={() => setIsCategoryModalOpen(false)}
                     >
-                        Close
+                        {t("marketingNested.close")}
                     </Button>
                     {categoryModalTab === "add" ? (
                         <Button
@@ -565,7 +602,7 @@ const MarketingLegalFaqsShared = ({
                             onClick={() => void handleCreateCategory()}
                             disabled={categorySaving || !newCategoryEn.trim() || !newCategoryAr.trim()}
                         >
-                            Add category
+                            {t("marketingNested.addCategoryTab")}
                         </Button>
                     ) : null}
                 </CommonModalFooter>
@@ -577,12 +614,11 @@ const MarketingLegalFaqsShared = ({
                 maxWidth="sm:max-w-[520px]"
             >
                 <CommonModalHeader
-                    title="Delete category?"
+                    title={t("marketingNested.remove") + " " + t("marketingNested.category") + "?"}
                     description={
-                        <>
-                            Deleting <strong>{pendingDeleteCategory?.name}</strong> will cascade delete all items
-                            inside this category in both English and Arabic.
-                        </>
+                        t("marketingNested.categoryModal.deleteConfirmShared", {
+                            name: pendingDeleteCategory?.name ?? t("marketingNested.fallbackThisCategory"),
+                        })
                     }
                 />
                 <CommonModalFooter>
@@ -592,7 +628,7 @@ const MarketingLegalFaqsShared = ({
                         className="h-11 common-rounded px-6 text-main-sharkGray hover:bg-main-titaniumWhite hover:text-main-mirage"
                         onClick={() => setPendingDeleteCategory(null)}
                     >
-                        Cancel
+                        {t("marketingNested.cancel")}
                     </Button>
                     <Button
                         type="button"
@@ -600,7 +636,7 @@ const MarketingLegalFaqsShared = ({
                         onClick={() => void handleConfirmDeleteCategory()}
                         disabled={categorySaving}
                     >
-                        Yes, delete category
+                        {t("marketingNested.remove")} {t("marketingNested.category")}
                     </Button>
                 </CommonModalFooter>
             </CommonModal>
