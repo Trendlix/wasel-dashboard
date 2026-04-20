@@ -12,6 +12,7 @@ This document explains the frontend realtime notification flow used in dashboard
 ## Socket Namespace
 
 - Socket.IO namespace: `/admin`
+- Unified namespace (new): `/notifications`
 - Base URL source:
   - `VITE_API_BASE_URL` (origin part is used)
   - fallback: `window.location.origin`
@@ -55,6 +56,46 @@ Expected payload shape (from backend consumers):
   trip_id?: number;
 }
 ```
+
+### 5) `notifications:new` (Unified)
+
+Purpose:
+- Receive unified backend events without breaking old dashboard channels.
+- Trigger same UX behavior: toast + sound + list/count refresh.
+
+Handshake used:
+```ts
+{
+  recipient_type: "admin",
+  recipient_id: adminId,
+  presence_state: "foreground"
+}
+```
+
+Payload:
+```ts
+{
+  id: number;
+  event_key: string;
+  title: string;
+  body: string;
+  payload?: Record<string, unknown>;
+  created_at: string;
+}
+```
+
+## Unified Event Mapping
+
+Mapping helpers live in:
+- `src/shared/core/notifications/notification-events.ts`
+
+Current bucket mapping examples:
+- Offers: `offer.campaign.by_admin`, `offer.quoted.by_driver`, `offer.accepted.by_user`
+- Updates: `update.campaign.by_admin`, `driver.verification.approved`, `user.status.changed`
+- Support: `ticket.created`, `ticket.reply.by_admin`, `chat.message.new`
+- General: any unmatched event key
+
+The store uses a dedupe key (`id` fallback to event+created+entity) to avoid duplicate handling.
 
 ## Store API (Zustand)
 

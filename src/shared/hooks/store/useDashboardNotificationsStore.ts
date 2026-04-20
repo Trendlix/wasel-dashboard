@@ -1,9 +1,15 @@
 import { create } from "zustand";
 import { isAxiosError } from "axios";
 import axiosNormalApiClient from "@/shared/utils/axios";
-import { getCookie } from "@/shared/utils/cookieUtils";
+import { getCookie, getTokenStoredInCookie } from "@/shared/utils/cookieUtils";
 import { io, type Socket } from "socket.io-client";
 import { showToast } from "@/shared/utils/toast";
+import {
+  buildUnifiedDashboardDedupeKey,
+  type IUnifiedDashboardNotificationEvent,
+  getUnifiedEventDisplayTitle,
+  mapUnifiedEventToDashboardBucket,
+} from "@/shared/core/notifications/notification-events";
 
 export type TDashboardNotificationTab = "user" | "driver" | "trip";
 
@@ -72,8 +78,20 @@ const defaultCounts: IDashboardNotificationsCount = {
 };
 
 let dashboardNotificationsSocket: Socket | null = null;
+let dashboardUnifiedNotificationsSocket: Socket | null = null;
 let dashboardNotificationAudio: HTMLAudioElement | null = null;
 let isDashboardAudioUnlocked = false;
+const recentUnifiedNotificationKeys = new Set<string>();
+
+const pushRecentUnifiedKey = (key: string) => {
+  recentUnifiedNotificationKeys.add(key);
+  if (recentUnifiedNotificationKeys.size > 250) {
+    const oldest = recentUnifiedNotificationKeys.values().next().value;
+    if (oldest) {
+      recentUnifiedNotificationKeys.delete(oldest);
+    }
+  }
+};
 
 const ensureDashboardAudioUnlocked = () => {
   if (typeof window === "undefined" || isDashboardAudioUnlocked) return;
@@ -113,6 +131,17 @@ const playDashboardNotificationSound = () => {
   void player.play().catch(() => {
     // Ignore autoplay/browser policy errors in background tabs.
   });
+};
+
+const resolveAdminIdForUnifiedSocket = (): number | null => {
+  const decoded = getTokenStoredInCookie("wasel_admin_access_token") as {
+    admin_id?: unknown;
+    isValid?: boolean;
+  };
+
+  if (!decoded?.isValid) return null;
+  const adminId = Number(decoded.admin_id);
+  return Number.isInteger(adminId) && adminId > 0 ? adminId : null;
 };
 
 const useDashboardNotificationsStore = create<DashboardNotificationsState>((set) => ({
@@ -220,20 +249,23 @@ const useDashboardNotificationsStore = create<DashboardNotificationsState>((set)
   },
 
   initializeRealtime: () => {
-    if (dashboardNotificationsSocket) return;
+    if (dashboardNotificationsSocket && dashboardUnifiedNotificationsSocket) return;
 
     const token = getCookie("wasel_admin_access_token");
     const apiBase = import.meta.env.VITE_API_BASE_URL;
     const baseURL = apiBase
       ? new URL(apiBase, window.location.origin).origin
       : window.location.origin;
+    const adminId = resolveAdminIdForUnifiedSocket();
 
-    dashboardNotificationsSocket = io(`${baseURL}/admin`, {
-      // Keep websocket preferred but allow fallback to polling in local/dev envs.
-      transports: ["websocket", "polling"],
-      withCredentials: true,
-      auth: token ? { token } : undefined,
-    });
+    if (!dashboardNotificationsSocket) {
+      dashboardNotificationsSocket = io(`${baseURL}/admin`, {
+        // Keep websocket preferred but allow fallback to polling in local/dev envs.
+        transports: ["websocket", "polling"],
+        withCredentials: true,
+        auth: token ? { token } : undefined,
+      });
+    }
 
     if (typeof window !== "undefined") {
       (window as any).__dashboardSocket = dashboardNotificationsSocket;
@@ -283,12 +315,64 @@ const useDashboardNotificationsStore = create<DashboardNotificationsState>((set)
     dashboardNotificationsSocket.on("connect_error", (error) => {
       console.error("Dashboard socket connect_error:", error?.message ?? error);
     });
+
+    if (adminId && !dashboardUnifiedNotificationsSocket) {
+      dashboardUnifiedNotificationsSocket = io(`${baseURL}/notifications`, {
+        transports: ["websocket", "polling"],
+        withCredentials: true,
+        auth: {
+          ...(token ? { token } : {}),
+          recipient_type: "admin",
+          recipient_id: adminId,
+          presence_state: "foreground",
+        },
+        query: {
+          recipient_type: "admin",
+          recipient_id: String(adminId),
+          presence_state: "foreground",
+        },
+      });
+
+      dashboardUnifiedNotificationsSocket.on(
+        "notifications:new",
+        (payload: IUnifiedDashboardNotificationEvent) => {
+          const dedupeKey = buildUnifiedDashboardDedupeKey(payload);
+          if (recentUnifiedNotificationKeys.has(dedupeKey)) {
+            return;
+          }
+          pushRecentUnifiedKey(dedupeKey);
+
+          const bucket = mapUnifiedEventToDashboardBucket(payload.event_key);
+          const fallbackTitle = getUnifiedEventDisplayTitle(payload);
+          const bucketLabelByType = {
+            offer: "Offer update",
+            update: "System update",
+            support: "Support update",
+            general: "New notification",
+          } as const;
+
+          playDashboardNotificationSound();
+          showToast(fallbackTitle || bucketLabelByType[bucket], "info");
+          void refreshData();
+        },
+      );
+
+      dashboardUnifiedNotificationsSocket.on("connect_error", (error) => {
+        console.error("Dashboard unified socket connect_error:", error?.message ?? error);
+      });
+    }
   },
 
   teardownRealtime: () => {
-    if (!dashboardNotificationsSocket) return;
-    dashboardNotificationsSocket.disconnect();
-    dashboardNotificationsSocket = null;
+    if (dashboardNotificationsSocket) {
+      dashboardNotificationsSocket.disconnect();
+      dashboardNotificationsSocket = null;
+    }
+    if (dashboardUnifiedNotificationsSocket) {
+      dashboardUnifiedNotificationsSocket.disconnect();
+      dashboardUnifiedNotificationsSocket = null;
+    }
+    recentUnifiedNotificationKeys.clear();
     if (typeof window !== "undefined") {
       (window as any).__dashboardSocket = null;
     }
