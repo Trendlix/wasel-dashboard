@@ -50,6 +50,13 @@
     "customer": "Customer",
     "noName": "Unnamed"
   },
+  "lock": {
+    "assignedTo": "Assigned to",
+    "lockedForYou": "Locked for your account",
+    "onlyOwnerCanReply": "This ticket is locked to another admin. Only the assigned admin can reply or change status.",
+    "chatDisabled": "Chat actions are disabled because this ticket is assigned to another admin.",
+    "actionDenied": "This ticket is assigned to another admin."
+  },
   "details": {
     "loading": "Loading…",
     "ticketTitle": "Ticket #{{id}}",
@@ -82,6 +89,10 @@
     "emptyTitle": "No categories",
     "emptyDescription": "No categories were found.",
     "deleteCategory": "Delete category",
+    "deleteConfirmTitle": "Delete category?",
+    "deleteConfirmBody": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
+    "confirmDelete": "Yes, delete",
+    "deleting": "Deleting...",
     "done": "Done"
   },
   "chat": {
@@ -113,5 +124,21 @@
     "processing": "Processing…",
     "yesClose": "Yes, close",
     "yesSolved": "Yes, solved"
+  },
+  "notifications": {
+    "title": "Recent Activity",
+    "openDrawer": "Open recent activity",
+    "closeDrawer": "Close recent activity",
+    "markAllAsRead": "Mark all read",
+    "markingAll": "Marking...",
+    "markAsRead": "Mark read",
+    "marking": "Marking...",
+    "read": "Read",
+    "empty": "No recent activity",
+    "emptyDescription": "New tickets and updates will appear here.",
+    "newTicket": "New ticket",
+    "newReply": "New reply",
+    "ticketClosed": "Ticket closed",
+    "ticketSolved": "Ticket solved"
   }
 }

@@ -175,6 +175,65 @@
   border-radius: 10px !important;
 }
 
+:root {
+  --wasel-scrollbar-size: 7px;
+  --wasel-scrollbar-track: rgba(0, 74, 173, 0.08);
+  --wasel-scrollbar-thumb: rgba(0, 74, 173, 0.45);
+  --wasel-scrollbar-thumb-hover: rgba(0, 74, 173, 0.7);
+}
+
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--wasel-scrollbar-thumb) var(--wasel-scrollbar-track);
+  }
+
+  *::-webkit-scrollbar {
+    width: var(--wasel-scrollbar-size);
+    height: var(--wasel-scrollbar-size);
+  }
+
+  *::-webkit-scrollbar-track {
+    background: var(--wasel-scrollbar-track);
+    border-radius: 9999px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: var(--wasel-scrollbar-thumb);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: var(--wasel-scrollbar-thumb-hover);
+  }
+
+  *::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
+
+/* Keep utility/class-based scrollbars aligned with the dashboard theme */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--wasel-scrollbar-thumb) var(--wasel-scrollbar-track) !important;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: var(--wasel-scrollbar-size);
+  height: var(--wasel-scrollbar-size);
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: var(--wasel-scrollbar-thumb) !important;
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--wasel-scrollbar-thumb) var(--wasel-scrollbar-track);
+}
+
 /* ─── reactjs-tiptap-editor theme override ────────────────────────────────── */
 /* Map --richtext-* variables to the wasel design system (HSL format)         */
 :root {

@@ -51,6 +51,20 @@
     "deleting": "جاري الحذف…",
     "confirm": "نعم، احذف"
   },
+  "disableModal": {
+    "title": "تعطيل القسيمة؟",
+    "description": "أنت على وشك تعطيل القسيمة {{code}}. لن يتمكن العملاء من استخدامها.",
+    "cancel": "إلغاء",
+    "confirm": "تعطيل",
+    "confirmLoading": "جارٍ التعطيل…"
+  },
+  "enableModal": {
+    "title": "تفعيل القسيمة؟",
+    "description": "أنت على وشك تفعيل القسيمة {{code}}. سيتمكن العملاء من استخدامها مرة أخرى.",
+    "cancel": "إلغاء",
+    "confirm": "تفعيل",
+    "confirmLoading": "جارٍ التفعيل…"
+  },
   "form": {
     "editTitle": "تعديل القسيمة",
     "addTitle": "إضافة قسيمة",

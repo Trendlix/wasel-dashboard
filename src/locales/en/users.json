@@ -25,6 +25,11 @@
     "activeUsers": "Active users",
     "blockedUsers": "Blocked users"
   },
+  "export": {
+    "title": "Export users",
+    "description": "Download a list of users based on selected filters.",
+    "dateHint": "Leave empty to export all users."
+  },
   "modal": {
     "title": "User details",
     "description": "View user information and update their account status.",

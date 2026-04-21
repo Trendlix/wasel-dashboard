@@ -69,7 +69,7 @@ interface UserState {
     setQuery: (query: Partial<IUserQuery>) => void;
     resetQuery: () => void;
     updateStatus: (id: number, status: TAppUserStatus) => Promise<void>;
-    exportUsers: () => Promise<void>;
+    exportUsers: (payload?: { date_from?: string; date_to?: string }) => Promise<void>;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -167,11 +167,15 @@ const useUserStore = create<UserState>((set, get) => ({
         }
     },
 
-    exportUsers: async () => {
+    exportUsers: async (payload) => {
         set({ exporting: true, error: null });
         try {
-            const payload = { ...get().query };
-            await axiosNormalApiClient.post("/dashboard/users/export", payload);
+            const body = {
+                ...get().query,
+                ...(payload?.date_from ? { date_from: payload.date_from } : {}),
+                ...(payload?.date_to ? { date_to: payload.date_to } : {}),
+            };
+            await axiosNormalApiClient.post("/dashboard/users/export", body);
         } catch (error) {
             set({
                 error: extractErrorMessage(error, "Failed to export users"),

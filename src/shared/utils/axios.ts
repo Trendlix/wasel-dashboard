@@ -1,8 +1,8 @@
-// axios.ts
 import axios, { isAxiosError, isCancel } from "axios";
 import { getCookie, setCookie, removeCookie } from "./cookieUtils";
 import { toastHandler } from "./toast";
 import { axiosRequestErrorMessage, shouldRetryGetAfterNetworkFailure } from "./networkErrors";
+import useBackendHealthStore from "@/shared/hooks/store/useBackendHealthStore";
 
 const baseURL = import.meta.env.VITE_API_BASE_URL || "";
 
@@ -58,11 +58,26 @@ const processQueue = (error: unknown, token: string | null = null) => {
 };
 
 const MAX_GET_RETRIES = 2;
+const BACKEND_UNAVAILABLE_STATUSES = [502, 503, 504];
+
+const shouldTreatAsBackendUnavailable = (error: unknown): boolean => {
+    if (!isAxiosError(error)) return false;
+    const status = error.response?.status;
+
+    if (status && BACKEND_UNAVAILABLE_STATUSES.includes(status)) {
+        return true;
+    }
+
+    // No response means connection timeout/network failure/backend unreachable.
+    return !error.response;
+};
 
 axiosNormalApiClient.interceptors.response.use(
     (res) => {
+        useBackendHealthStore.getState().markBackendHealthy();
         const method = res.config.method?.toUpperCase();
-        if (method && method !== "GET") {
+        const shouldShowToast = (res.config as any)?.meta?.showToast ?? true;
+        if (method && method !== "GET" && shouldShowToast) {
             toastHandler(res.data?.message, res.status);
         }
         return res;
@@ -149,8 +164,17 @@ axiosNormalApiClient.interceptors.response.use(
             }
         }
 
-        const message = axiosRequestErrorMessage(error);
-        toastHandler(message, status, "error");
+        if (shouldTreatAsBackendUnavailable(error)) {
+            void useBackendHealthStore
+                .getState()
+                .confirmBackendUnavailable(axiosRequestErrorMessage(error));
+        }
+
+        const shouldShowToast = (originalRequest as any)?.meta?.showToast ?? true;
+        if (shouldShowToast) {
+            const message = axiosRequestErrorMessage(error);
+            toastHandler(message, status, "error");
+        }
         return Promise.reject(error);
     }
 );

@@ -51,6 +51,20 @@
     "deleting": "Deleting…",
     "confirm": "Yes, delete"
   },
+  "disableModal": {
+    "title": "Disable voucher?",
+    "description": "You are about to disable voucher {{code}}. Customers will not be able to use it.",
+    "cancel": "Cancel",
+    "confirm": "Disable",
+    "confirmLoading": "Disabling…"
+  },
+  "enableModal": {
+    "title": "Enable voucher?",
+    "description": "You are about to enable voucher {{code}}. Customers will be able to use it again.",
+    "cancel": "Cancel",
+    "confirm": "Enable",
+    "confirmLoading": "Enabling…"
+  },
   "form": {
     "editTitle": "Edit voucher",
     "addTitle": "Add voucher",

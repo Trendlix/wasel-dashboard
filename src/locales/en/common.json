@@ -64,6 +64,16 @@
     "timeout": "The request timed out. Please try again.",
     "requestFailed": "Something went wrong. Please try again."
   },
+  "backendUnavailable": {
+    "title": "We are having trouble reaching the server",
+    "description": "The dashboard cannot connect to the server right now. We will keep retrying automatically, or you can retry now.",
+    "lastCheck": "Connection status",
+    "detectedAt": "Outage detected at {{time}}",
+    "detectedNow": "Outage detected just now",
+    "tryAgain": "Try again",
+    "rechecking": "Checking...",
+    "autoRetryHint": "Automatic reconnect runs in the background every few seconds."
+  },
   "pagination": {
     "pageOf": "Page {{current}} of {{total}}",
     "previous": "Previous",

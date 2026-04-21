@@ -23,7 +23,9 @@ import useVoucherStore, {
   type IVoucher,
   type TVoucherStatus,
 } from "@/shared/hooks/store/useVoucherStore";
+import VoucherDisableModal from "./modals/VoucherDisableModal";
 import VoucherDeleteModal from "./modals/VoucherDeleteModal";
+import VoucherEnableModal from "./modals/VoucherEnableModal";
 import VoucherExportModal from "./modals/VoucherExportModal";
 import VoucherFormModal from "./modals/VoucherFormModal";
 import { formatAppDateShort } from "@/lib/formatLocaleDate";
@@ -69,6 +71,8 @@ const VoucherTable = () => {
   const [formOpen, setFormOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [disableOpen, setDisableOpen] = useState(false);
+  const [enableOpen, setEnableOpen] = useState(false);
   const [selectedVoucher, setSelectedVoucher] = useState<IVoucher | null>(null);
   const [exportDateFrom, setExportDateFrom] = useState("");
   const [exportDateTo, setExportDateTo] = useState("");
@@ -105,8 +109,18 @@ const VoucherTable = () => {
   };
 
   const handleToggleStatus = async (voucher: IVoucher) => {
-    const nextStatus: TVoucherStatus = voucher.status === "active" ? "inactive" : "active";
-    await updateVoucherStatus(voucher.id, nextStatus);
+    setSelectedVoucher(voucher);
+    if (voucher.status === "active") {
+      setDisableOpen(true);
+      return;
+    }
+    setEnableOpen(true);
+  };
+
+  const handleConfirmStatusChange = async (nextStatus: TVoucherStatus) => {
+    if (!selectedVoucher) return;
+    await updateVoucherStatus(selectedVoucher.id, nextStatus);
+    setSelectedVoucher(null);
     await refreshAll();
   };
 
@@ -267,6 +281,28 @@ const VoucherTable = () => {
         loading={submitting}
         onOpenChange={setDeleteOpen}
         onConfirm={handleDelete}
+      />
+
+      <VoucherDisableModal
+        open={disableOpen}
+        voucher={selectedVoucher}
+        loading={submitting}
+        onOpenChange={(value) => {
+          setDisableOpen(value);
+          if (!value) setSelectedVoucher(null);
+        }}
+        onConfirm={() => handleConfirmStatusChange("inactive")}
+      />
+
+      <VoucherEnableModal
+        open={enableOpen}
+        voucher={selectedVoucher}
+        loading={submitting}
+        onOpenChange={(value) => {
+          setEnableOpen(value);
+          if (!value) setSelectedVoucher(null);
+        }}
+        onConfirm={() => handleConfirmStatusChange("active")}
       />
 
       <VoucherExportModal

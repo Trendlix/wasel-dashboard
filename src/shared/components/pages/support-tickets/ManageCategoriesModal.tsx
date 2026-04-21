@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Trash2 } from "lucide-react";
+import { AlertTriangle, Trash2 } from "lucide-react";
 import clsx from "clsx";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +19,7 @@ interface ManageCategoriesModalProps {
 }
 
 const ManageCategoriesModal = ({ open, onOpenChange }: ManageCategoriesModalProps) => {
-    const { t } = useTranslation("support");
+    const { t } = useTranslation(["support", "common"]);
     const {
         categories,
         categoriesLoading,
@@ -30,6 +30,8 @@ const ManageCategoriesModal = ({ open, onOpenChange }: ManageCategoriesModalProp
     } = useTicketStore();
 
     const [newName, setNewName] = useState("");
+    const [categoryToDelete, setCategoryToDelete] = useState<{ id: number; name: string } | null>(null);
+    const [deleting, setDeleting] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -52,8 +54,22 @@ const ManageCategoriesModal = ({ open, onOpenChange }: ManageCategoriesModalProp
         if (e.key === "Enter") handleAdd();
     };
 
+    const handleConfirmDelete = async () => {
+        if (!categoryToDelete) return;
+        setDeleting(true);
+        try {
+            await deleteCategory(categoryToDelete.id);
+            setCategoryToDelete(null);
+        } catch {
+            // error toast handled by axios interceptor
+        } finally {
+            setDeleting(false);
+        }
+    };
+
     return (
-        <CommonModal open={open} onOpenChange={onOpenChange} maxWidth="sm:max-w-[560px]">
+        <>
+            <CommonModal open={open} onOpenChange={onOpenChange} maxWidth="sm:max-w-[560px]">
             <CommonModalHeader
                 title={t("categories.title")}
                 description={t("categories.description")}
@@ -138,7 +154,12 @@ const ManageCategoriesModal = ({ open, onOpenChange }: ManageCategoriesModalProp
                                     </div>
                                     <button
                                         type="button"
-                                        onClick={() => deleteCategory(cat.id)}
+                                        onClick={() =>
+                                            setCategoryToDelete({
+                                                id: cat.id,
+                                                name: cat.name,
+                                            })
+                                        }
                                         className="p-1.5 text-main-remove hover:bg-main-remove/10 rounded-lg transition-colors shrink-0"
                                         title={t("categories.deleteCategory")}
                                         aria-label={t("categories.deleteCategory")}
@@ -161,7 +182,52 @@ const ManageCategoriesModal = ({ open, onOpenChange }: ManageCategoriesModalProp
                     {t("categories.done")}
                 </Button>
             </CommonModalFooter>
-        </CommonModal>
+            </CommonModal>
+
+            <CommonModal
+                open={categoryToDelete !== null}
+                onOpenChange={(v) => !v && setCategoryToDelete(null)}
+                loading={deleting}
+                variant="danger"
+                maxWidth="sm:max-w-[420px]"
+            >
+                <CommonModalBody className="flex flex-col items-center text-center space-y-4 pt-6 pb-2">
+                    <div className="w-16 h-16 bg-main-remove/10 rounded-2xl flex items-center justify-center ring-8 ring-main-remove/5">
+                        <AlertTriangle className="w-8 h-8 text-main-remove" />
+                    </div>
+                </CommonModalBody>
+                <CommonModalHeader
+                    title={t("categories.deleteConfirmTitle")}
+                    description={t("categories.deleteConfirmBody", {
+                        name: categoryToDelete?.name ?? "",
+                    })}
+                />
+                <CommonModalFooter>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setCategoryToDelete(null)}
+                        disabled={deleting}
+                        className="h-10 px-5 border-main-whiteMarble text-main-hydrocarbon"
+                    >
+                        {t("common:cancel")}
+                    </Button>
+                    <Button
+                        type="button"
+                        onClick={handleConfirmDelete}
+                        disabled={deleting}
+                        className={clsx(
+                            "h-10 px-5 font-semibold text-main-white",
+                            "bg-main-remove hover:bg-main-remove/90"
+                        )}
+                    >
+                        {deleting
+                            ? t("categories.deleting")
+                            : t("categories.confirmDelete")}
+                    </Button>
+                </CommonModalFooter>
+            </CommonModal>
+        </>
     );
 };
 

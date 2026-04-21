@@ -188,6 +188,7 @@ const VerificationList = () => {
           if (!v) setConfirmAction(null);
         }}
         loading={updating}
+        variant={confirmAction?.type === "approve" ? "success" : "danger"}
       >
         <CommonModalHeader
           title={

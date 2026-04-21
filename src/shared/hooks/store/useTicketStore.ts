@@ -3,6 +3,7 @@ import axiosNormalApiClient from "@/shared/utils/axios";
 import { isAxiosError } from "axios";
 import { io, type Socket } from "socket.io-client";
 import { getCookie } from "@/shared/utils/cookieUtils";
+import { showToast } from "@/shared/utils/toast";
 import type {
     ITicket,
     ITicketCategory,
@@ -26,6 +27,27 @@ export interface ITicketPaginationMeta {
     has_previous_page: boolean;
     is_first_page: boolean;
     is_last_page: boolean;
+}
+
+export interface ISupportNotification {
+    id: number;
+    ticket_id: number;
+    ticket_subject: string | null;
+    ticket_status: string | null;
+    triggered_by_user_id: number | null;
+    triggered_by_user_name: string | null;
+    triggered_by_driver_id: number | null;
+    triggered_by_driver_name: string | null;
+    triggeredByType: "user" | "driver";
+    triggeredById: number | null;
+    triggeredByName: string | null;
+    type: string;
+    color: string;
+    title: string;
+    description: string;
+    created_at: string;
+    is_read: boolean;
+    read_at: string | null;
 }
 
 // ─── Support socket (module-level singleton) ──────────────────────────────────
@@ -57,9 +79,22 @@ interface TicketState {
 
     // support socket
     supportUnreadCount: number;
+    activeSupportChatTicketId: number | null;
     initializeSupportSocket: (adminId: number) => void;
     teardownSupportSocket: () => void;
     appendSupportMessage: (ticketId: number, support: ITicketSupport) => void;
+    setActiveSupportChatTicket: (ticketId: number) => void;
+    clearActiveSupportChatTicket: (ticketId?: number) => void;
+
+    // support notifications
+    supportNotifications: ISupportNotification[];
+    supportNotificationsLoading: boolean;
+    supportNotificationsMeta: ITicketPaginationMeta | null;
+    fetchSupportNotifications: (page?: number) => Promise<void>;
+    markSupportNotificationAsRead: (id: number) => Promise<void>;
+    markAllSupportNotificationsAsRead: () => Promise<void>;
+    markSupportNotificationsForTicketAsRead: (ticketId: number) => Promise<void>;
+    prependSupportNotification: (notification: Partial<ISupportNotification>) => void;
 
     fetchTickets: (query?: ITicketQuery) => Promise<void>;
     fetchStats: () => Promise<void>;
@@ -90,6 +125,46 @@ const defaultQuery: ITicketQuery = {
     sorting: "desc",
 };
 
+// ─── Support notification sound ──────────────────────────────────────────────
+
+let supportNotificationAudio: HTMLAudioElement | null = null;
+let isSupportAudioUnlocked = false;
+
+const ensureSupportAudioUnlocked = () => {
+    if (typeof window === "undefined" || isSupportAudioUnlocked) return;
+
+    const unlock = () => {
+        if (!supportNotificationAudio) return;
+        supportNotificationAudio
+            .play()
+            .then(() => {
+                supportNotificationAudio?.pause();
+                if (supportNotificationAudio) supportNotificationAudio.currentTime = 0;
+                isSupportAudioUnlocked = true;
+            })
+            .catch(() => {})
+            .finally(() => {
+                window.removeEventListener("pointerdown", unlock);
+            });
+    };
+
+    window.addEventListener("pointerdown", unlock, { once: true });
+};
+
+const playSupportNotificationSound = () => {
+    if (typeof window === "undefined") return;
+    if (!supportNotificationAudio) {
+        supportNotificationAudio = new Audio("/sound/mixkit-digital-quick-tone-2866.wav");
+        supportNotificationAudio.preload = "auto";
+        supportNotificationAudio.volume = 1;
+        ensureSupportAudioUnlocked();
+    }
+
+    const player = supportNotificationAudio.cloneNode(true) as HTMLAudioElement;
+    player.volume = 1;
+    void player.play().catch(() => {});
+};
+
 // ─── Store ────────────────────────────────────────────────────────────────────
 
 const useTicketStore = create<TicketState>((set, get) => ({
@@ -109,6 +184,10 @@ const useTicketStore = create<TicketState>((set, get) => ({
     detailLoading: false,
 
     supportUnreadCount: 0,
+    activeSupportChatTicketId: null,
+    supportNotifications: [],
+    supportNotificationsLoading: false,
+    supportNotificationsMeta: null,
 
     // ── Support socket ──────────────────────────────────────────────────────
 
@@ -128,14 +207,38 @@ const useTicketStore = create<TicketState>((set, get) => ({
             query: { admin_id: adminId },
         });
 
+        supportSocket.on("connect", () => {
+            const activeTicketId = useTicketStore.getState().activeSupportChatTicketId;
+            if (!activeTicketId) return;
+            supportSocket?.emit("ticket:chat_presence", {
+                ticket_id: activeTicketId,
+                active: true,
+            });
+        });
+
         supportSocket.on("support:count", (payload: { total: number; unread: number }) => {
             set({ supportUnreadCount: payload?.unread ?? 0 });
         });
 
         supportSocket.on(
             "support_notification:new",
-            () => {
-                useTicketStore.getState().fetchStats();
+            (payload: { title?: string; description?: string; ticket_id?: number; user_id?: number; driver_id?: number; type?: string }) => {
+                const state = useTicketStore.getState();
+                const activeTicketId = state.activeSupportChatTicketId;
+                const incomingTicketId = Number(payload?.ticket_id);
+                if (
+                    activeTicketId !== null &&
+                    Number.isInteger(incomingTicketId) &&
+                    incomingTicketId > 0 &&
+                    incomingTicketId === activeTicketId
+                ) {
+                    return;
+                }
+                playSupportNotificationSound();
+                showToast(payload?.title || "New support activity", "info");
+                state.fetchStats();
+                state.fetchTickets();
+                state.fetchSupportNotifications();
             }
         );
 
@@ -153,8 +256,16 @@ const useTicketStore = create<TicketState>((set, get) => ({
 
     teardownSupportSocket: () => {
         if (!supportSocket) return;
+        const activeTicketId = get().activeSupportChatTicketId;
+        if (activeTicketId) {
+            supportSocket.emit("ticket:chat_presence", {
+                ticket_id: activeTicketId,
+                active: false,
+            });
+        }
         supportSocket.disconnect();
         supportSocket = null;
+        set({ activeSupportChatTicketId: null });
     },
 
     appendSupportMessage: (ticketId, support) => {
@@ -170,6 +281,30 @@ const useTicketStore = create<TicketState>((set, get) => ({
                 },
             };
         });
+    },
+
+    setActiveSupportChatTicket: (ticketId) => {
+        set({ activeSupportChatTicketId: ticketId });
+        if (supportSocket?.connected) {
+            supportSocket.emit("ticket:chat_presence", {
+                ticket_id: ticketId,
+                active: true,
+            });
+        }
+    },
+
+    clearActiveSupportChatTicket: (ticketId) => {
+        const activeTicketId = get().activeSupportChatTicketId;
+        if (ticketId && activeTicketId !== ticketId) return;
+
+        const ticketIdToClear = ticketId ?? activeTicketId;
+        set({ activeSupportChatTicketId: null });
+        if (supportSocket?.connected && ticketIdToClear) {
+            supportSocket.emit("ticket:chat_presence", {
+                ticket_id: ticketIdToClear,
+                active: false,
+            });
+        }
     },
 
     fetchTickets: async (query) => {
@@ -297,7 +432,11 @@ const useTicketStore = create<TicketState>((set, get) => ({
     },
 
     replyOnTicket: async (id, title, description) => {
-        const response = await axiosNormalApiClient.post(`/ticket/${id}/reply`, { title, description });
+        const response = await axiosNormalApiClient.post(
+            `/ticket/${id}/reply`,
+            { title, description },
+            { meta: { showToast: false } },
+        );
         const support = response.data?.data?.support as ITicketSupport | undefined;
 
         set((state) => ({
@@ -312,6 +451,101 @@ const useTicketStore = create<TicketState>((set, get) => ({
         }
 
         get().fetchStats();
+    },
+
+    // ── Support Notifications ────────────────────────────────────────────────
+
+    fetchSupportNotifications: async (page = 1) => {
+        set({ supportNotificationsLoading: true });
+        try {
+            const response = await axiosNormalApiClient.get("/ticket/notifications", {
+                params: { page, limit: 20 },
+            });
+            set({
+                supportNotifications: response.data.data ?? [],
+                supportNotificationsMeta: response.data.meta ?? null,
+                supportNotificationsLoading: false,
+            });
+        } catch {
+            set({ supportNotificationsLoading: false });
+        }
+    },
+
+    markSupportNotificationAsRead: async (id) => {
+        try {
+            await axiosNormalApiClient.patch(`/ticket/notifications/${id}/mark-as-read`);
+            set((state) => ({
+                supportNotifications: state.supportNotifications.map((n) =>
+                    n.id === id ? { ...n, is_read: true, read_at: new Date().toISOString() } : n
+                ),
+            }));
+        } catch {
+            // silently fail
+        }
+    },
+
+    markAllSupportNotificationsAsRead: async () => {
+        try {
+            await axiosNormalApiClient.patch("/ticket/notifications/mark-all-as-read");
+            set((state) => ({
+                supportNotifications: state.supportNotifications.map((n) => ({
+                    ...n,
+                    is_read: true,
+                    read_at: n.read_at ?? new Date().toISOString(),
+                })),
+            }));
+        } catch {
+            // silently fail
+        }
+    },
+
+    markSupportNotificationsForTicketAsRead: async (ticketId) => {
+        try {
+            await axiosNormalApiClient.patch(
+                `/ticket/notifications/ticket/${ticketId}/mark-as-read`,
+                {},
+                { meta: { showToast: false } },
+            );
+            set((state) => ({
+                supportNotifications: state.supportNotifications.map((n) =>
+                    n.ticket_id === ticketId
+                        ? { ...n, is_read: true, read_at: n.read_at ?? new Date().toISOString() }
+                        : n
+                ),
+            }));
+        } catch {
+            // silently fail
+        }
+    },
+
+    prependSupportNotification: (notification) => {
+        set((state) => {
+            const exists = state.supportNotifications.some((n) => n.id === notification.id);
+            if (exists) return {};
+            const newNotification: ISupportNotification = {
+                id: notification.id ?? Date.now(),
+                ticket_id: notification.ticket_id ?? 0,
+                ticket_subject: notification.ticket_subject ?? null,
+                ticket_status: notification.ticket_status ?? null,
+                triggered_by_user_id: notification.triggered_by_user_id ?? null,
+                triggered_by_user_name: notification.triggered_by_user_name ?? null,
+                triggered_by_driver_id: notification.triggered_by_driver_id ?? null,
+                triggered_by_driver_name: notification.triggered_by_driver_name ?? null,
+                triggeredByType: (notification.triggeredByType as "user" | "driver") ?? "user",
+                triggeredById: notification.triggeredById ?? null,
+                triggeredByName: notification.triggeredByName ?? null,
+                type: notification.type ?? "new_ticket",
+                color: notification.color ?? "blue",
+                title: notification.title ?? "",
+                description: notification.description ?? "",
+                created_at: notification.created_at ?? new Date().toISOString(),
+                is_read: false,
+                read_at: null,
+            };
+            return {
+                supportNotifications: [newNotification, ...state.supportNotifications].slice(0, 50),
+            };
+        });
     },
 }));
 

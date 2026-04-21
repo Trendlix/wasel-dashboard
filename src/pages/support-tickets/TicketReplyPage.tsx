@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import clsx from "clsx";
 import { ArrowLeft, CheckCircle, Send, XCircle } from "lucide-react";
+import { isAxiosError } from "axios";
 import { Button } from "@/components/ui/button";
 import PageTransition from "@/shared/components/common/PageTransition";
 import {
@@ -12,6 +13,7 @@ import {
 } from "@/shared/components/common/CommonModal";
 import useTicketStore, { getSupportSocket } from "@/shared/hooks/store/useTicketStore";
 import useAuthStore from "@/shared/hooks/store/useAuthStore";
+import { showToast } from "@/shared/utils/toast";
 import {
     getOwnerDisplayName,
     ticketPriorityStyles,
@@ -29,7 +31,18 @@ const TicketReplyPage = () => {
     const { ticketId } = useParams<{ ticketId: string }>();
     const navigate = useNavigate();
 
-    const { selectedTicket, detailLoading, fetchTicketDetail, replyOnTicket, appendSupportMessage, closeTicket, solveTicket } = useTicketStore();
+    const {
+        selectedTicket,
+        detailLoading,
+        fetchTicketDetail,
+        replyOnTicket,
+        appendSupportMessage,
+        closeTicket,
+        solveTicket,
+        setActiveSupportChatTicket,
+        clearActiveSupportChatTicket,
+        markSupportNotificationsForTicketAsRead,
+    } = useTicketStore();
     const { userProfile } = useAuthStore();
 
     const [message, setMessage] = useState("");
@@ -82,6 +95,7 @@ const TicketReplyPage = () => {
         const handler = (payload: { ticketId: number; support: ITicketSupport }) => {
             if (payload.ticketId === numId) {
                 appendSupportMessage(numId, payload.support);
+                void markSupportNotificationsForTicketAsRead(numId);
             }
         };
 
@@ -89,7 +103,25 @@ const TicketReplyPage = () => {
         return () => {
             socket.off("ticket:new_message", handler);
         };
-    }, [ticketId, appendSupportMessage]);
+    }, [ticketId, appendSupportMessage, markSupportNotificationsForTicketAsRead]);
+
+    useEffect(() => {
+        const numId = Number(ticketId);
+        if (!numId) return;
+
+        setActiveSupportChatTicket(numId);
+        void markSupportNotificationsForTicketAsRead(numId);
+
+        const handleBeforeUnload = () => {
+            clearActiveSupportChatTicket(numId);
+        };
+        window.addEventListener("beforeunload", handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+            clearActiveSupportChatTicket(numId);
+        };
+    }, [ticketId, setActiveSupportChatTicket, clearActiveSupportChatTicket, markSupportNotificationsForTicketAsRead]);
 
     const scrollChatToBottom = (behavior: ScrollBehavior = "smooth") => {
         requestAnimationFrame(() => {
@@ -128,7 +160,7 @@ const TicketReplyPage = () => {
 
     const handleSend = async () => {
         const text = message.trim();
-        if (!text || !selectedTicket || sending) return;
+        if (!text || !selectedTicket || sending || isLockedForCurrentAdmin) return;
         setSending(true);
         try {
             const title = text.length > 60 ? text.slice(0, 60).trimEnd() + "…" : text;
@@ -137,6 +169,14 @@ const TicketReplyPage = () => {
             if (textareaRef.current) {
                 textareaRef.current.style.height = "auto";
                 textareaRef.current.focus();
+            }
+        } catch (error) {
+            const messageFromApi = isAxiosError(error)
+                ? error.response?.data?.message
+                : null;
+            showToast(messageFromApi || t("support:lock.actionDenied"), "error");
+            if (selectedTicket) {
+                await fetchTicketDetail(selectedTicket.id);
             }
         } finally {
             setSending(false);
@@ -152,11 +192,21 @@ const TicketReplyPage = () => {
 
     const handleConfirm = async () => {
         if (!ticket || !confirmAction) return;
+        if (isLockedForCurrentAdmin) {
+            showToast(t("support:lock.actionDenied"), "error");
+            return;
+        }
         setActing(true);
         try {
             if (confirmAction === "close") await closeTicket(ticket.id);
             else await solveTicket(ticket.id);
             setConfirmAction(null);
+        } catch (error) {
+            const messageFromApi = isAxiosError(error)
+                ? error.response?.data?.message
+                : null;
+            showToast(messageFromApi || t("support:lock.actionDenied"), "error");
+            await fetchTicketDetail(ticket.id);
         } finally {
             setActing(false);
         }
@@ -169,6 +219,13 @@ const TicketReplyPage = () => {
     const ownerInitial = ownerName[0]?.toUpperCase() ?? "?";
     const isResolved = ticket?.status === "closed" || ticket?.status === "solved";
     const currentAdminId = userProfile?.id ?? null;
+    const assignedAdmin = ticket?.assigned_admin ?? null;
+    const isLockedForCurrentAdmin =
+        ticket !== null &&
+        ticket !== undefined &&
+        ticket.assigned_admin_id !== null &&
+        ticket.assigned_admin_id !== currentAdminId;
+    const canManageTicket = !isResolved && !isLockedForCurrentAdmin;
 
     const createdLine =
         ticket &&
@@ -230,7 +287,22 @@ const TicketReplyPage = () => {
                                 </InfoCell>
                             </div>
 
-                            {!isResolved && (
+                            {assignedAdmin && (
+                                <div className="mt-4 rounded-lg bg-main-white/10 px-3 py-2 text-xs">
+                                    <span className="text-main-white/60">{t("support:lock.assignedTo")} </span>
+                                    <span className="font-semibold text-main-white">
+                                        {assignedAdmin.name || assignedAdmin.email}
+                                    </span>
+                                </div>
+                            )}
+
+                            {isLockedForCurrentAdmin && (
+                                <div className="mt-4 rounded-lg bg-main-remove/15 border border-main-remove/30 px-3 py-2 text-xs text-main-white">
+                                    {t("support:lock.onlyOwnerCanReply")}
+                                </div>
+                            )}
+
+                            {canManageTicket && (
                                 <>
                                     <hr className="border-main-white/15 mt-5" />
                                     <div className="flex gap-2 mt-4">
@@ -296,6 +368,7 @@ const TicketReplyPage = () => {
                                         timestamp={s.created_at}
                                         text={s.description ?? s.title}
                                         updatedBy={s.updated_by}
+                                        senderType={s.sender_type}
                                         currentAdminId={currentAdminId}
                                     />
                                 ))}
@@ -319,6 +392,10 @@ const TicketReplyPage = () => {
                                 {t("support:chat.resolvedNotice", {
                                     status: t(`support:statuses.${ticket?.status ?? "closed"}`),
                                 })}
+                            </p>
+                        ) : isLockedForCurrentAdmin ? (
+                            <p className="text-center text-sm text-main-remove py-1">
+                                {t("support:lock.chatDisabled")}
                             </p>
                         ) : (
                             <div className="space-y-2">
@@ -361,6 +438,7 @@ const TicketReplyPage = () => {
                 onOpenChange={(v) => !v && setConfirmAction(null)}
                 maxWidth="sm:max-w-[400px]"
                 loading={acting}
+                variant={confirmAction === "close" ? "danger" : "success"}
             >
                 <CommonModalHeader
                     title={
@@ -391,7 +469,7 @@ const TicketReplyPage = () => {
                         className={clsx(
                             "h-10 px-5 font-semibold text-main-white",
                             confirmAction === "close"
-                                ? "bg-main-sharkGray hover:bg-main-sharkGray/90"
+                                ? "bg-main-remove hover:bg-main-remove/90"
                                 : "bg-main-vividMint hover:bg-main-vividMint/90"
                         )}
                     >
@@ -442,32 +520,54 @@ const SupportBubble = ({
     timestamp,
     text,
     updatedBy,
+    senderType,
     currentAdminId,
 }: {
     timestamp: string;
     text: string;
     updatedBy?: { id: number; name: string | null } | null;
+    senderType?: "admin" | "user" | "driver";
     currentAdminId: number | null;
 }) => {
     const { t, i18n } = useTranslation("support");
     const time = formatAppDateTime(timestamp, i18n.language);
     const initial = updatedBy?.name?.[0]?.toUpperCase() ?? "S";
-    const isMe = currentAdminId !== null && updatedBy?.id === currentAdminId;
+    const normalizedSenderType = senderType ?? "admin";
+    const isCustomerMessage = normalizedSenderType === "user" || normalizedSenderType === "driver";
+    const isMe = normalizedSenderType === "admin" && currentAdminId !== null && updatedBy?.id === currentAdminId;
     const senderLabel = isMe ? t("chat.you") : (updatedBy?.name ?? t("chat.supportTeam"));
 
     return (
-        <div className="flex justify-start">
-            <div className="max-w-[65%] bg-main-white border border-main-whiteMarble rounded-2xl rounded-tl-sm px-5 py-4 shadow-sm">
+        <div className={clsx("flex", isCustomerMessage ? "justify-end" : "justify-start")}>
+            <div
+                className={clsx(
+                    "max-w-[65%] px-5 py-4",
+                    isCustomerMessage
+                        ? "bg-main-primary rounded-2xl rounded-tr-sm"
+                        : "bg-main-white border border-main-whiteMarble rounded-2xl rounded-tl-sm shadow-sm",
+                )}
+            >
                 <div className="flex items-center gap-2.5 mb-2">
-                    <div className="w-8 h-8 rounded-full bg-main-primary/10 flex items-center justify-center text-main-primary text-xs font-bold shrink-0">
+                    <div
+                        className={clsx(
+                            "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0",
+                            isCustomerMessage
+                                ? "bg-main-white text-main-primary"
+                                : "bg-main-primary/10 text-main-primary",
+                        )}
+                    >
                         {initial}
                     </div>
                     <div>
-                        <p className="text-main-mirage font-bold text-sm leading-tight">{senderLabel}</p>
-                        <p className="text-main-sharkGray text-xs">{time}</p>
+                        <p className={clsx("font-bold text-sm leading-tight", isCustomerMessage ? "text-main-white" : "text-main-mirage")}>
+                            {senderLabel}
+                        </p>
+                        <p className={clsx("text-xs", isCustomerMessage ? "text-main-white/60" : "text-main-sharkGray")}>{time}</p>
                     </div>
                 </div>
-                <p className="text-main-hydrocarbon text-sm leading-relaxed whitespace-pre-wrap wrap-break-word">{text}</p>
+                <p className={clsx("text-sm leading-relaxed whitespace-pre-wrap wrap-break-word", isCustomerMessage ? "text-main-white" : "text-main-hydrocarbon")}>
+                    {text}
+                </p>
             </div>
         </div>
     );

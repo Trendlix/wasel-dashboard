@@ -612,6 +612,7 @@ const MarketingLegalFaqsShared = ({
                 open={Boolean(pendingDeleteCategory)}
                 onOpenChange={(open) => !open && setPendingDeleteCategory(null)}
                 maxWidth="sm:max-w-[520px]"
+                variant="danger"
             >
                 <CommonModalHeader
                     title={t("marketingNested.remove") + " " + t("marketingNested.category") + "?"}
@@ -621,6 +622,11 @@ const MarketingLegalFaqsShared = ({
                         })
                     }
                 />
+                <CommonModalBody className="pt-0 pb-0 flex items-center justify-center">
+                    <div className="w-16 h-16 bg-main-remove/10 rounded-2xl flex items-center justify-center ring-8 ring-main-remove/5">
+                        <Trash2 className="w-8 h-8 text-main-remove" />
+                    </div>
+                </CommonModalBody>
                 <CommonModalFooter>
                     <Button
                         type="button"

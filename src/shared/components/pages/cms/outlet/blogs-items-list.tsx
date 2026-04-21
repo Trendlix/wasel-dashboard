@@ -7,9 +7,14 @@ import { useCmsBlogsStore, type BlogStatus, type CmsLocale } from "@/shared/hook
 import NoDataFound from "@/shared/components/common/NoDataFound";
 import TablePagination from "@/shared/components/common/TablePagination";
 import { formInputWrapperClass } from "@/shared/components/common/formStyles";
-import { RotateCcw, Search } from "lucide-react";
+import { FileText, RotateCcw, Search, Send, Trash2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CommonModal, CommonModalFooter, CommonModalHeader } from "@/shared/components/common/CommonModal";
+import {
+    CommonModal,
+    CommonModalBody,
+    CommonModalFooter,
+    CommonModalHeader,
+} from "@/shared/components/common/CommonModal";
 import { formatAppDateShort } from "@/lib/formatLocaleDate";
 
 type ConfirmActionType = "publish" | "draft" | "delete";
@@ -414,8 +419,28 @@ const BlogItemsListPage = () => {
                 onOpenChange={(open) => !open && handleCloseConfirm()}
                 loading={confirmLoading}
                 maxWidth="sm:max-w-[460px]"
+                variant={confirmAction?.type === "delete" ? "danger" : confirmAction?.type === "publish" ? "success" : "default"}
             >
                 <CommonModalHeader title={confirmCopy.title} description={confirmCopy.description} />
+                <CommonModalBody className="pt-0 pb-0 flex items-center justify-center">
+                    <div
+                        className={
+                            confirmAction?.type === "delete"
+                                ? "w-16 h-16 bg-main-remove/10 rounded-2xl flex items-center justify-center ring-8 ring-main-remove/5"
+                                : confirmAction?.type === "publish"
+                                  ? "w-16 h-16 bg-main-vividMint/10 rounded-2xl flex items-center justify-center ring-8 ring-main-vividMint/5"
+                                  : "w-16 h-16 bg-main-primary/10 rounded-2xl flex items-center justify-center ring-8 ring-main-primary/5"
+                        }
+                    >
+                        {confirmAction?.type === "delete" ? (
+                            <Trash2 className="w-8 h-8 text-main-remove" />
+                        ) : confirmAction?.type === "publish" ? (
+                            <Send className="w-8 h-8 text-main-vividMint" />
+                        ) : (
+                            <FileText className="w-8 h-8 text-main-primary" />
+                        )}
+                    </div>
+                </CommonModalBody>
                 <CommonModalFooter className="mt-0 py-5">
                     <Button
                         type="button"

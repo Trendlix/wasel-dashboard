@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { axiosRequestErrorMessage } from "@/shared/utils/networkErrors";
 import { useTranslation } from "react-i18next";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import useRolesStore, { AdminRole } from "@/shared/hooks/store/useRolesStore";
 import RoleCard from "./RoleCard";
 import RoleCardSkeleton from "./RoleCardSkeleton";
@@ -64,11 +64,9 @@ const DeleteRoleModal = ({ open, onOpenChange, role, onConfirm, loading, error }
                     </>
                 }
             />
-            <CommonModalBody className="pb-0">
-                <div className="flex items-center gap-3 rounded-xl bg-main-remove/5 border border-main-remove/20 px-4 py-3 mb-2">
-                    <Trash2 className="w-4 h-4 text-main-remove shrink-0" />
-                    <p className="text-sm text-main-remove font-medium">{t("roles:rolesDelete.warning")}</p>
-                </div>
+            <CommonModalBody className="pb-0 flex flex-col items-center text-center space-y-4">
+
+                <p className="text-sm text-main-remove font-medium">{t("roles:rolesDelete.warning")}</p>
                 {error ? (
                     <p className="text-xs font-medium text-main-red mt-2" role="alert">
                         {error}

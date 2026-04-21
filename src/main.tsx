@@ -6,12 +6,15 @@ import { router } from "./app/router";
 import "./index.css";
 import { i18nInitPromise } from "./i18n";
 import useLanguageStore from "./shared/hooks/store/useLanguageStore";
+import useBackendHealthStore from "./shared/hooks/store/useBackendHealthStore";
+import BackendUnavailablePage from "./shared/components/common/BackendUnavailablePage";
 
 const RootChrome = () => {
     const isRTL = useLanguageStore((s) => s.isRTL);
+    const backendUnavailable = useBackendHealthStore((s) => s.backendUnavailable);
     return (
         <>
-            <RouterProvider router={router} />
+            {backendUnavailable ? <BackendUnavailablePage /> : <RouterProvider router={router} />}
             <Toaster
                 position={isRTL ? "top-left" : "top-right"}
                 gutter={12}

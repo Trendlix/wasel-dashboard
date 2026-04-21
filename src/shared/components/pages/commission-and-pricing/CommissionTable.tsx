@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import clsx from "clsx";
-import { Pencil, Percent, Plus, Trash2 } from "lucide-react";
+import { AlertTriangle, Pencil, Percent, Plus, Trash2 } from "lucide-react";
 import useCommissionStore, {
     type ICommission,
     type TCommissionCategory,
@@ -9,6 +9,12 @@ import useCommissionStore, {
 } from "@/shared/hooks/store/useCommissionStore";
 import CommissionModal from "./modals/CommissionModal";
 import { axiosRequestErrorMessage } from "@/shared/utils/networkErrors";
+import { Button } from "@/components/ui/button";
+import {
+    CommonModal,
+    CommonModalBody,
+    CommonModalFooter,
+} from "@/shared/components/common/CommonModal";
 
 const categoryStyles: Record<TCommissionCategory, { bg: string; text: string }> = {
     trip: { bg: "bg-main-primary", text: "text-main-white" },
@@ -134,42 +140,53 @@ const DeleteConfirmModal = ({
     const { t } = useTranslation("commission");
     const catLabel = t(`categories.${commission.category}`);
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-            <div className="bg-main-white common-rounded shadow-xl p-6 w-full max-w-sm mx-4 space-y-4">
-                <p className="text-main-mirage font-bold text-base">{t("delete.title")}</p>
-                {isLastActive ? (
-                    <p className="text-xs font-medium text-main-red mt-1">
-                        {t("delete.cannotDelete", { category: catLabel })}
-                    </p>
-                ) : (
-                    <p className="text-main-sharkGray text-sm">
-                        {t("delete.confirmBody", { category: catLabel })}
-                    </p>
-                )}
-                {error ? (
-                    <p className="text-xs font-medium text-main-red" role="alert">
-                        {error}
-                    </p>
-                ) : null}
-                <div className="flex justify-end gap-3 pt-2 border-t border-main-whiteMarble">
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="font-bold text-main-sharkGray h-10 px-5 common-rounded hover:bg-main-titaniumWhite text-sm"
-                    >
-                        {t("delete.cancel")}
-                    </button>
-                    <button
-                        type="button"
-                        onClick={onConfirm}
-                        disabled={loading || isLastActive}
-                        className="bg-red-500 hover:bg-red-600 text-white font-bold h-10 px-5 common-rounded text-sm disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                        {loading ? t("delete.deleting") : t("delete.confirm")}
-                    </button>
+        <CommonModal
+            open
+            onOpenChange={(value) => {
+                if (!value) onClose();
+            }}
+            loading={loading}
+            maxWidth="sm:max-w-[420px]"
+            variant="danger"
+        >
+            <CommonModalBody className="flex flex-col items-center text-center space-y-4 pt-6 pb-2">
+                <div className="w-16 h-16 bg-main-remove/10 rounded-2xl flex items-center justify-center ring-8 ring-main-remove/5">
+                    <AlertTriangle className="w-8 h-8 text-main-remove" />
                 </div>
-            </div>
-        </div>
+                <div className="space-y-1.5 max-w-[300px]">
+                    <p className="text-xl font-bold text-main-mirage tracking-tight">{t("delete.title")}</p>
+                    <p className={clsx("text-sm leading-relaxed", isLastActive ? "text-main-red font-medium" : "text-main-sharkGray")}>
+                        {isLastActive
+                            ? t("delete.cannotDelete", { category: catLabel })
+                            : t("delete.confirmBody", { category: catLabel })}
+                    </p>
+                    {error ? (
+                        <p className="text-xs font-medium text-main-red" role="alert">
+                            {error}
+                        </p>
+                    ) : null}
+                </div>
+            </CommonModalBody>
+            <CommonModalFooter className="justify-center gap-3 mt-2">
+                <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={onClose}
+                    disabled={loading}
+                    className="h-11 px-6 text-main-sharkGray hover:bg-main-titaniumWhite font-semibold common-rounded"
+                >
+                    {t("delete.cancel")}
+                </Button>
+                <Button
+                    type="button"
+                    onClick={onConfirm}
+                    disabled={loading || isLastActive}
+                    className="h-11 px-8 bg-main-remove hover:bg-main-remove/90 text-white font-bold common-rounded shadow-lg shadow-main-remove/20 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                    {loading ? t("delete.deleting") : t("delete.confirm")}
+                </Button>
+            </CommonModalFooter>
+        </CommonModal>
     );
 };
 

@@ -50,6 +50,13 @@
     "customer": "عميل",
     "noName": "بدون اسم"
   },
+  "lock": {
+    "assignedTo": "تم الإسناد إلى",
+    "lockedForYou": "مقفلة لحسابك",
+    "onlyOwnerCanReply": "هذه التذكرة مقفلة لمشرف آخر. فقط المشرف المعيّن يمكنه الرد أو تغيير الحالة.",
+    "chatDisabled": "إجراءات المحادثة معطلة لأن التذكرة مسندة إلى مشرف آخر.",
+    "actionDenied": "هذه التذكرة مسندة إلى مشرف آخر."
+  },
   "details": {
     "loading": "جاري التحميل…",
     "ticketTitle": "تذكرة #{{id}}",
@@ -82,6 +89,10 @@
     "emptyTitle": "لا توجد تصنيفات",
     "emptyDescription": "لم يتم العثور على أي تصنيفات.",
     "deleteCategory": "حذف التصنيف",
+    "deleteConfirmTitle": "حذف التصنيف؟",
+    "deleteConfirmBody": "هل أنت متأكد أنك تريد حذف \"{{name}}\"؟ لا يمكن التراجع عن هذا الإجراء.",
+    "confirmDelete": "نعم، احذف",
+    "deleting": "جاري الحذف...",
     "done": "تم"
   },
   "chat": {
@@ -113,5 +124,21 @@
     "processing": "جاري المعالجة…",
     "yesClose": "نعم، أغلق",
     "yesSolved": "نعم، تم الحل"
+  },
+  "notifications": {
+    "title": "النشاط الأخير",
+    "openDrawer": "فتح النشاط الأخير",
+    "closeDrawer": "إغلاق النشاط الأخير",
+    "markAllAsRead": "قراءة الكل",
+    "markingAll": "جاري التحديد...",
+    "markAsRead": "قراءة",
+    "marking": "جاري...",
+    "read": "مقروء",
+    "empty": "لا يوجد نشاط حديث",
+    "emptyDescription": "ستظهر التذاكر والتحديثات الجديدة هنا.",
+    "newTicket": "تذكرة جديدة",
+    "newReply": "رد جديد",
+    "ticketClosed": "تم إغلاق التذكرة",
+    "ticketSolved": "تم حل التذكرة"
   }
 }

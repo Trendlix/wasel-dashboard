@@ -17,6 +17,7 @@ import { statusStyles, type TUserStatus } from "@/shared/core/pages/users";
 import TablePagination from "../../common/TablePagination";
 import NoDataFound from "../../common/NoDataFound";
 import UserDetailsModal from "./UserDetailsModal";
+import UsersExportModal from "./UsersExportModal";
 import useUserStore, { type IAppUser } from "@/shared/hooks/store/useUserStore";
 import StatusSelect from "../../common/StatusSelect";
 import { formInputWrapperClass } from "../../common/formStyles";
@@ -60,6 +61,9 @@ const UsersTable = () => {
     const [statusFilter, setStatusFilter] = useState("all");
     const [selectedUser, setSelectedUser] = useState<IAppUser | null>(null);
     const [modalOpen, setModalOpen] = useState(false);
+    const [exportModalOpen, setExportModalOpen] = useState(false);
+    const [exportDateFrom, setExportDateFrom] = useState("");
+    const [exportDateTo, setExportDateTo] = useState("");
 
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -88,6 +92,12 @@ const UsersTable = () => {
     const handleViewDetails = (user: IAppUser) => {
         setSelectedUser(user);
         setModalOpen(true);
+    };
+
+    const handleExportConfirm = async (payload: { date_from?: string; date_to?: string }) => {
+        setExportDateFrom(payload.date_from || "");
+        setExportDateTo(payload.date_to || "");
+        await exportUsers(payload);
     };
 
     const currentPage = meta?.current_page ?? 1;
@@ -130,7 +140,7 @@ const UsersTable = () => {
                 {/* Export */}
                 <Button
                     className="h-11 px-6 bg-main-primary text-main-white shrink-0 font-bold"
-                    onClick={exportUsers}
+                    onClick={() => setExportModalOpen(true)}
                     disabled={exporting}
                 >
                     <Download size={16} />
@@ -202,6 +212,15 @@ const UsersTable = () => {
                 user={selectedUser}
                 open={modalOpen}
                 onOpenChange={setModalOpen}
+            />
+
+            <UsersExportModal
+                open={exportModalOpen}
+                loading={exporting}
+                initialDateFrom={exportDateFrom}
+                initialDateTo={exportDateTo}
+                onOpenChange={setExportModalOpen}
+                onConfirm={handleExportConfirm}
             />
         </div>
     );

@@ -28,6 +28,7 @@ import {
     type TTicketStatus,
 } from "@/shared/core/pages/supportTickets";
 import { formatAppDateShort } from "@/lib/formatLocaleDate";
+import useAuthStore from "@/shared/hooks/store/useAuthStore";
 
 const SkeletonRow = () => (
     <TableRow className="border-b border-main-whiteMarble animate-pulse">
@@ -41,6 +42,7 @@ const SkeletonRow = () => (
 
 const TicketsTable = () => {
     const { t, i18n } = useTranslation(["support", "common"]);
+    const { userProfile } = useAuthStore();
     const {
         tickets,
         meta,
@@ -264,6 +266,7 @@ const TicketsTable = () => {
                                     key={ticket.id}
                                     ticket={ticket}
                                     lang={i18n.language}
+                                    currentAdminId={userProfile?.id ?? null}
                                     onViewDetails={handleViewDetails}
                                 />
                             ))}
@@ -306,10 +309,12 @@ const TicketsTable = () => {
 const TicketRow = ({
     ticket,
     lang,
+    currentAdminId,
     onViewDetails,
 }: {
     ticket: ITicket;
     lang: string;
+    currentAdminId: number | null;
     onViewDetails: (t: ITicket) => void;
 }) => {
     const { t } = useTranslation("support");
@@ -322,6 +327,10 @@ const TicketRow = ({
 
     const rawName = owner ? getOwnerDisplayName(owner) : "";
     const displayName = owner ? (rawName || t("owner.noName")) : "—";
+    const assignedAdmin = ticket.assigned_admin;
+    const isLockedForCurrentAdmin =
+        ticket.assigned_admin_id !== null &&
+        ticket.assigned_admin_id !== currentAdminId;
 
     const updatedDate = formatAppDateShort(ticket.updated_at, lang);
 
@@ -341,6 +350,16 @@ const TicketRow = ({
                         </span>
                         {owner.email && (
                             <span className="text-main-sharkGray text-xs">{owner.email}</span>
+                        )}
+                        {assignedAdmin && (
+                            <span className="text-main-primary text-[11px] font-medium">
+                                {t("lock.assignedTo")}: {assignedAdmin.name || assignedAdmin.email}
+                            </span>
+                        )}
+                        {isLockedForCurrentAdmin && (
+                            <span className="text-main-remove text-[11px] font-semibold">
+                                {t("lock.lockedForYou")}
+                            </span>
                         )}
                     </div>
                 ) : (

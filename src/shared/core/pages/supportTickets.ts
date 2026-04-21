@@ -61,6 +61,12 @@ export interface ITicketCategory {
     ticket_count?: number;
 }
 
+export interface ITicketAssignedAdmin {
+    id: number;
+    name: string | null;
+    email: string;
+}
+
 export interface ITicket {
     id: number;
     subject: string;
@@ -72,6 +78,8 @@ export interface ITicket {
     updated_at: string;
     category_id: number;
     category: ITicketCategory;
+    assigned_admin_id: number | null;
+    assigned_admin: ITicketAssignedAdmin | null;
     user_id: number | null;
     user: ITicketOwner | null;
     driver_id: number | null;
@@ -93,11 +101,33 @@ export interface ITicketSupport {
     status: string;
     created_at: string;
     updated_by: { id: number; name: string | null } | null;
+    sender_type?: "admin" | "user" | "driver";
 }
 
 export interface ITicketDetail extends ITicket {
     attachments_urls: string[];
     supports: ITicketSupport[];
+}
+
+export interface ISupportNotificationItem {
+    id: number;
+    ticket_id: number;
+    ticket_subject: string | null;
+    ticket_status: string | null;
+    triggered_by_user_id: number | null;
+    triggered_by_user_name: string | null;
+    triggered_by_driver_id: number | null;
+    triggered_by_driver_name: string | null;
+    triggeredByType: "user" | "driver";
+    triggeredById: number | null;
+    triggeredByName: string | null;
+    type: string;
+    color: string;
+    title: string;
+    description: string;
+    created_at: string;
+    is_read: boolean;
+    read_at: string | null;
 }
 
 export interface ITicketQuery {

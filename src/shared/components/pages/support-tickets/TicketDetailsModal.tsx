@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import clsx from "clsx";
-import { CheckCircle, MessageSquare, XCircle } from "lucide-react";
+import { isAxiosError } from "axios";
+import { CheckCircle, MessageSquare, XCircle, } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     CommonModal,
@@ -11,6 +12,7 @@ import {
     CommonModalHeader,
 } from "../../common/CommonModal";
 import useTicketStore from "@/shared/hooks/store/useTicketStore";
+import useAuthStore from "@/shared/hooks/store/useAuthStore";
 import {
     ticketPriorityStyles,
     ticketStatusStyles,
@@ -19,6 +21,7 @@ import {
     type TTicketPriority,
 } from "@/shared/core/pages/supportTickets";
 import { formatAppDateShort } from "@/lib/formatLocaleDate";
+import { showToast } from "@/shared/utils/toast";
 
 interface TicketDetailsModalProps {
     open: boolean;
@@ -30,7 +33,8 @@ type TConfirmAction = "close" | "solve" | null;
 const TicketDetailsModal = ({ open, onOpenChange }: TicketDetailsModalProps) => {
     const { t, i18n } = useTranslation(["support", "common"]);
     const navigate = useNavigate();
-    const { selectedTicket, detailLoading, closeTicket, solveTicket } = useTicketStore();
+    const { selectedTicket, detailLoading, closeTicket, solveTicket, fetchTicketDetail } = useTicketStore();
+    const { userProfile } = useAuthStore();
 
     const [confirmAction, setConfirmAction] = useState<TConfirmAction>(null);
     const [acting, setActing] = useState(false);
@@ -40,8 +44,8 @@ const TicketDetailsModal = ({ open, onOpenChange }: TicketDetailsModalProps) => 
     const ownerType = ticket?.user
         ? t("support:owner.user")
         : ticket?.driver
-          ? t("support:owner.driver")
-          : t("support:owner.unknown");
+            ? t("support:owner.driver")
+            : t("support:owner.unknown");
 
     const ownerDisplay = owner
         ? (getOwnerDisplayName(owner) || t("support:owner.noName"))
@@ -49,14 +53,30 @@ const TicketDetailsModal = ({ open, onOpenChange }: TicketDetailsModalProps) => 
 
     const isClosed = ticket?.status === "closed";
     const isSolved = ticket?.status === "solved";
+    const currentAdminId = userProfile?.id ?? null;
+    const assignedAdmin = ticket?.assigned_admin ?? null;
+    const isLockedForCurrentAdmin =
+        !!ticket &&
+        ticket.assigned_admin_id !== null &&
+        ticket.assigned_admin_id !== currentAdminId;
 
     const handleConfirm = async () => {
         if (!ticket || !confirmAction) return;
+        if (isLockedForCurrentAdmin) {
+            showToast(t("support:lock.actionDenied"), "error");
+            return;
+        }
         setActing(true);
         try {
             if (confirmAction === "close") await closeTicket(ticket.id);
             else await solveTicket(ticket.id);
             setConfirmAction(null);
+        } catch (error) {
+            const messageFromApi = isAxiosError(error)
+                ? error.response?.data?.message
+                : null;
+            showToast(messageFromApi || t("support:lock.actionDenied"), "error");
+            await fetchTicketDetail(ticket.id);
         } finally {
             setActing(false);
         }
@@ -152,6 +172,21 @@ const TicketDetailsModal = ({ open, onOpenChange }: TicketDetailsModalProps) => 
                                     </p>
                                 </div>
                             </div>
+
+                            {assignedAdmin && (
+                                <div className="rounded-xl border border-main-whiteMarble bg-main-luxuryWhite px-3 py-2 text-xs text-main-sharkGray">
+                                    <span className="font-semibold text-main-mirage">
+                                        {t("support:lock.assignedTo")}:
+                                    </span>{" "}
+                                    {assignedAdmin.name || assignedAdmin.email}
+                                </div>
+                            )}
+
+                            {isLockedForCurrentAdmin && (
+                                <div className="rounded-xl border border-main-remove/30 bg-main-remove/10 px-3 py-2 text-xs text-main-remove font-medium">
+                                    {t("support:lock.onlyOwnerCanReply")}
+                                </div>
+                            )}
                         </>
                     ) : null}
                 </CommonModalBody>
@@ -159,7 +194,7 @@ const TicketDetailsModal = ({ open, onOpenChange }: TicketDetailsModalProps) => 
                 {ticket && !detailLoading && (
                     <CommonModalFooter className="justify-between">
                         <div className="flex gap-2">
-                            {!isClosed && !isSolved && (
+                            {!isClosed && !isSolved && !isLockedForCurrentAdmin && (
                                 <Button
                                     type="button"
                                     variant="outline"
@@ -170,7 +205,7 @@ const TicketDetailsModal = ({ open, onOpenChange }: TicketDetailsModalProps) => 
                                     {t("support:details.close")}
                                 </Button>
                             )}
-                            {!isSolved && !isClosed && (
+                            {!isSolved && !isClosed && !isLockedForCurrentAdmin && (
                                 <Button
                                     type="button"
                                     variant="outline"
@@ -186,7 +221,8 @@ const TicketDetailsModal = ({ open, onOpenChange }: TicketDetailsModalProps) => 
                         <Button
                             type="button"
                             onClick={handleReply}
-                            className="h-10 px-5 bg-main-primary text-main-white font-semibold"
+                            disabled={isLockedForCurrentAdmin}
+                            className="h-10 px-5 bg-main-primary text-main-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <MessageSquare size={14} />
                             {t("support:details.openChat")}
@@ -200,6 +236,7 @@ const TicketDetailsModal = ({ open, onOpenChange }: TicketDetailsModalProps) => 
                 onOpenChange={(v) => !v && setConfirmAction(null)}
                 maxWidth="sm:max-w-[400px]"
                 loading={acting}
+                variant={confirmAction === "solve" ? "success" : "danger"}
             >
                 <CommonModalHeader
                     title={
@@ -230,15 +267,15 @@ const TicketDetailsModal = ({ open, onOpenChange }: TicketDetailsModalProps) => 
                         className={clsx(
                             "h-10 px-5 font-semibold text-main-white",
                             confirmAction === "close"
-                                ? "bg-main-sharkGray hover:bg-main-sharkGray/90"
+                                ? "bg-main-remove hover:bg-main-remove/90"
                                 : "bg-main-vividMint hover:bg-main-vividMint/90"
                         )}
                     >
                         {acting
                             ? t("support:details.processing")
                             : confirmAction === "close"
-                              ? t("support:details.yesClose")
-                              : t("support:details.yesSolved")}
+                                ? t("support:details.yesClose")
+                                : t("support:details.yesSolved")}
                     </Button>
                 </CommonModalFooter>
             </CommonModal>
