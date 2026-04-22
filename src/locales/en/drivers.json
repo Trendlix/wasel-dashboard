@@ -45,6 +45,56 @@
     "saveChanges": "Save changes",
     "saving": "Saving…"
   },
+  "fullView": {
+    "button": "Full View",
+    "title": "Driver Full View",
+    "description": "Review key driver data, documents, and document expiry dates.",
+    "backToDrivers": "Back to drivers",
+    "invalidTitle": "Invalid driver",
+    "invalidDescription": "The driver id in this URL is not valid.",
+    "notFound": "Driver details could not be loaded.",
+    "joinedOn": "Joined on {{date}}",
+    "phone": "Phone",
+    "additionalPhone": "Additional phone",
+    "address": "Address",
+    "verificationNotes": "Verification notes",
+    "status": {
+      "label": "Driver status",
+      "save": "Save status",
+      "saving": "Saving...",
+      "saved": "Driver status updated successfully.",
+      "saveFailed": "Failed to update driver status."
+    },
+    "documents": {
+      "title": "Documents",
+      "description": "Expand to review all uploaded driver documents.",
+      "open": "Open",
+      "openInModal": "Open in modal",
+      "openInBrowser": "Open in browser",
+      "modalDescription": "Only supported file types are previewed in this modal.",
+      "unsupportedType": "This file type is not supported for preview. Only image and PDF files are allowed.",
+      "close": "Close",
+      "pdfPreviewLabel": "PDF document preview is available in the modal.",
+      "previewUnavailable": "Preview is not available for this file type.",
+      "empty": "No documents are available for this driver.",
+      "profileImage": "Profile image",
+      "nationalIdFront": "National ID (front)",
+      "nationalIdBack": "National ID (back)",
+      "licenseFront": "License (front)",
+      "licenseBack": "License (back)",
+      "criminalRecord": "Criminal record"
+    },
+    "expiries": {
+      "title": "Expiration Control",
+      "description": "Expand to edit National ID and License expiry dates.",
+      "nationalIdLabel": "National ID expiry date",
+      "licenseLabel": "License expiry date",
+      "save": "Save expiry dates",
+      "saving": "Saving...",
+      "saved": "Expiry dates updated successfully.",
+      "saveFailed": "Failed to update expiry dates."
+    }
+  },
   "statuses": {
     "pending": "Pending",
     "approved": "Approved",

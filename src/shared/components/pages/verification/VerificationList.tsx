@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import { FileText, Search } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import TablePagination from "@/shared/components/common/TablePagination";
 import {
@@ -26,6 +27,7 @@ const tabs: TTab[] = ["pending", "approved", "rejected"];
 
 const VerificationList = () => {
   const { t } = useTranslation(["verification", "common"]);
+  const navigate = useNavigate();
   const {
     verifications,
     meta,
@@ -156,6 +158,7 @@ const VerificationList = () => {
               }}
               onApprove={() => openActionConfirmation("approve", item)}
               onReject={() => openActionConfirmation("reject", item)}
+              onFullView={() => navigate(`/drivers/${item.id}`)}
             />
           ))
         ) : (
@@ -249,12 +252,14 @@ const VerificationRow = ({
   onViewDocuments,
   onApprove,
   onReject,
+  onFullView,
 }: {
   item: IAppVerificationItem;
   updating: boolean;
   onViewDocuments: () => void;
   onApprove: () => void;
   onReject: () => void;
+  onFullView: () => void;
 }) => {
   const { t, i18n } = useTranslation("verification");
   const initials = (item.name ?? t("list.driverLabel"))
@@ -307,6 +312,14 @@ const VerificationRow = ({
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
+            <button
+              type="button"
+              onClick={onFullView}
+              disabled={updating}
+              className="h-8 px-4 text-xs font-semibold border border-main-primary text-main-primary rounded-md hover:bg-main-primary/5 disabled:opacity-60"
+            >
+              {t("list.fullView")}
+            </button>
             <button
               type="button"
               onClick={onViewDocuments}

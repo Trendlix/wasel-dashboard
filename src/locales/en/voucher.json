@@ -9,7 +9,7 @@
     "suspended": "Suspended",
     "expired": "Expired"
   },
-  "addVoucher": "Add voucher",
+  "addVoucher": "Add voucher (offer)",
   "table": {
     "code": "Code",
     "description": "Description",

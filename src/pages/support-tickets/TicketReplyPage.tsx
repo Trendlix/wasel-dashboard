@@ -2,10 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import clsx from "clsx";
-import { ArrowLeft, CheckCircle, Send, XCircle } from "lucide-react";
+import { CheckCircle, Send, XCircle } from "lucide-react";
 import { isAxiosError } from "axios";
 import { Button } from "@/components/ui/button";
 import PageTransition from "@/shared/components/common/PageTransition";
+import BackButton from "@/shared/components/common/BackButton";
 import {
     CommonModal,
     CommonModalFooter,
@@ -236,14 +237,11 @@ const TicketReplyPage = () => {
             <PageTransition>
                 <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-3 shrink-0">
-                        <button
-                            type="button"
+                        <BackButton
+                            label={t("common:back")}
                             onClick={() => navigate("/support-tickets")}
-                            className="w-9 h-9 rounded-full bg-main-primary flex items-center justify-center text-main-white hover:bg-main-primary/85 transition-colors shrink-0"
                             aria-label={t("support:chat.backAria")}
-                        >
-                            <ArrowLeft size={16} />
-                        </button>
+                        />
                         {detailLoading || !ticket ? (
                             <div className="space-y-1.5">
                                 <div className="h-5 w-36 rounded bg-main-whiteMarble animate-pulse" />

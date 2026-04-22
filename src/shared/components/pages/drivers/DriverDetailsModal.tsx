@@ -1,6 +1,8 @@
 import { useState } from "react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import { ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Select,
@@ -36,6 +38,7 @@ const STATUS_OPTIONS: TDriverStatus[] = [
 
 const DriverDetailsModal = ({ driver, open, onOpenChange }: DriverDetailsModalProps) => {
     const { t, i18n } = useTranslation(["drivers", "common"]);
+    const navigate = useNavigate();
     const { updateStatus, updating } = useDriverStore();
     const [selected, setSelected] = useState<TDriverStatus>(driver?.status ?? "pending");
 
@@ -112,6 +115,19 @@ const DriverDetailsModal = ({ driver, open, onOpenChange }: DriverDetailsModalPr
             </CommonModalBody>
 
             <CommonModalFooter>
+                <Button
+                    type="button"
+                    variant="ghost"
+                    className="me-auto h-11 px-4 bg-main-primary/10 text-main-primary hover:bg-main-primary/15 border border-main-primary/20 common-rounded font-semibold"
+                    onClick={() => {
+                        onOpenChange(false);
+                        navigate(`/drivers/${driver.id}`);
+                    }}
+                    disabled={updating}
+                >
+                    <ArrowUpRight size={16} />
+                    <span>{t("fullView.button")}</span>
+                </Button>
                 <Button
                     type="button"
                     variant="ghost"

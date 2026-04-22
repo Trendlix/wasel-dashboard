@@ -1,10 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { formatAppDateTime } from "@/lib/formatLocaleDate";
-import { ArrowLeft, Calendar, Mail, Phone, User, Hash } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Calendar, Mail, Phone, User, Hash } from "lucide-react";
 import PageHeader from "@/shared/components/common/PageHeader";
 import NoDataFound from "@/shared/components/common/NoDataFound";
+import BackButton from "@/shared/components/common/BackButton";
 import type {
     TDetailedNotificationType,
     IDetailedUserNotification,
@@ -76,14 +76,10 @@ const NotificationDetailPage = ({ type, loading, error, notification }: Props) =
     if (error || !notification) {
         return (
             <div className="space-y-6">
-                <Button
-                    variant="outline"
-                    className="h-9 px-4 border-main-whiteMarble text-main-hydrocarbon gap-2"
+                <BackButton
+                    label={t("common:back")}
                     onClick={() => navigate(backPath)}
-                >
-                    <ArrowLeft size={15} />
-                    {t("common:back")}
-                </Button>
+                />
                 <NoDataFound
                     title={t("notifications:notFoundTitle")}
                     description={error ?? t("notifications:notFoundDescription")}
@@ -177,14 +173,10 @@ const NotificationDetailPage = ({ type, loading, error, notification }: Props) =
 
     return (
         <div className="space-y-6">
-            <Button
-                variant="outline"
-                className="h-9 px-4 border-main-whiteMarble text-main-hydrocarbon gap-2"
+            <BackButton
+                label={t("common:back")}
                 onClick={() => navigate(backPath)}
-            >
-                <ArrowLeft size={15} />
-                {t("common:back")}
-            </Button>
+            />
             <PageHeader title={t(`notifications:${titleKey}`)} description={t("notifications:detailPageDescription", { id: notification.id })} />
 
             <Section title={t("notifications:sectionNotification")}>

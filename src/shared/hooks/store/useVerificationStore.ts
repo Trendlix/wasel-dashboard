@@ -83,6 +83,15 @@ interface IUpdateVerificationPayload {
   status: TVerificationStatus;
   reason_for_rejection?: string;
   verification_notes?: string;
+  national_id_expiry?: string;
+  license_expiry?: string;
+  address?: string;
+  additional_phone?: string;
+}
+
+interface IUpdateVerificationExpiriesPayload {
+  national_id_expiry?: string;
+  license_expiry?: string;
 }
 
 interface VerificationState {
@@ -95,6 +104,7 @@ interface VerificationState {
   countsLoading: boolean;
   detailsLoading: boolean;
   updating: boolean;
+  expiriesUpdating: boolean;
   error: string | null;
   query: IVerificationQuery;
 
@@ -106,6 +116,7 @@ interface VerificationState {
   setQuery: (query: Partial<IVerificationQuery>) => void;
   resetQuery: () => void;
   updateVerificationStatus: (id: number, payload: IUpdateVerificationPayload) => Promise<void>;
+  updateVerificationExpiries: (id: number, payload: IUpdateVerificationExpiriesPayload) => Promise<void>;
 }
 
 const extractErrorMessage = (error: unknown, fallback: string): string => {
@@ -130,6 +141,7 @@ const useVerificationStore = create<VerificationState>((set, get) => ({
   countsLoading: false,
   detailsLoading: false,
   updating: false,
+  expiriesUpdating: false,
   error: null,
   query: defaultQuery,
 
@@ -243,6 +255,19 @@ const useVerificationStore = create<VerificationState>((set, get) => ({
                   notes: payload.verification_notes ?? null,
                   is_profile_verified: payload.status === "approved",
                 },
+                documents: {
+                  ...state.details.documents,
+                  national_id_expiry:
+                    payload.national_id_expiry ?? state.details.documents.national_id_expiry,
+                  license_expiry:
+                    payload.license_expiry ?? state.details.documents.license_expiry,
+                  address: Object.prototype.hasOwnProperty.call(payload, "address")
+                    ? payload.address ?? null
+                    : state.details.documents.address,
+                  additional_phone: Object.prototype.hasOwnProperty.call(payload, "additional_phone")
+                    ? payload.additional_phone ?? null
+                    : state.details.documents.additional_phone,
+                },
               }
             : state.details,
         updating: false,
@@ -253,6 +278,41 @@ const useVerificationStore = create<VerificationState>((set, get) => ({
       set({
         error: extractErrorMessage(error, "Failed to update verification status"),
         updating: false,
+      });
+      throw error;
+    }
+  },
+
+  updateVerificationExpiries: async (id, payload) => {
+    set({ expiriesUpdating: true, error: null });
+    try {
+      const response = await axiosNormalApiClient.patch(`/dashboard/verifications/${id}/expiries`, payload);
+      const updatedExpiries = response.data?.data as
+        | { national_id_expiry?: string | null; license_expiry?: string | null }
+        | undefined;
+
+      set((state) => ({
+        details:
+          state.detailsId === id && state.details
+            ? {
+                ...state.details,
+                documents: {
+                  ...state.details.documents,
+                  national_id_expiry:
+                    updatedExpiries?.national_id_expiry ?? state.details.documents.national_id_expiry,
+                  license_expiry:
+                    updatedExpiries?.license_expiry ?? state.details.documents.license_expiry,
+                },
+              }
+            : state.details,
+        expiriesUpdating: false,
+      }));
+
+      await get().fetchVerificationDetails(id);
+    } catch (error) {
+      set({
+        error: extractErrorMessage(error, "Failed to update verification expiries"),
+        expiriesUpdating: false,
       });
       throw error;
     }

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ExternalLink, FileText, IdCard, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
   CommonModal,
@@ -21,7 +22,28 @@ interface VerificationDetailsModalProps {
   onOpenChange: (value: boolean) => void;
 }
 
-const isImageDocument = (url: string) => /\.(png|jpe?g|webp|gif|avif|svg)$/i.test(url);
+type TDocumentPreviewType = "image" | "pdf" | "unsupported";
+
+const IMAGE_EXTENSIONS = new Set(["png", "jpg", "jpeg", "webp", "gif", "avif", "svg"]);
+
+const getFileExtension = (url: string) => {
+  const cleanUrl = url.split(/[?#]/)[0];
+  const ext = cleanUrl.split(".").pop() ?? "";
+  return ext.toLowerCase();
+};
+
+const detectDocumentPreviewType = (url: string): TDocumentPreviewType => {
+  const ext = getFileExtension(url);
+  if (IMAGE_EXTENSIONS.has(ext)) return "image";
+  if (ext === "pdf") return "pdf";
+  return "unsupported";
+};
+
+interface ISelectedDocument {
+  label: string;
+  url: string;
+  previewType: TDocumentPreviewType;
+}
 
 const VerificationDetailsModal = ({
   open,
@@ -41,6 +63,14 @@ const VerificationDetailsModal = ({
   const [rejectReason, setRejectReason] = useState("");
   const [verificationNotes, setVerificationNotes] = useState("");
   const [reasonError, setReasonError] = useState<string | null>(null);
+  const [nationalIdExpiry, setNationalIdExpiry] = useState("");
+  const [licenseExpiry, setLicenseExpiry] = useState("");
+  const [address, setAddress] = useState("");
+  const [additionalPhone, setAdditionalPhone] = useState("");
+  const [nationalIdExpiryError, setNationalIdExpiryError] = useState<string | null>(null);
+  const [licenseExpiryError, setLicenseExpiryError] = useState<string | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<ISelectedDocument | null>(null);
+  const [documentModalOpen, setDocumentModalOpen] = useState(false);
 
   const handleModalOpenChange = (next: boolean) => {
     if (!next) {
@@ -48,6 +78,14 @@ const VerificationDetailsModal = ({
       setRejectReason("");
       setVerificationNotes("");
       setReasonError(null);
+      setNationalIdExpiry("");
+      setLicenseExpiry("");
+      setAddress("");
+      setAdditionalPhone("");
+      setNationalIdExpiryError(null);
+      setLicenseExpiryError(null);
+      setSelectedDocument(null);
+      setDocumentModalOpen(false);
     }
     onOpenChange(next);
   };
@@ -62,9 +100,21 @@ const VerificationDetailsModal = ({
 
   useEffect(() => {
     if (!details) return;
+    const toDateInput = (value?: string | null) => {
+      if (!value) return "";
+      const parsed = new Date(value);
+      if (Number.isNaN(parsed.getTime())) return "";
+      return parsed.toISOString().slice(0, 10);
+    };
     queueMicrotask(() => {
       setRejectReason(details.verification.rejected_reason ?? "");
       setVerificationNotes(details.verification.notes ?? "");
+      setNationalIdExpiry(toDateInput(details.documents.national_id_expiry));
+      setLicenseExpiry(toDateInput(details.documents.license_expiry));
+      setAddress(details.documents.address ?? "");
+      setAdditionalPhone(details.documents.additional_phone ?? "");
+      setNationalIdExpiryError(null);
+      setLicenseExpiryError(null);
     });
   }, [details]);
 
@@ -83,9 +133,30 @@ const VerificationDetailsModal = ({
 
   const handleApprove = async () => {
     if (!verification) return;
+    const nationalExpiryValue = nationalIdExpiry.trim();
+    const licenseExpiryValue = licenseExpiry.trim();
+    let hasError = false;
+    if (!nationalExpiryValue) {
+      setNationalIdExpiryError(t("verification:details.expiryRequiredError"));
+      hasError = true;
+    } else {
+      setNationalIdExpiryError(null);
+    }
+    if (!licenseExpiryValue) {
+      setLicenseExpiryError(t("verification:details.expiryRequiredError"));
+      hasError = true;
+    } else {
+      setLicenseExpiryError(null);
+    }
+    if (hasError) return;
+
     await updateVerificationStatus(verification.id, {
       status: "approved",
       verification_notes: verificationNotes.trim() || undefined,
+      national_id_expiry: nationalExpiryValue,
+      license_expiry: licenseExpiryValue,
+      address,
+      additional_phone: additionalPhone,
     });
     handleModalOpenChange(false);
   };
@@ -93,17 +164,45 @@ const VerificationDetailsModal = ({
   const handleReject = async () => {
     if (!verification) return;
     const reason = rejectReason.trim() || t("verification:rejectReasonDefault");
+    const payload: {
+      status: "rejected";
+      reason_for_rejection: string;
+      verification_notes?: string;
+      national_id_expiry?: string;
+      license_expiry?: string;
+      address?: string;
+      additional_phone?: string;
+    } = {
+      status: "rejected",
+      reason_for_rejection: reason,
+      verification_notes: verificationNotes.trim() || undefined,
+    };
+
+    if (nationalIdExpiry.trim()) payload.national_id_expiry = nationalIdExpiry.trim();
+    if (licenseExpiry.trim()) payload.license_expiry = licenseExpiry.trim();
+    if (address !== (details?.documents.address ?? "")) payload.address = address;
+    if (additionalPhone !== (details?.documents.additional_phone ?? "")) {
+      payload.additional_phone = additionalPhone;
+    }
+
     try {
       setReasonError(null);
-      await updateVerificationStatus(verification.id, {
-        status: "rejected",
-        reason_for_rejection: reason,
-        verification_notes: verificationNotes.trim() || undefined,
-      });
+      setNationalIdExpiryError(null);
+      setLicenseExpiryError(null);
+      await updateVerificationStatus(verification.id, payload);
       handleModalOpenChange(false);
     } catch {
       setReasonError(t("verification:rejectError"));
     }
+  };
+
+  const handleOpenDocument = (label: string, url: string) => {
+    setSelectedDocument({
+      label,
+      url,
+      previewType: detectDocumentPreviewType(url),
+    });
+    setDocumentModalOpen(true);
   };
 
   if (!verification) return null;
@@ -118,7 +217,8 @@ const VerificationDetailsModal = ({
   const fmt = (v?: string | null) => formatAppDateShort(v, i18n.language, "—");
 
   return (
-    <CommonModal
+    <>
+      <CommonModal
       open={open}
       onOpenChange={handleModalOpenChange}
       loading={updating}
@@ -162,22 +262,25 @@ const VerificationDetailsModal = ({
                           <Icon size={15} className="shrink-0" />
                           <span className="truncate">{doc.label}</span>
                         </p>
-                        <a
-                          href={value}
-                          target="_blank"
-                          rel="noreferrer"
+                        <button
+                          type="button"
+                          onClick={() => handleOpenDocument(doc.label, value)}
                           className="text-main-primary text-xs font-semibold inline-flex items-center gap-1 hover:underline shrink-0"
                         >
-                          {t("verification:details.open")}
+                          {t("verification:details.openInModal")}
                           <ExternalLink size={13} />
-                        </a>
+                        </button>
                       </div>
-                      {isImageDocument(value) ? (
+                      {detectDocumentPreviewType(value) === "image" ? (
                         <img
                           src={value}
                           alt={doc.label}
                           className="w-full h-48 rounded-xl object-cover border border-main-whiteMarble"
                         />
+                      ) : detectDocumentPreviewType(value) === "pdf" ? (
+                        <div className="h-48 rounded-xl border border-main-whiteMarble bg-main-luxuryWhite flex items-center justify-center text-main-sharkGray text-sm">
+                          {t("verification:details.pdfPreviewLabel")}
+                        </div>
                       ) : (
                         <div className="h-48 rounded-xl border border-dashed border-main-whiteMarble bg-main-luxuryWhite flex items-center justify-center text-main-sharkGray text-sm">
                           {t("verification:details.previewUnavailable")}
@@ -195,16 +298,53 @@ const VerificationDetailsModal = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="rounded-2xl border border-main-whiteMarble p-4 space-y-2">
-                <p className="text-main-sharkGray text-xs">{t("verification:details.nationalIdExpiry")}</p>
-                <p className="text-main-mirage font-semibold">{fmt(details.documents.national_id_expiry)}</p>
-                <p className="text-main-sharkGray text-xs mt-3">{t("verification:details.licenseExpiry")}</p>
-                <p className="text-main-mirage font-semibold">{fmt(details.documents.license_expiry)}</p>
+                <p className="text-main-sharkGray text-xs">{t("verification:details.nationalIdExpiryRequired")}</p>
+                <Input
+                  type="date"
+                  value={nationalIdExpiry}
+                  onChange={(e) => {
+                    setNationalIdExpiry(e.target.value);
+                    if (nationalIdExpiryError) setNationalIdExpiryError(null);
+                  }}
+                  className="h-10"
+                  disabled={updating}
+                />
+                {nationalIdExpiryError ? (
+                  <p className="text-xs font-medium text-main-red">{nationalIdExpiryError}</p>
+                ) : null}
+
+                <p className="text-main-sharkGray text-xs mt-3">{t("verification:details.licenseExpiryRequired")}</p>
+                <Input
+                  type="date"
+                  value={licenseExpiry}
+                  onChange={(e) => {
+                    setLicenseExpiry(e.target.value);
+                    if (licenseExpiryError) setLicenseExpiryError(null);
+                  }}
+                  className="h-10"
+                  disabled={updating}
+                />
+                {licenseExpiryError ? (
+                  <p className="text-xs font-medium text-main-red">{licenseExpiryError}</p>
+                ) : null}
               </div>
               <div className="rounded-2xl border border-main-whiteMarble p-4 space-y-2">
                 <p className="text-main-sharkGray text-xs">{t("verification:details.address")}</p>
-                <p className="text-main-mirage font-semibold">{details.documents.address ?? "—"}</p>
+                <Input
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder={t("verification:details.addressPlaceholder")}
+                  className="h-10"
+                  disabled={updating}
+                />
                 <p className="text-main-sharkGray text-xs mt-3">{t("verification:details.additionalPhone")}</p>
-                <p className="text-main-mirage font-semibold">{details.documents.additional_phone ?? "—"}</p>
+                <Input
+                  value={additionalPhone}
+                  onChange={(e) => setAdditionalPhone(e.target.value)}
+                  placeholder={t("verification:details.additionalPhonePlaceholder")}
+                  className="h-10"
+                  disabled={updating}
+                />
               </div>
             </div>
 
@@ -247,6 +387,16 @@ const VerificationDetailsModal = ({
         <Button
           type="button"
           variant="ghost"
+          className="h-10 px-6 bg-main-primary/10 text-main-primary hover:bg-main-primary/15 border border-main-primary/20 rounded-xl font-semibold"
+          onClick={() => selectedDocument?.url && window.open(selectedDocument.url, "_blank", "noopener,noreferrer")}
+          disabled={!selectedDocument?.url}
+        >
+          <ExternalLink size={15} />
+          {t("verification:details.openInBrowser")}
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
           className="h-11 px-7 text-main-sharkGray hover:bg-main-titaniumWhite"
           onClick={() => handleModalOpenChange(false)}
           disabled={updating}
@@ -273,7 +423,51 @@ const VerificationDetailsModal = ({
           </Button>
         </div>
       </CommonModalFooter>
-    </CommonModal>
+      </CommonModal>
+
+      <CommonModal
+      open={documentModalOpen}
+      onOpenChange={(next) => {
+        setDocumentModalOpen(next);
+        if (!next) setSelectedDocument(null);
+      }}
+      maxWidth="sm:max-w-[980px]"
+    >
+      <CommonModalHeader
+        title={selectedDocument?.label ?? t("verification:details.title")}
+        description={t("verification:details.modalDescription")}
+      />
+      <CommonModalBody className="pb-6">
+        {selectedDocument?.previewType === "image" ? (
+          <img
+            src={selectedDocument.url}
+            alt={selectedDocument.label}
+            className="w-full max-h-[70vh] rounded-xl object-contain border border-main-whiteMarble bg-main-luxuryWhite"
+          />
+        ) : selectedDocument?.previewType === "pdf" ? (
+          <iframe
+            title={selectedDocument.label}
+            src={selectedDocument.url}
+            className="w-full h-[70vh] rounded-xl border border-main-whiteMarble"
+          />
+        ) : (
+          <div className="rounded-xl border border-dashed border-main-whiteMarble bg-main-luxuryWhite p-8 text-center text-main-sharkGray">
+            {t("verification:details.unsupportedType")}
+          </div>
+        )}
+      </CommonModalBody>
+      <CommonModalFooter>
+        <Button
+          type="button"
+          variant="ghost"
+          className="h-10 px-6"
+          onClick={() => setDocumentModalOpen(false)}
+        >
+          {t("verification:details.close")}
+        </Button>
+      </CommonModalFooter>
+      </CommonModal>
+    </>
   );
 };
 

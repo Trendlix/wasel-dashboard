@@ -20,6 +20,7 @@ import {
 } from "@/shared/hooks/store/useCmsBlogsStore";
 import { Trash2, X } from "lucide-react";
 import { CommonModal, CommonModalFooter, CommonModalHeader } from "@/shared/components/common/CommonModal";
+import BackButton from "@/shared/components/common/BackButton";
 
 // ─── Schema Scripts Editor (same pattern as SEO forms) ───────────────────────
 
@@ -470,14 +471,11 @@ const BlogItemForm = ({ mode, initialItem, onBack }: BlogItemFormProps) => {
                     >
                         {savingItem ? t("sharedEditor.saving") : mode === "create" ? t("cms:blogItemEditor.createButton") : t("cms:blogItemEditor.updateButton")}
                     </Button>
-                    <Button
-                        type="button"
-                        variant="outline"
+                    <BackButton
+                        label={t("cms:blogItemEditor.back")}
                         onClick={onBack}
-                        className="border-main-whiteMarble text-main-hydrocarbon hover:bg-main-titaniumWhite px-6"
-                    >
-                        {t("cms:blogItemEditor.back")}
-                    </Button>
+                        className="px-6"
+                    />
                 </div>
 
             </div>

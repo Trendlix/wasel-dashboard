@@ -16,6 +16,7 @@ import UsersPage from "../pages/users";
 // import WalletAndFinancePage from "../pages/wallet-and-finance";
 // import StorageOwnersPage from "../pages/storage-owners";
 import DriversPage from "../pages/drivers";
+import DriverFullViewPage from "../pages/drivers/detail";
 // import BlogsPage from "@/pages/blogs";
 // import AddBlogPage from "@/pages/blogs/AddBlogPage";
 // import EditBlogPage from "@/pages/blogs/EditBlogPage";
@@ -36,6 +37,7 @@ import NotificationsDriverTab from "@/pages/notifications/driver";
 import NotificationsUserTab from "@/pages/notifications/user";
 import NotificationsTripTab from "@/pages/notifications/trip";
 import NotificationsOffersUpdatesTab from "@/pages/notifications/offers-updates";
+import NotificationsOffersUpdatesDetail from "@/pages/notifications/detail/offers-updates";
 import NotificationsUserDetail from "@/pages/notifications/detail/user";
 import NotificationsDriverDetail from "@/pages/notifications/detail/driver";
 import NotificationsTripDetail from "@/pages/notifications/detail/trip";
@@ -111,6 +113,7 @@ export const router = createBrowserRouter([
             { path: "analytics", element: <Suspense fallback={lazyRouteFallback}><AnalyticsPage /></Suspense> },
             { path: "users", element: <UsersPage /> },
             { path: "drivers", element: <DriversPage /> },
+            { path: "drivers/:id", element: <DriverFullViewPage /> },
             // { path: "wallet-and-finance", element: <WalletAndFinancePage /> },
             // { path: "storage-owners", element: <StorageOwnersPage /> },
 
@@ -124,6 +127,7 @@ export const router = createBrowserRouter([
                     { path: "user",   element: <NotificationsUserTab /> },
                     { path: "trip",   element: <NotificationsTripTab /> },
                     { path: "offers-updates", element: <NotificationsOffersUpdatesTab /> },
+                    { path: "offers-updates/:source/:campaignId", element: <NotificationsOffersUpdatesDetail /> },
                     { path: "users/:notificationId",   element: <NotificationsUserDetail /> },
                     { path: "drivers/:notificationId", element: <NotificationsDriverDetail /> },
                     { path: "trips/:notificationId",   element: <NotificationsTripDetail /> },
