@@ -55,7 +55,7 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
     <tr
       data-slot="table-row"
       className={cn(
-        "border-b transition-[background-color,box-shadow] duration-[var(--wasel-motion-duration)] ease-[var(--wasel-motion-ease-out)] hover:bg-muted/55 hover:shadow-sm data-[state=selected]:bg-muted",
+        "border-b transition-[background-color,box-shadow] duration-(--wasel-motion-duration) ease-(--wasel-motion-ease-out) hover:bg-muted/55 hover:shadow-sm data-[state=selected]:bg-muted",
         className
       )}
       {...props}
@@ -68,7 +68,7 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
     <th
       data-slot="table-head"
       className={cn(
-        "h-10 px-2 text-start align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pe-0",
+        "h-10 px-2 text-start align-top font-medium whitespace-normal break-words max-w-[260px] text-foreground [&:has([role=checkbox])]:pe-0",
         className
       )}
       {...props}
@@ -80,8 +80,11 @@ function TableCell({ className, ...props }: React.ComponentProps<"td">) {
   return (
     <td
       data-slot="table-cell"
+      style={{
+        wordBreak: "break-word"
+      }}
       className={cn(
-        "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pe-0",
+        "p-2 align-top whitespace-normal max-w-[320px] [&:has([role=checkbox])]:pe-0",
         className
       )}
       {...props}

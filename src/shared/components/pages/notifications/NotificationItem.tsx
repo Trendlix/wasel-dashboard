@@ -1,4 +1,5 @@
 import type { IAdminDashboardNotification } from "@/shared/hooks/store/useDashboardNotificationsStore";
+import { useTranslation } from "react-i18next";
 
 interface INotificationItemProps {
     item: IAdminDashboardNotification;
@@ -9,6 +10,7 @@ interface INotificationItemProps {
 }
 
 const NotificationItem = ({ item, tab, sentAt, onMarkAsRead, actionLoadingId }: INotificationItemProps) => {
+    const { t } = useTranslation(["common"]);
     const isRead = item.is_read ?? Boolean(item.read_at);
     const isLoading = actionLoadingId === item.id;
 
@@ -24,16 +26,16 @@ const NotificationItem = ({ item, tab, sentAt, onMarkAsRead, actionLoadingId }: 
                         onClick={() => onMarkAsRead(tab, item.id)}
                         className="mt-1 h-7 px-3 w-fit rounded-md bg-main-primary text-main-white text-xs font-semibold hover:bg-main-primary/90 disabled:opacity-60 disabled:cursor-not-allowed"
                     >
-                        {isLoading ? "Marking..." : "Mark as read"}
+                        {isLoading ? t("common:marking") : t("common:markRead")}
                     </button>
                 ) : null}
             </div>
             <div className="flex flex-col items-end gap-1 shrink-0">
                 <span className="text-main-silverSteel text-xs">{sentAt}</span>
                 {isRead ? (
-                    <span className="text-[11px] font-medium text-main-sharkGray">Read</span>
+                    <span className="text-[11px] font-medium text-main-sharkGray">{t("common:read")}</span>
                 ) : (
-                    <span className="text-[11px] font-semibold text-main-primary">Unread</span>
+                    <span className="text-[11px] font-semibold text-main-primary">{t("common:unread")}</span>
                 )}
             </div>
         </div>

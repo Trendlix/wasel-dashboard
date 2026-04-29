@@ -1,19 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useParams } from "react-router-dom";
-import { ChevronDown, ChevronUp, ExternalLink, FileText, IdCard, ShieldCheck } from "lucide-react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { ChevronDown, ChevronUp, ExternalLink, FileText, IdCard, ShieldCheck, Truck as TruckIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PageHeader from "@/shared/components/common/PageHeader";
 import PageTransition from "@/shared/components/common/PageTransition";
 import BackButton from "@/shared/components/common/BackButton";
 import { CommonModal, CommonModalBody, CommonModalFooter, CommonModalHeader } from "@/shared/components/common/CommonModal";
 import { showToast } from "@/shared/utils/toast";
-import useDriverStore from "@/shared/hooks/store/useDriverStore";
 import useVerificationStore from "@/shared/hooks/store/useVerificationStore";
 import { driverStatusStyles, type TDriverStatus } from "@/shared/core/pages/drivers";
+import type { TVerificationStatus } from "@/shared/core/pages/verification";
 import { formatAppDateLong } from "@/lib/formatLocaleDate";
 
 type TDocumentPreviewType = "image" | "pdf" | "unsupported";
@@ -40,39 +41,90 @@ interface ISelectedDocument {
 }
 
 const DRIVER_STATUS_OPTIONS: TDriverStatus[] = [
-  "pending",
   "approved",
   "suspended",
-  "blocked",
   "rejected",
-  "deleted",
 ];
+type TAllowedVerificationStatus = Extract<TVerificationStatus, "approved" | "rejected" | "suspended">;
 
 const isDriverStatus = (value: string): value is TDriverStatus => DRIVER_STATUS_OPTIONS.includes(value as TDriverStatus);
 
-const toInputDate = (value?: string | null) => {
+const toInputDateTimeLocal = (value?: string | null) => {
   if (!value) return "";
-  return value.slice(0, 10);
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "";
+  const year = parsed.getFullYear();
+  const month = String(parsed.getMonth() + 1).padStart(2, "0");
+  const day = String(parsed.getDate()).padStart(2, "0");
+  const hours = String(parsed.getHours()).padStart(2, "0");
+  const minutes = String(parsed.getMinutes()).padStart(2, "0");
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
 
-const toIsoDateString = (value: string) => new Date(`${value}T00:00:00.000Z`).toISOString();
+const toIsoDateTimeString = (value: string) => {
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return null;
+  return parsed.toISOString();
+};
+
+const truckStatusStyles: Record<"pending" | "approved" | "suspended", { bg: string; text: string }> = {
+  pending: { bg: "bg-main-vividAmber/15", text: "text-main-vividAmber" },
+  approved: { bg: "bg-main-vividMint/15", text: "text-main-vividMint" },
+  suspended: { bg: "bg-main-remove/15", text: "text-main-remove" },
+};
+
+const noteStatusStyles: Record<TDriverStatus, { badge: string; panel: string; title: string }> = {
+  pending: {
+    badge: "bg-main-vividAmber/15 text-main-vividAmber",
+    panel: "border-main-vividAmber/20 bg-main-vividAmber/5",
+    title: "text-main-vividAmber",
+  },
+  approved: {
+    badge: "bg-main-vividMint/15 text-main-vividMint",
+    panel: "border-main-vividMint/20 bg-main-vividMint/5",
+    title: "text-main-vividMint",
+  },
+  suspended: {
+    badge: "bg-main-remove/15 text-main-remove",
+    panel: "border-main-remove/20 bg-main-remove/5",
+    title: "text-main-remove",
+  },
+  rejected: {
+    badge: "bg-main-remove/15 text-main-remove",
+    panel: "border-main-remove/20 bg-main-remove/5",
+    title: "text-main-remove",
+  },
+  blocked: {
+    badge: "bg-main-remove/15 text-main-remove",
+    panel: "border-main-remove/20 bg-main-remove/5",
+    title: "text-main-remove",
+  },
+  deleted: {
+    badge: "bg-main-remove/15 text-main-remove",
+    panel: "border-main-remove/20 bg-main-remove/5",
+    title: "text-main-remove",
+  },
+};
 
 const DriverFullViewPage = () => {
   const { t, i18n } = useTranslation(["drivers", "common"]);
   const navigate = useNavigate();
+  const location = useLocation();
   const { id } = useParams<{ id: string }>();
+  const isVerificationFullView = location.pathname.startsWith("/verification/");
   const driverId = Number(id);
   const isValidId = Number.isInteger(driverId) && driverId > 0;
 
   const {
     details,
     detailsLoading,
+    updating: statusUpdating,
     expiriesUpdating,
     fetchVerificationDetails,
     clearVerificationDetails,
+    updateVerificationStatus,
     updateVerificationExpiries,
   } = useVerificationStore();
-  const { updateStatus, updating: statusUpdating } = useDriverStore();
 
   const [documentsExpanded, setDocumentsExpanded] = useState(true);
   const [expiriesExpanded, setExpiriesExpanded] = useState(true);
@@ -83,6 +135,8 @@ const DriverFullViewPage = () => {
   const [selectedDocument, setSelectedDocument] = useState<ISelectedDocument | null>(null);
   const [documentModalOpen, setDocumentModalOpen] = useState(false);
   const [selectedDriverStatus, setSelectedDriverStatus] = useState<TDriverStatus>("pending");
+  const [statusModalOpen, setStatusModalOpen] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
 
   useEffect(() => {
     if (!isValidId) return;
@@ -92,15 +146,17 @@ const DriverFullViewPage = () => {
 
   useEffect(() => {
     if (!details) return;
-    const nextNational = toInputDate(details.documents.national_id_expiry);
-    const nextLicense = toInputDate(details.documents.license_expiry);
+    const nextNational = toInputDateTimeLocal(details.documents.national_id_expiry);
+    const nextLicense = toInputDateTimeLocal(details.documents.license_expiry);
     queueMicrotask(() => {
       setNationalIdExpiry(nextNational);
       setLicenseExpiry(nextLicense);
       setInitialNationalIdExpiry(nextNational);
       setInitialLicenseExpiry(nextLicense);
       const nextStatus = isDriverStatus(details.verification.status) ? details.verification.status : "pending";
-      setSelectedDriverStatus(nextStatus);
+      setSelectedDriverStatus(
+        DRIVER_STATUS_OPTIONS.includes(nextStatus) ? nextStatus : "approved",
+      );
     });
   }, [details]);
 
@@ -149,10 +205,12 @@ const DriverFullViewPage = () => {
   const payload = useMemo(() => {
     const next: { national_id_expiry?: string; license_expiry?: string } = {};
     if (nationalIdExpiry && nationalIdExpiry !== initialNationalIdExpiry) {
-      next.national_id_expiry = toIsoDateString(nationalIdExpiry);
+      const iso = toIsoDateTimeString(nationalIdExpiry);
+      if (iso) next.national_id_expiry = iso;
     }
     if (licenseExpiry && licenseExpiry !== initialLicenseExpiry) {
-      next.license_expiry = toIsoDateString(licenseExpiry);
+      const iso = toIsoDateTimeString(licenseExpiry);
+      if (iso) next.license_expiry = iso;
     }
     return next;
   }, [initialLicenseExpiry, initialNationalIdExpiry, licenseExpiry, nationalIdExpiry]);
@@ -184,10 +242,33 @@ const DriverFullViewPage = () => {
 
   const handleSaveStatus = async () => {
     if (!isValidId || selectedDriverStatus === currentDriverStatus) return;
+
+    setStatusMessage("");
+    setStatusModalOpen(true);
+  };
+
+  const handleConfirmSaveStatus = async () => {
+    if (!isValidId || selectedDriverStatus === currentDriverStatus) return;
+
+    const trimmedMessage = statusMessage.trim();
+    const payload: { status: TAllowedVerificationStatus; verification_notes?: string; reason_for_rejection?: string } = {
+      status: selectedDriverStatus as TAllowedVerificationStatus,
+    };
+
+    if (trimmedMessage) {
+      if (selectedDriverStatus === "approved") {
+        payload.verification_notes = trimmedMessage;
+      } else if (selectedDriverStatus === "rejected") {
+        payload.reason_for_rejection = trimmedMessage;
+      }
+    }
+
     try {
-      await updateStatus(driverId, selectedDriverStatus);
+      await updateVerificationStatus(driverId, payload);
       await fetchVerificationDetails(driverId);
       showToast(t("fullView.status.saved"), "success");
+      setStatusModalOpen(false);
+      setStatusMessage("");
     } catch {
       showToast(t("fullView.status.saveFailed"), "error");
     }
@@ -203,6 +284,9 @@ const DriverFullViewPage = () => {
 
   const statusKey = currentDriverStatus;
   const statusStyle = driverStatusStyles[statusKey] ?? driverStatusStyles.pending;
+  const notesVisualStyle = noteStatusStyles[statusKey] ?? noteStatusStyles.pending;
+  const statusReasonNote = details?.verification.rejected_reason?.trim() ?? "";
+  const verificationAdminNote = details?.verification.notes?.trim() ?? "";
 
   return (
     <PageTransition>
@@ -210,8 +294,8 @@ const DriverFullViewPage = () => {
 
       <div className="mb-6">
         <BackButton
-          label={t("fullView.backToDrivers")}
-          onClick={() => navigate("/drivers")}
+          label={isVerificationFullView ? t("common:back") : t("fullView.backToDrivers")}
+          onClick={() => navigate(isVerificationFullView ? "/verification" : "/drivers")}
         />
       </div>
 
@@ -281,6 +365,84 @@ const DriverFullViewPage = () => {
                 >
                   {statusUpdating ? t("fullView.status.saving") : t("fullView.status.save")}
                 </Button>
+              </div>
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-main-whiteMarble bg-main-white p-5">
+            <div className="mb-3">
+              <p className="text-main-mirage font-semibold">{t("fullView.trucks.title")}</p>
+              <p className="text-main-sharkGray text-sm">{t("fullView.trucks.description")}</p>
+            </div>
+            {details.trucks.length === 0 ? (
+              <div className="rounded-xl border border-main-whiteMarble bg-main-luxuryWhite p-4 text-main-sharkGray text-sm">
+                {t("fullView.trucks.empty")}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {details.trucks.map((truck) => (
+                  <div key={truck.id} className="rounded-xl border border-main-whiteMarble bg-main-luxuryWhite p-4">
+                    <div className="flex items-start justify-between gap-3 mb-4">
+                      <div className="min-w-0">
+                        <p className="text-main-mirage font-semibold flex items-center gap-2">
+                          <TruckIcon size={16} className="shrink-0" />
+                          <span className="truncate">{truck.truck_type_name ?? `${t("fullView.trucks.truck")} #${truck.id}`}</span>
+                        </p>
+                        <p className="text-main-sharkGray text-xs mt-1">
+                          {t("fullView.trucks.idLabel")}: #{truck.id}
+                        </p>
+                      </div>
+                      <span
+                        className={clsx(
+                          "px-2.5 py-1 rounded-full text-xs font-medium shrink-0",
+                          truckStatusStyles[truck.status]?.bg ?? "bg-main-whiteMarble",
+                          truckStatusStyles[truck.status]?.text ?? "text-main-sharkGray",
+                        )}
+                      >
+                        {t(`fullView.trucks.statusValues.${truck.status}`)}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <InfoCard label={t("fullView.trucks.brand")} value={truck.brand || "—"} />
+                      <InfoCard label={t("fullView.trucks.year")} value={String(truck.year ?? "—")} />
+                      <InfoCard label={t("fullView.trucks.plate")} value={truck.license_plate || "—"} />
+                      <InfoCard label={t("fullView.trucks.license")} value={truck.license || "—"} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section className="rounded-2xl border border-main-whiteMarble bg-main-white p-5">
+            <div className="mb-4 flex items-start justify-between gap-3">
+              <div>
+                <p className="text-main-mirage font-semibold">{t("fullView.notes.title")}</p>
+                <p className="text-main-sharkGray text-sm">{t("fullView.notes.description")}</p>
+              </div>
+              <span className={clsx("px-3 py-1 rounded-full text-xs font-medium", notesVisualStyle.badge)}>
+                {t(`statuses.${statusKey}`)}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className={clsx("rounded-xl border p-4", notesVisualStyle.panel)}>
+                <p className={clsx("text-sm font-semibold mb-2", notesVisualStyle.title)}>
+                  {t("fullView.notes.statusReasonLabel")}
+                </p>
+                <p className="text-sm text-main-mirage leading-6 whitespace-pre-wrap wrap-break-word">
+                  {statusReasonNote || t("fullView.notes.statusReasonFallback", { status: t(`statuses.${statusKey}`) })}
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-main-whiteMarble bg-main-luxuryWhite p-4">
+                <p className="text-sm font-semibold text-main-mirage mb-2">
+                  {t("fullView.notes.verificationNoteLabel")}
+                </p>
+                <p className="text-sm text-main-mirage leading-6 whitespace-pre-wrap wrap-break-word">
+                  {verificationAdminNote || t("fullView.notes.verificationNoteFallback")}
+                </p>
               </div>
             </div>
           </section>
@@ -359,7 +521,7 @@ const DriverFullViewPage = () => {
                   <div>
                     <p className="text-xs text-main-sharkGray mb-2">{t("fullView.expiries.nationalIdLabel")}</p>
                     <Input
-                      type="date"
+                      type="datetime-local"
                       value={nationalIdExpiry}
                       onChange={(e) => setNationalIdExpiry(e.target.value)}
                       className="h-11"
@@ -369,7 +531,7 @@ const DriverFullViewPage = () => {
                   <div>
                     <p className="text-xs text-main-sharkGray mb-2">{t("fullView.expiries.licenseLabel")}</p>
                     <Input
-                      type="date"
+                      type="datetime-local"
                       value={licenseExpiry}
                       onChange={(e) => setLicenseExpiry(e.target.value)}
                       className="h-11"
@@ -393,6 +555,58 @@ const DriverFullViewPage = () => {
           </section>
         </div>
       )}
+
+      <CommonModal
+        open={statusModalOpen}
+        onOpenChange={(open) => {
+          setStatusModalOpen(open);
+          if (!open) setStatusMessage("");
+        }}
+        loading={statusUpdating}
+      >
+        <CommonModalHeader
+          title={t("fullView.status.confirmTitle")}
+          description={t("fullView.status.confirmDescription", {
+            status: t(`statuses.${selectedDriverStatus}`),
+          })}
+        />
+        <CommonModalBody className="space-y-3">
+          {(selectedDriverStatus === "approved" || selectedDriverStatus === "rejected") && (
+            <>
+              <p className="text-sm text-main-sharkGray">
+                {selectedDriverStatus === "approved"
+                  ? t("fullView.status.approveMessageHint")
+                  : t("fullView.status.rejectMessageHint")}
+              </p>
+              <Textarea
+                value={statusMessage}
+                onChange={(event) => setStatusMessage(event.target.value)}
+                placeholder={t("fullView.status.messagePlaceholder")}
+                className="min-h-[110px] border-main-whiteMarble focus-visible:ring-main-primary/30"
+              />
+            </>
+          )}
+        </CommonModalBody>
+        <CommonModalFooter>
+          <Button
+            type="button"
+            variant="ghost"
+            className="h-10 px-6"
+            onClick={() => setStatusModalOpen(false)}
+            disabled={statusUpdating}
+          >
+            {t("common:cancel")}
+          </Button>
+          <Button
+            type="button"
+            onClick={handleConfirmSaveStatus}
+            disabled={statusUpdating}
+            className="h-10 px-6 bg-main-primary text-main-white"
+          >
+            {statusUpdating ? t("fullView.status.saving") : t("fullView.status.save")}
+          </Button>
+        </CommonModalFooter>
+      </CommonModal>
 
       <CommonModal
         open={documentModalOpen}

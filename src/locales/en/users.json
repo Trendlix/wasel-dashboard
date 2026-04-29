@@ -42,6 +42,34 @@
     "saveChanges": "Save changes",
     "saving": "Saving…"
   },
+  "fullView": {
+    "button": "Full View",
+    "title": "User Full View",
+    "description": "Review user profile details, account status, and saved addresses.",
+    "backToUsers": "Back to users",
+    "invalidTitle": "Invalid user",
+    "invalidDescription": "The user id in this URL is not valid.",
+    "notFound": "User details could not be loaded.",
+    "joinedOn": "Joined on {{date}}",
+    "phone": "Phone",
+    "email": "Email",
+    "emailVerified": "Email verified",
+    "phoneVerified": "Phone verified",
+    "voucherUsage": "Voucher usage",
+    "lastUpdated": "Last updated",
+    "status": {
+      "label": "Account status",
+      "save": "Save status",
+      "saving": "Saving...",
+      "saved": "User status updated successfully.",
+      "saveFailed": "Failed to update user status."
+    },
+    "addresses": {
+      "title": "Saved addresses",
+      "description": "User delivery addresses and labels.",
+      "empty": "No saved addresses for this user."
+    }
+  },
   "statuses": {
     "active": "Active",
     "inactive": "Inactive",

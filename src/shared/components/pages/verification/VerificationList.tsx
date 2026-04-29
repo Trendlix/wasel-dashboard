@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import { FileText, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import TablePagination from "@/shared/components/common/TablePagination";
 import {
   verificationStatusStyles,
@@ -20,28 +21,32 @@ import {
   CommonModalHeader,
 } from "@/shared/components/common/CommonModal";
 import { formatAppDateShort } from "@/lib/formatLocaleDate";
+import NoDataFound from "@/shared/components/common/NoDataFound";
 
-type TTab = TVerificationStatus;
+type TStatusTab = Exclude<TVerificationStatus, "suspended">;
+type TFlowTab = "registration" | "re_verification";
 
-const tabs: TTab[] = ["pending", "approved", "rejected"];
-
-const VerificationList = () => {
+const VerificationList = ({
+  flowType,
+  statusTab,
+}: {
+  flowType: TFlowTab;
+  statusTab: TStatusTab;
+}) => {
   const { t } = useTranslation(["verification", "common"]);
   const navigate = useNavigate();
   const {
     verifications,
     meta,
-    counts,
     loading,
     query,
-    fetchVerifications,
     setQuery,
     setPage,
+    fetchVerificationCounts,
     updateVerificationStatus,
     updating,
   } = useVerificationStore();
 
-  const [activeTab, setActiveTab] = useState<TTab>(query.status ?? "pending");
   const [searchInput, setSearchInput] = useState("");
   const [selectedVerification, setSelectedVerification] = useState<IAppVerificationItem | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -50,53 +55,64 @@ const VerificationList = () => {
     type: "approve" | "reject";
     verification: IAppVerificationItem;
   } | null>(null);
+  const [confirmMessage, setConfirmMessage] = useState("");
+  const previousFlowTypeRef = useRef<TFlowTab | null>(null);
+  const effectiveStatus = flowType === "re_verification" && statusTab === "pending"
+    ? "suspended"
+    : statusTab;
 
   useEffect(() => {
-    fetchVerifications({ ...query, status: activeTab });
-  }, []);
+    setQuery({ flow_type: flowType, status: effectiveStatus });
+
+    if (previousFlowTypeRef.current !== flowType) {
+      fetchVerificationCounts();
+      previousFlowTypeRef.current = flowType;
+    }
+  }, [effectiveStatus, fetchVerificationCounts, flowType, setQuery]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
+      const normalizedSearch = searchInput.trim() || undefined;
+      if (normalizedSearch === query.search) return;
+
       setQuery({
-        status: activeTab,
-        search: searchInput.trim() || undefined,
+        flow_type: flowType,
+        status: effectiveStatus,
+        search: normalizedSearch,
       });
     }, 350);
     return () => clearTimeout(timer);
-  }, [activeTab, searchInput]);
+  }, [effectiveStatus, flowType, query.search, searchInput, setQuery]);
 
   const openActionConfirmation = (
     type: "approve" | "reject",
     verification: IAppVerificationItem,
   ) => {
     setConfirmAction({ type, verification });
+    setConfirmMessage("");
     setConfirmModalOpen(true);
   };
 
   const handleConfirmAction = async () => {
     if (!confirmAction) return;
+    const trimmedMessage = confirmMessage.trim();
 
     if (confirmAction.type === "approve") {
-      await updateVerificationStatus(confirmAction.verification.id, { status: "approved" });
+      await updateVerificationStatus(confirmAction.verification.id, {
+        status: "approved",
+        verification_notes: trimmedMessage || undefined,
+      });
     } else {
       await updateVerificationStatus(confirmAction.verification.id, {
         status: "rejected",
-        reason_for_rejection: t("verification:rejectReasonDefault"),
+        reason_for_rejection: trimmedMessage || undefined,
       });
     }
 
     setConfirmModalOpen(false);
     setConfirmAction(null);
+    setConfirmMessage("");
   };
-
-  const currentCount = useMemo(
-    () => ({
-      pending: counts.pending,
-      approved: counts.approved,
-      rejected: counts.rejected,
-    }),
-    [counts],
-  );
 
   const currentPage = meta?.current_page ?? 1;
   const totalPages = meta?.total_pages ?? 1;
@@ -107,29 +123,6 @@ const VerificationList = () => {
 
   return (
     <div className="bg-main-white border border-main-whiteMarble common-rounded overflow-hidden">
-      <div className="border-b border-main-whiteMarble px-4">
-        <div className="flex items-center gap-6">
-          {tabs.map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              onClick={() => setActiveTab(tab)}
-              className={clsx(
-                "h-10 text-sm font-semibold border-b-2 transition",
-                activeTab === tab
-                  ? "text-main-primary border-main-primary"
-                  : "text-main-hydrocarbon border-transparent",
-              )}
-            >
-              {t("verification:list.tabWithCount", {
-                label: t(`verification:statuses.${tab}`),
-                count: currentCount[tab],
-              })}
-            </button>
-          ))}
-        </div>
-      </div>
-
       <div className="p-4 border-b border-main-whiteMarble">
         <div className="h-10 border border-main-whiteMarble common-rounded px-3 flex items-center gap-2">
           <Search size={16} className="text-main-silverSteel shrink-0" />
@@ -158,12 +151,15 @@ const VerificationList = () => {
               }}
               onApprove={() => openActionConfirmation("approve", item)}
               onReject={() => openActionConfirmation("reject", item)}
-              onFullView={() => navigate(`/drivers/${item.id}`)}
+              onFullView={() => navigate(`/verification/${item.id}`)}
             />
           ))
         ) : (
-          <div className="p-6 text-center text-main-sharkGray text-sm">
-            {t("verification:list.empty")}
+          <div className="p-2">
+            <NoDataFound
+              title={t("verification:list.empty")}
+              description={t("verification:list.emptyDescription")}
+            />
           </div>
         )}
       </div>
@@ -188,7 +184,10 @@ const VerificationList = () => {
         open={confirmModalOpen}
         onOpenChange={(v) => {
           setConfirmModalOpen(v);
-          if (!v) setConfirmAction(null);
+          if (!v) {
+            setConfirmAction(null);
+            setConfirmMessage("");
+          }
         }}
         loading={updating}
         variant={confirmAction?.type === "approve" ? "success" : "danger"}
@@ -208,7 +207,13 @@ const VerificationList = () => {
           }
         />
         <CommonModalBody className="pt-0">
-          <p className="text-sm text-main-sharkGray">{t("verification:confirm.note")}</p>
+          <p className="text-sm text-main-sharkGray mb-3">{t("verification:confirm.note")}</p>
+          <Textarea
+            value={confirmMessage}
+            onChange={(event) => setConfirmMessage(event.target.value)}
+            placeholder={t("verification:confirm.messagePlaceholder")}
+            className="min-h-[110px] border-main-whiteMarble focus-visible:ring-main-primary/30"
+          />
         </CommonModalBody>
         <CommonModalFooter>
           <Button
@@ -269,7 +274,7 @@ const VerificationRow = ({
     .slice(0, 2)
     .toUpperCase();
 
-  const statusKey = (["pending", "approved", "rejected"] as const).includes(item.status)
+  const statusKey = (["pending", "approved", "rejected", "suspended"] as const).includes(item.status)
     ? item.status
     : "pending";
   const status = verificationStatusStyles[statusKey];

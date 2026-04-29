@@ -9,10 +9,12 @@ import CustomersPage from "../pages/customers";
 import SettingsPage from "../pages/settings";
 import NotFoundPage from "../pages/not-found";
 import VerificationPage from "../pages/verification";
+import VerificationListRoute from "../pages/verification/list-route";
 import TripsPage from "../pages/trips";
 import NotificationsPage from "../pages/notifications";
 const AnalyticsPage = lazy(() => import("../pages/analytics"));
 import UsersPage from "../pages/users";
+import UserFullViewPage from "../pages/users/detail";
 // import WalletAndFinancePage from "../pages/wallet-and-finance";
 // import StorageOwnersPage from "../pages/storage-owners";
 import DriversPage from "../pages/drivers";
@@ -33,11 +35,16 @@ import VoucherAndPromoPage from "@/pages/voucher-and-promo";
 import AcceptInvitationPage from "@/pages/accept-invitation";
 import SupportTicketsPage from "@/pages/support-tickets";
 import TicketReplyPage from "@/pages/support-tickets/TicketReplyPage";
+import TestCenterPage from "@/pages/test-center";
+import TestCenterTripTab from "@/pages/test-center/trip";
 import NotificationsDriverTab from "@/pages/notifications/driver";
 import NotificationsUserTab from "@/pages/notifications/user";
 import NotificationsTripTab from "@/pages/notifications/trip";
 import NotificationsOffersUpdatesTab from "@/pages/notifications/offers-updates";
+import NotificationsOffersUpdatesLayout from "@/pages/notifications/offers-updates-layout";
+import NotificationsDriverOffersUpdatesTab from "@/pages/notifications/driver-offers-updates";
 import NotificationsOffersUpdatesDetail from "@/pages/notifications/detail/offers-updates";
+import NotificationsDriverOffersUpdatesDetail from "@/pages/notifications/detail/driver-offers-updates";
 import NotificationsUserDetail from "@/pages/notifications/detail/user";
 import NotificationsDriverDetail from "@/pages/notifications/detail/driver";
 import NotificationsTripDetail from "@/pages/notifications/detail/trip";
@@ -108,10 +115,19 @@ export const router = createBrowserRouter([
             { path: "orders", element: <OrdersPage /> },
             { path: "customers", element: <CustomersPage /> },
             { path: "settings", element: <SettingsPage /> },
-            { path: "verification", element: <VerificationPage /> },
+            {
+                path: "verification",
+                element: <VerificationPage />,
+                children: [
+                    { index: true, element: <Navigate to="registration/pending" replace /> },
+                    { path: ":flowType/:status", element: <VerificationListRoute /> },
+                ],
+            },
+            { path: "verification/:id", element: <DriverFullViewPage /> },
             { path: "trips", element: <TripsPage /> },
             { path: "analytics", element: <Suspense fallback={lazyRouteFallback}><AnalyticsPage /></Suspense> },
             { path: "users", element: <UsersPage /> },
+            { path: "users/:id", element: <UserFullViewPage /> },
             { path: "drivers", element: <DriversPage /> },
             { path: "drivers/:id", element: <DriverFullViewPage /> },
             // { path: "wallet-and-finance", element: <WalletAndFinancePage /> },
@@ -126,8 +142,17 @@ export const router = createBrowserRouter([
                     { path: "driver", element: <NotificationsDriverTab /> },
                     { path: "user",   element: <NotificationsUserTab /> },
                     { path: "trip",   element: <NotificationsTripTab /> },
-                    { path: "offers-updates", element: <NotificationsOffersUpdatesTab /> },
-                    { path: "offers-updates/:source/:campaignId", element: <NotificationsOffersUpdatesDetail /> },
+                    {
+                        path: "offers-updates",
+                        element: <NotificationsOffersUpdatesLayout />,
+                        children: [
+                            { index: true, element: <Navigate to="users" replace /> },
+                            { path: "users", element: <NotificationsOffersUpdatesTab /> },
+                            { path: "users/:source/:campaignId", element: <NotificationsOffersUpdatesDetail /> },
+                            { path: "drivers", element: <NotificationsDriverOffersUpdatesTab /> },
+                            { path: "drivers/:source/:campaignId", element: <NotificationsDriverOffersUpdatesDetail /> },
+                        ],
+                    },
                     { path: "users/:notificationId",   element: <NotificationsUserDetail /> },
                     { path: "drivers/:notificationId", element: <NotificationsDriverDetail /> },
                     { path: "trips/:notificationId",   element: <NotificationsTripDetail /> },
@@ -263,6 +288,14 @@ export const router = createBrowserRouter([
             { path: "support-tickets/:ticketId/reply", element: <TicketReplyPage /> },
             { path: "commission-and-pricing", element: <CommissionAndPricingPage /> },
             { path: "voucher-and-promo", element: <VoucherAndPromoPage /> },
+            {
+                path: "test-center",
+                element: <TestCenterPage />,
+                children: [
+                    { index: true, element: <Navigate to="trip" replace /> },
+                    { path: "trip", element: <TestCenterTripTab /> },
+                ],
+            },
 
             {
                 path: "data-management",

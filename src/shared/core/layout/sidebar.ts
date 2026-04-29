@@ -9,6 +9,7 @@ export interface ISidebarItem {
     icon: LucideIcon;
     to: string;
     badgeKey?: SidebarBadgeKey;
+    superAdminOnly?: boolean;
 }
 
 export const sidebarItems: ISidebarItem[] = [
@@ -98,4 +99,11 @@ export const sidebarItems: ISidebarItem[] = [
         icon: Settings,
         to: "/settings",
     },
+    // {
+    //     id: 15,
+    //     nameKey: "testCenter",
+    //     icon: Truck,
+    //     to: "/test-center",
+    //     superAdminOnly: true,
+    // },
 ];

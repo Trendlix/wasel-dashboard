@@ -278,23 +278,10 @@ const useDashboardNotificationsStore = create<DashboardNotificationsState>((set)
       ]);
     };
 
-    dashboardNotificationsSocket.on("dashboard:notifications:count", (payload: IDashboardNotificationsCount) => {
-      set({
-        counts: {
-          total: payload?.total ?? 0,
-          unread_total: payload?.unread_total ?? 0,
-          by_type: {
-            user: payload?.by_type?.user ?? 0,
-            driver: payload?.by_type?.driver ?? 0,
-            trip: payload?.by_type?.trip ?? 0,
-          },
-          unread_by_type: {
-            user: payload?.unread_by_type?.user ?? 0,
-            driver: payload?.unread_by_type?.driver ?? 0,
-            trip: payload?.unread_by_type?.trip ?? 0,
-          },
-        },
-      });
+    dashboardNotificationsSocket.on("dashboard:notifications:count", () => {
+      // Always resolve counts from the authenticated API so sidebar badges remain
+      // admin-specific even if gateway broadcasts aggregate payloads.
+      void useDashboardNotificationsStore.getState().fetchNotificationsCount();
     });
 
     dashboardNotificationsSocket.on("dashboard:notification:user:new", refreshData);

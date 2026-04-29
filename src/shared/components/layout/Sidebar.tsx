@@ -39,10 +39,12 @@ const Nav = () => {
     return (
         <nav className="p-4 w-full flex flex-col gap-1.5">
             {sidebarItems?.map((item) => {
+                const isSuperAdmin = userProfile?.role?.slug === "super-admin" || userProfile?.role?.slug === "super_admin";
+                const blockedBySuperAdminRule = Boolean(item.superAdminOnly) && !isSuperAdmin;
                 const hasNavAccess = canAccessPath(userProfile?.role, item.to);
                 return (
                     <SidebarItem
-                        hide={!hasNavAccess}
+                        hide={!hasNavAccess || blockedBySuperAdminRule}
                         key={item.id}
                         item={item}
                         notificationsCount={counts.unread_total}

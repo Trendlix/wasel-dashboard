@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Bell, MessageSquare, CheckCircle, XCircle, Ticket, Check } from "lucide-react";
 import useTicketStore, { type ISupportNotification } from "@/shared/hooks/store/useTicketStore";
+import NoDataFound from "@/shared/components/common/NoDataFound";
 
 const formatRelativeTime = (value: string) => {
     const date = new Date(value);
@@ -276,16 +277,11 @@ const SupportNotificationsPanel = ({ className, listClassName }: SupportNotifica
                         />
                     ))
                 ) : (
-                    <div className="rounded-xl bg-main-luxuryWhite px-4 py-8 text-center">
-                        <div className="w-12 h-12 rounded-full bg-main-primary/10 flex items-center justify-center mx-auto mb-3">
-                            <Bell className="w-5 h-5 text-main-primary" />
-                        </div>
-                        <p className="text-sm font-medium text-main-mirage">
-                            {t("notifications.empty")}
-                        </p>
-                        <p className="text-xs text-main-sharkGray mt-1">
-                            {t("notifications.emptyDescription")}
-                        </p>
+                    <div className="p-1">
+                        <NoDataFound
+                            title={t("notifications.empty")}
+                            description={t("notifications.emptyDescription")}
+                        />
                     </div>
                 )}
             </div>

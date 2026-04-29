@@ -1,19 +1,20 @@
-import { CheckCircle2, FileText, XCircle } from "lucide-react";
+import { CheckCircle2, FileText, PauseCircle, XCircle } from "lucide-react";
 import type { IAnalyticsCard } from "@/shared/components/common/AnalyticsCard";
 import type { LucideIcon } from "lucide-react";
 
-export type TVerificationStatus = "pending" | "approved" | "rejected";
+export type TVerificationStatus = "pending" | "approved" | "rejected" | "suspended";
 
 export const verificationStatusStyles: Record<TVerificationStatus, { bg: string; text: string }> = {
   pending: { bg: "bg-main-mustardGold/10", text: "text-main-mustardGold" },
   approved: { bg: "bg-main-vividMint/10", text: "text-main-vividMint" },
   rejected: { bg: "bg-main-remove/10", text: "text-main-remove" },
+  suspended: { bg: "bg-main-primary/10", text: "text-main-primary" },
 };
 
 export const verificationAnalyticsConfig: Array<
   Pick<IAnalyticsCard, "id" | "classname"> & {
     icon: LucideIcon;
-    titleKey: "pendingReviews" | "approved" | "rejected";
+    titleKey: "pendingReviews" | "approved" | "rejected" | "suspended";
     iconWrapper: string;
   }
 > = [
@@ -35,6 +36,13 @@ export const verificationAnalyticsConfig: Array<
     id: 3,
     titleKey: "rejected",
     icon: XCircle,
+    classname: "bg-main-white border border-main-whiteMarble",
+    iconWrapper: "bg-main-primary/10 text-main-primary",
+  },
+  {
+    id: 4,
+    titleKey: "suspended",
+    icon: PauseCircle,
     classname: "bg-main-white border border-main-whiteMarble",
     iconWrapper: "bg-main-primary/10 text-main-primary",
   },

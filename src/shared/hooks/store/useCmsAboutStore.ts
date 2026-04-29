@@ -36,7 +36,6 @@ export interface CmsAboutStandForSection {
 }
 
 export interface CmsAboutFutureCard {
-    img: string;
     titles: string[];
     descriptions: string[];
 }
@@ -84,7 +83,6 @@ interface CmsAboutState {
     savingPart: AboutPart | null;
     bgDraftFile: File | null;
     standForDraftImages: (File | null)[];
-    futureDraftImages: (File | null)[];
     error: string | null;
     fieldErrors: Record<string, string>;
     fetchPart: (part: AboutPart) => Promise<void>;
@@ -100,8 +98,6 @@ interface CmsAboutState {
     addFutureCard: () => void;
     updateFutureCard: (lang: CmsLocale, index: number, patch: Partial<CmsAboutFutureCard>) => void;
     removeFutureCard: (index: number) => void;
-    setFutureCardImage: (index: number, file: File | null) => void;
-    clearFutureCardImage: (index: number) => void;
     setHeroBgFile: (file: File | null) => void;
     clearHeroBg: () => void;
     savePart: (part: AboutPart) => Promise<boolean>;
@@ -116,7 +112,6 @@ const useCmsAboutStore = create<CmsAboutState>((set, get) => ({
     savingPart: null,
     bgDraftFile: null,
     standForDraftImages: [],
-    futureDraftImages: [],
     error: null,
     fieldErrors: {},
 
@@ -134,7 +129,6 @@ const useCmsAboutStore = create<CmsAboutState>((set, get) => ({
                 loading: false,
                 bgDraftFile: part === "hero" ? null : state.bgDraftFile,
                 standForDraftImages: part === "stand_for" ? [] : state.standForDraftImages,
-                futureDraftImages: part === "future" ? [] : state.futureDraftImages,
             }));
         } catch (error) {
             set({ loading: false, error: extractErrorMessage(error, `Failed to fetch about ${part} section.`) });
@@ -226,10 +220,9 @@ const useCmsAboutStore = create<CmsAboutState>((set, get) => ({
     addFutureCard: () =>
         set((state) => ({
             future: {
-                en: { ...state.future.en, cards: [...state.future.en.cards, { img: "", titles: [], descriptions: [] }] },
-                ar: { ...state.future.ar, cards: [...state.future.ar.cards, { img: "", titles: [], descriptions: [] }] },
+                en: { ...state.future.en, cards: [...state.future.en.cards, { titles: [], descriptions: [] }] },
+                ar: { ...state.future.ar, cards: [...state.future.ar.cards, { titles: [], descriptions: [] }] },
             },
-            futureDraftImages: [...state.futureDraftImages, null],
             fieldErrors: Object.fromEntries(Object.entries(state.fieldErrors).filter(([key]) => !key.startsWith("future."))),
         })),
 
@@ -251,35 +244,8 @@ const useCmsAboutStore = create<CmsAboutState>((set, get) => ({
                 en: { ...state.future.en, cards: state.future.en.cards.filter((_, i) => i !== index) },
                 ar: { ...state.future.ar, cards: state.future.ar.cards.filter((_, i) => i !== index) },
             },
-            futureDraftImages: state.futureDraftImages.filter((_, i) => i !== index),
             fieldErrors: Object.fromEntries(Object.entries(state.fieldErrors).filter(([key]) => !key.startsWith("future."))),
         })),
-
-    setFutureCardImage: (index, file) =>
-        set((state) => {
-            const nextDrafts = [...state.futureDraftImages];
-            nextDrafts[index] = file;
-            return {
-                futureDraftImages: nextDrafts,
-                fieldErrors: Object.fromEntries(Object.entries(state.fieldErrors).filter(([key]) => !key.startsWith("future."))),
-            };
-        }),
-
-    clearFutureCardImage: (index) =>
-        set((state) => {
-            const clearCards = (locale: CmsLocale) =>
-                state.future[locale].cards.map((card, i) => (i === index ? { ...card, img: "" } : card));
-            const nextDrafts = [...state.futureDraftImages];
-            nextDrafts[index] = null;
-            return {
-                future: {
-                    en: { ...state.future.en, cards: clearCards("en") },
-                    ar: { ...state.future.ar, cards: clearCards("ar") },
-                },
-                futureDraftImages: nextDrafts,
-                fieldErrors: Object.fromEntries(Object.entries(state.fieldErrors).filter(([key]) => !key.startsWith("future."))),
-            };
-        }),
 
     setHeroBgFile: (file) => set({ bgDraftFile: file }),
 
@@ -323,17 +289,7 @@ const useCmsAboutStore = create<CmsAboutState>((set, get) => ({
                 };
             }
             if (part === "future") {
-                const next = partPayload as Localized<CmsAboutFutureSection>;
-                return {
-                    en: {
-                        ...next.en,
-                        cards: next.en.cards.map((card, index) => ({ ...card, img: card.img || (state.futureDraftImages[index] ? "__draft__" : "") })),
-                    },
-                    ar: {
-                        ...next.ar,
-                        cards: next.ar.cards.map((card, index) => ({ ...card, img: card.img || (state.futureDraftImages[index] ? "__draft__" : "") })),
-                    },
-                };
+                return partPayload;
             }
             return partPayload;
         })();
@@ -377,17 +333,8 @@ const useCmsAboutStore = create<CmsAboutState>((set, get) => ({
             }
 
             if (part === "future") {
-                const formData = new FormData();
-                formData.append("payload", JSON.stringify(withDrafts));
-                state.futureDraftImages.forEach((file, index) => {
-                    if (file && (withDrafts as Localized<CmsAboutFutureSection>).en.cards[index]?.img === "__draft__") {
-                        formData.append("future_card_images", file);
-                    }
-                });
-                const response = await axiosNormalApiClient.patch("/dashboard/cms/sections/about/future", formData, {
-                    headers: { "Content-Type": "multipart/form-data" },
-                });
-                set((s) => ({ future: asLocalized(response.data?.data, s.future.en), savingPart: null, futureDraftImages: [] }));
+                const response = await axiosNormalApiClient.patch("/dashboard/cms/sections/about/future", withDrafts);
+                set((s) => ({ future: asLocalized(response.data?.data, s.future.en), savingPart: null }));
                 return true;
             }
 

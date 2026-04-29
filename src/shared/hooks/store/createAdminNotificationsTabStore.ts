@@ -12,6 +12,10 @@ export interface IAdminNotificationTabRow {
     title: string;
     description: string;
     target_id: number | null;
+    user_id?: number | null;
+    driver_id?: number | null;
+    trip_id?: number | null;
+    type?: string | null;
     admin_id: number | null;
     created_at: string;
     is_read: boolean;
@@ -101,7 +105,38 @@ export const createAdminNotificationsTabStore = (type: TAdminNotificationTabType
                     { params },
                 );
 
-                let rows: IAdminNotificationTabRow[] = response.data?.data?.items ?? [];
+                let rows: IAdminNotificationTabRow[] = (response.data?.data?.items ?? []).map(
+                    (item: Record<string, unknown>) => {
+                        const payload =
+                            item.payload && typeof item.payload === "object"
+                                ? (item.payload as Record<string, unknown>)
+                                : null;
+                        const user_id =
+                            typeof item.user_id === "number"
+                                ? item.user_id
+                                : (typeof payload?.user_id === "number" ? payload.user_id : null);
+                        const driver_id =
+                            typeof item.driver_id === "number"
+                                ? item.driver_id
+                                : (typeof payload?.driver_id === "number" ? payload.driver_id : null);
+                        const trip_id =
+                            typeof item.trip_id === "number"
+                                ? item.trip_id
+                                : (typeof payload?.trip_id === "number" ? payload.trip_id : null);
+                        const target_id =
+                            type === "user" ? user_id :
+                                type === "driver" ? driver_id :
+                                    trip_id;
+                        return {
+                            ...(item as unknown as IAdminNotificationTabRow),
+                            user_id,
+                            driver_id,
+                            trip_id,
+                            target_id,
+                            type: typeof item.type === "string" ? item.type : null,
+                        };
+                    },
+                );
 
                 rows = [...rows].sort((a, b) => {
                     if (sortValue === "created-desc") return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();

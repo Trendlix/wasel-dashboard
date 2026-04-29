@@ -121,7 +121,6 @@ export const cmsAboutStandForSchema = z.object({
 });
 
 export const cmsAboutFutureCardSchema = z.object({
-    img: requiredAssetValue("Future card image URL"),
     titles: z
         .array(requiredText("Future card title", 160))
         .min(1, "At least one future card title is required")

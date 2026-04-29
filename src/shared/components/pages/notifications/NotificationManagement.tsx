@@ -31,6 +31,8 @@ import NoDataFound from "@/shared/components/common/NoDataFound";
 import { formInputWrapperClass, formSelectTriggerClass } from "@/shared/components/common/formStyles";
 import SendNotificationModal from "./SendNotificationModal";
 import {
+    adminDriverNotificationTypeOptions,
+    driverNotificationBusinessCategoryOptions,
     notificationManagementTabs,
     type TNotificationDeliveryStatus,
     type TNotificationManagementTab,
@@ -48,11 +50,12 @@ const statusStyles: Record<TNotificationDeliveryStatus, string> = {
     failed: "bg-main-lightCoral/20 text-main-lightCoral",
 };
 
-const managementTabI18nKey: Record<TNotificationManagementTab, "tabDriver" | "tabUser" | "tabTrip" | "tabOffersUpdates"> = {
+const managementTabI18nKey: Record<TNotificationManagementTab, "tabDriver" | "tabUser" | "tabTrip" | "tabOffersUpdates" | "tabDriverOffersUpdates"> = {
     "driver-admin": "tabDriver",
     "user-admin": "tabUser",
     "trip-admin": "tabTrip",
     "offers-updates": "tabOffersUpdates",
+    "driver-offers-updates": "tabDriverOffersUpdates",
 };
 
 const deliveryStatusI18nKey: Record<TNotificationDeliveryStatus, "deliveryStatusSent" | "deliveryStatusScheduled" | "deliveryStatusFailed"> = {
@@ -75,6 +78,8 @@ const NotificationManagement = () => {
         dateFilter,
         readFilter,
         sortValue,
+        driverTypeFilter,
+        driverBusinessCategoryFilter,
         page,
         viewItem,
         sendModalOpen,
@@ -86,6 +91,8 @@ const NotificationManagement = () => {
         setDateFilter,
         setReadFilter,
         setSortValue,
+        setDriverTypeFilter,
+        setDriverBusinessCategoryFilter,
         setPage,
         setViewItem,
         setSendModalOpen,
@@ -135,6 +142,11 @@ const NotificationManagement = () => {
                 }
             }
 
+            if (activeTab === "driver-admin") {
+                if (driverTypeFilter !== "all" && row.driver_notification_type !== driverTypeFilter) return false;
+                if (driverBusinessCategoryFilter !== "all" && row.driver_business_category !== driverBusinessCategoryFilter) return false;
+            }
+
             return true;
         });
 
@@ -145,7 +157,7 @@ const NotificationManagement = () => {
             if (sortValue === "title-desc") return b.title.localeCompare(a.title);
             return 0;
         });
-    }, [rows, search, dateFilter, readFilter, sortValue]);
+    }, [rows, search, dateFilter, readFilter, sortValue, activeTab, driverTypeFilter, driverBusinessCategoryFilter]);
 
     const pageSize = 10;
     const totalPages = Math.max(1, Math.ceil(filteredRows.length / pageSize));
@@ -264,6 +276,41 @@ const NotificationManagement = () => {
                             </SelectContent>
                         </Select>
 
+                        {activeTab === "driver-admin" && (
+                            <>
+                                <Select value={driverTypeFilter} onValueChange={(v) => setDriverTypeFilter(v as typeof driverTypeFilter)}>
+                                    <SelectTrigger className={`${formSelectTriggerClass} w-fit`}>
+                                        <SelectValue placeholder={t("notifications:driverTypeFilter")} />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">{t("common:all")}</SelectItem>
+                                        {adminDriverNotificationTypeOptions.map((type) => (
+                                            <SelectItem key={type} value={type}>
+                                                {t(`notifications:driverNotificationTypes.${type}`)}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+
+                                <Select
+                                    value={driverBusinessCategoryFilter}
+                                    onValueChange={(v) => setDriverBusinessCategoryFilter(v as typeof driverBusinessCategoryFilter)}
+                                >
+                                    <SelectTrigger className={`${formSelectTriggerClass} w-fit`}>
+                                        <SelectValue placeholder={t("notifications:driverBusinessCategoryFilter")} />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">{t("common:all")}</SelectItem>
+                                        {driverNotificationBusinessCategoryOptions.map((category) => (
+                                            <SelectItem key={category} value={category}>
+                                                {t(`notifications:driverBusinessCategories.${category}`)}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </>
+                        )}
+
                         <Button
                             variant="outline"
                             onClick={resetFilters}
@@ -327,6 +374,15 @@ const NotificationManagement = () => {
                                                 >
                                                     <span className="inline-flex items-center gap-1"><Eye size={13} />{t("common:view")}</span>
                                                 </button>
+                                                {row.source === "driver" && row.driver_id && (
+                                                    <button
+                                                        type="button"
+                                                        className="h-8 px-2.5 common-rounded text-main-secondary hover:bg-main-secondary/10 text-xs font-semibold"
+                                                        onClick={() => navigate(`/drivers/${row.driver_id}`)}
+                                                    >
+                                                        <span className="inline-flex items-center gap-1">{t("notifications:goToDriver")}</span>
+                                                    </button>
+                                                )}
                                                 {!row.is_read && (row.source === "user" || row.source === "driver" || row.source === "trip") && (
                                                     <button
                                                         type="button"

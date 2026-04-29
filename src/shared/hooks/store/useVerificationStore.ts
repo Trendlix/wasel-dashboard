@@ -9,6 +9,7 @@ export interface IAppVerificationItem {
   email: string | null;
   phone: string;
   status: TVerificationStatus;
+  verification_flow_type?: "registration" | "re_verification";
   reason_for_rejection: string | null;
   created_at: string;
   updated_at: string;
@@ -42,12 +43,14 @@ export interface IVerificationQuery {
   order?: "asc" | "desc";
   sort_by?: "created_at" | "name" | "email" | "phone" | "status";
   status?: TVerificationStatus;
+  flow_type?: "registration" | "re_verification";
 }
 
 export interface IVerificationCounts {
   pending: number;
   approved: number;
   rejected: number;
+  suspended: number;
 }
 
 export interface IVerificationDetails {
@@ -77,6 +80,16 @@ export interface IVerificationDetails {
     address: string | null;
     additional_phone: string | null;
   };
+  trucks: Array<{
+    id: number;
+    brand: string;
+    license_plate: string;
+    license: string;
+    year: number;
+    status: "pending" | "approved" | "suspended";
+    truck_type_id: number;
+    truck_type_name: string | null;
+  }>;
 }
 
 interface IUpdateVerificationPayload {
@@ -129,12 +142,13 @@ const defaultQuery: IVerificationQuery = {
   limit: 10,
   order: "desc",
   status: "pending",
+  flow_type: "registration",
 };
 
 const useVerificationStore = create<VerificationState>((set, get) => ({
   verifications: [],
   meta: null,
-  counts: { pending: 0, approved: 0, rejected: 0 },
+  counts: { pending: 0, approved: 0, rejected: 0, suspended: 0 },
   details: null,
   detailsId: null,
   loading: false,
@@ -167,10 +181,13 @@ const useVerificationStore = create<VerificationState>((set, get) => ({
     set({ countsLoading: true, error: null });
     try {
       const base = { page: 1, limit: 1, order: "desc" as const };
-      const [pendingRes, approvedRes, rejectedRes] = await Promise.all([
-        axiosNormalApiClient.get("/dashboard/verifications", { params: { ...base, status: "pending" } }),
-        axiosNormalApiClient.get("/dashboard/verifications", { params: { ...base, status: "approved" } }),
-        axiosNormalApiClient.get("/dashboard/verifications", { params: { ...base, status: "rejected" } }),
+      const flowType = get().query.flow_type;
+      const pendingStatus = flowType === "re_verification" ? "suspended" : "pending";
+      const [pendingRes, approvedRes, rejectedRes, suspendedRes] = await Promise.all([
+        axiosNormalApiClient.get("/dashboard/verifications", { params: { ...base, flow_type: flowType, status: pendingStatus } }),
+        axiosNormalApiClient.get("/dashboard/verifications", { params: { ...base, flow_type: flowType, status: "approved" } }),
+        axiosNormalApiClient.get("/dashboard/verifications", { params: { ...base, flow_type: flowType, status: "rejected" } }),
+        axiosNormalApiClient.get("/dashboard/verifications", { params: { ...base, flow_type: flowType, status: "suspended" } }),
       ]);
 
       set({
@@ -178,6 +195,7 @@ const useVerificationStore = create<VerificationState>((set, get) => ({
           pending: pendingRes.data?.meta?.total ?? 0,
           approved: approvedRes.data?.meta?.total ?? 0,
           rejected: rejectedRes.data?.meta?.total ?? 0,
+          suspended: suspendedRes.data?.meta?.total ?? 0,
         },
         countsLoading: false,
       });

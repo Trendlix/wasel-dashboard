@@ -1,23 +1,24 @@
 import clsx from "clsx";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { notificationsFilterTabs } from "@/shared/core/pages/notifications";
 import useDashboardNotificationsStore from "@/shared/hooks/store/useDashboardNotificationsStore";
 import NotificationItem from "./NotificationItem";
 
-const formatRelativeTime = (value: string) => {
+const formatRelativeTime = (value: string, language: string, t: (key: string, options?: Record<string, string | number>) => string) => {
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return "-";
 
     const diffMs = Date.now() - date.getTime();
     const diffMinutes = Math.max(1, Math.floor(diffMs / (1000 * 60)));
 
-    if (diffMinutes < 60) return `${diffMinutes} min ago`;
+    if (diffMinutes < 60) return t("notifications:relativeMinutesAgo", { count: diffMinutes });
     const diffHours = Math.floor(diffMinutes / 60);
-    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+    if (diffHours < 24) return t("notifications:relativeHoursAgo", { count: diffHours });
     const diffDays = Math.floor(diffHours / 24);
-    if (diffDays < 30) return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+    if (diffDays < 30) return t("notifications:relativeDaysAgo", { count: diffDays });
 
-    return date.toLocaleDateString("en-US", {
+    return date.toLocaleDateString(language.startsWith("ar") ? "ar-EG" : "en-US", {
         month: "short",
         day: "numeric",
         year: "numeric",
@@ -25,6 +26,7 @@ const formatRelativeTime = (value: string) => {
 };
 
 const RecentNotifications = () => {
+    const { t, i18n } = useTranslation(["notifications", "common"]);
     const {
         notifications,
         loading,
@@ -39,6 +41,11 @@ const RecentNotifications = () => {
     const [headerActionLoading, setHeaderActionLoading] = useState(false);
     const [tabActionLoading, setTabActionLoading] = useState(false);
     const [itemActionLoadingId, setItemActionLoadingId] = useState<number | null>(null);
+    const tabLabelByValue = {
+        user: t("notifications:tabUsers"),
+        driver: t("notifications:tabDrivers"),
+        trip: t("notifications:tabTrip"),
+    };
 
     useEffect(() => {
         fetchNotifications();
@@ -83,14 +90,14 @@ const RecentNotifications = () => {
     return (
         <div className="bg-main-white border border-main-whiteMarble common-rounded p-6 flex flex-col gap-2 h-full">
             <div className="flex items-center justify-between gap-3 mb-2">
-                <h3 className="text-main-mirage font-bold text-lg">Recent Notifications</h3>
+                <h3 className="text-main-mirage font-bold text-lg">{t("notifications:recentNotifications")}</h3>
                 <button
                     type="button"
                     onClick={handleMarkAll}
                     disabled={!hasUnreadAny || headerActionLoading}
                     className="h-8 px-3 rounded-lg bg-main-primary text-main-white text-xs font-semibold hover:bg-main-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    {headerActionLoading ? "Marking..." : "Mark all as read"}
+                    {headerActionLoading ? t("common:marking") : t("common:markAllRead")}
                 </button>
             </div>
 
@@ -110,7 +117,7 @@ const RecentNotifications = () => {
                                         : "text-main-sharkGray hover:text-main-mirage",
                                 )}
                             >
-                                {tab.label}
+                                {tabLabelByValue[tab.value]}
                             </button>
                         );
                     })}
@@ -122,7 +129,9 @@ const RecentNotifications = () => {
                     disabled={!hasUnreadInActiveTab || tabActionLoading}
                     className="h-8 px-3 rounded-lg border border-main-primary text-main-primary text-xs font-semibold hover:bg-main-primary/10 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    {tabActionLoading ? "Marking..." : `Mark ${activeTab} as read`}
+                    {tabActionLoading
+                        ? t("common:marking")
+                        : t("notifications:markTabAsRead", { tab: tabLabelByValue[activeTab] })}
                 </button>
             </div>
 
@@ -140,14 +149,14 @@ const RecentNotifications = () => {
                             key={`${activeTab}-${item.id}`}
                             item={item}
                             tab={activeTab}
-                            sentAt={formatRelativeTime(item.created_at)}
+                            sentAt={formatRelativeTime(item.created_at, i18n.language, t)}
                             onMarkAsRead={handleMarkItem}
                             actionLoadingId={itemActionLoadingId}
                         />
                     ))
                 ) : (
                     <div className="rounded bg-main-luxuryWhite px-4 py-6 text-sm text-main-sharkGray text-center">
-                        No notifications for this tab.
+                        {t("notifications:noNotificationsForTab")}
                     </div>
                 )}
             </div>

@@ -12,5 +12,6 @@
   "supportTickets": "Support Tickets",
   "cms": "CMS",
   "adminRolesPermissions": "Admin Roles & Permissions",
-  "adminSettings": "Admin Settings"
+  "adminSettings": "Admin Settings",
+  "testCenter": "Test Center"
 }

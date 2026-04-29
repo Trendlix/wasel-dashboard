@@ -4,17 +4,20 @@
   "statuses": {
     "pending": "Pending",
     "approved": "Approved",
-    "rejected": "Rejected"
+    "rejected": "Rejected",
+    "suspended": "Suspended"
   },
   "analytics": {
     "pendingReviews": "Pending reviews",
     "approved": "Approved",
-    "rejected": "Rejected"
+    "rejected": "Rejected",
+    "suspended": "Suspended"
   },
   "list": {
     "tabWithCount": "{{label}} ({{count}})",
     "searchPlaceholder": "Search by name or type…",
     "empty": "No verification requests found.",
+    "emptyDescription": "Try adjusting your search or filters.",
     "driverLabel": "Driver",
     "submittedDocuments": "Submitted documents:",
     "docId": "ID",
@@ -24,7 +27,10 @@
     "fullView": "Full View",
     "viewDocuments": "View documents",
     "approve": "Approve",
-    "reject": "Reject"
+    "reject": "Reject",
+    "reverification": "Re-verifications",
+    "registration": "Registration",
+    "docsReverification": "Docs Re-verification"
   },
   "confirm": {
     "nameFallback": "this applicant",
@@ -34,6 +40,7 @@
     "rejectDescription": "Are you sure you want to reject verification for {{name}}?",
     "fallbackDescription": "Please confirm this action.",
     "note": "This action will update the verification status immediately.",
+    "messagePlaceholder": "Write an optional message...",
     "confirmApprove": "Confirm approve",
     "confirmReject": "Confirm reject",
     "saving": "Saving…"
@@ -55,10 +62,11 @@
     "pdfPreviewLabel": "PDF document preview is available in the modal.",
     "previewUnavailable": "Preview unavailable",
     "noDocuments": "No uploaded documents found.",
+    "noDocumentsDescription": "There are no uploaded files for this verification yet.",
     "nationalIdExpiry": "National ID expiry",
-    "nationalIdExpiryRequired": "National ID expiry (required on approve)",
+    "nationalIdExpiryRequired": "National ID expiry date and time (required on approve)",
     "licenseExpiry": "License expiry",
-    "licenseExpiryRequired": "License expiry (required on approve)",
+    "licenseExpiryRequired": "License expiry date and time (required on approve)",
     "address": "Address",
     "addressPlaceholder": "Enter address (optional)",
     "additionalPhone": "Additional phone",
@@ -69,10 +77,13 @@
     "rejectionLabel": "Rejection reason",
     "rejectionPlaceholder": "Required when rejecting verification…",
     "loadError": "Unable to load verification details.",
+    "loadErrorDescription": "Please try again or refresh the page.",
     "reject": "Reject",
     "approve": "Approve",
     "rejecting": "Rejecting…",
-    "approving": "Approving…"
+    "approving": "Approving…",
+    "viewerZoom": "Lens & Zoom",
+    "viewerCrop": "Crop"
   },
   "documents": {
     "profileImage": "Profile image",

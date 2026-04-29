@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { Send, Bell } from "lucide-react";
 import clsx from "clsx";
+import { useTranslation } from "react-i18next";
 import AudienceSelector from "./AudienceSelector";
 import type { TNotificationAudience } from "@/shared/core/pages/notifications";
 import axiosNormalApiClient from "@/shared/utils/axios";
 import useDashboardNotificationsStore from "@/shared/hooks/store/useDashboardNotificationsStore";
 
 const NotificationForm = () => {
+    const { t } = useTranslation(["notifications"]);
     const [audience, setAudience] = useState<TNotificationAudience>("all");
     const [title, setTitle] = useState("");
     const [message, setMessage] = useState("");
@@ -45,34 +47,34 @@ const NotificationForm = () => {
                 <div className="w-10 h-10 rounded-xl bg-main-primary/10 flex items-center justify-center">
                     <Bell size={18} className="text-main-primary" />
                 </div>
-                <h3 className="text-main-mirage font-bold text-lg">Send New Notification</h3>
+                <h3 className="text-main-mirage font-bold text-lg">{t("notifications:sendNewNotification")}</h3>
             </div>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-5 flex-1">
                 {/* Audience */}
                 <div className="flex flex-col gap-2">
-                    <label className="text-main-mirage text-sm font-medium">Target Audience</label>
+                    <label className="text-main-mirage text-sm font-medium">{t("notifications:sendModal.targetAudienceLabel")}</label>
                     <AudienceSelector value={audience} onChange={setAudience} />
                 </div>
 
                 {/* Title */}
                 <div className="flex flex-col gap-2">
-                    <label className="text-main-mirage text-sm font-medium">Notification Title</label>
+                    <label className="text-main-mirage text-sm font-medium">{t("notifications:notificationTitle")}</label>
                     <input
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        placeholder="Enter notification title..."
+                        placeholder={t("notifications:sendModal.titlePlaceholder")}
                         className="h-10 w-full border border-main-whiteMarble common-rounded px-3 text-sm outline-none placeholder:text-main-silverSteel focus:border-main-primary transition-colors"
                     />
                 </div>
 
                 {/* Message */}
                 <div className="flex flex-col gap-2 flex-1">
-                    <label className="text-main-mirage text-sm font-medium">Message</label>
+                    <label className="text-main-mirage text-sm font-medium">{t("notifications:sendModal.messageLabel")}</label>
                     <textarea
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
-                        placeholder="Enter your message..."
+                        placeholder={t("notifications:sendModal.messagePlaceholder")}
                         rows={5}
                         className="w-full border border-main-whiteMarble common-rounded px-3 py-2 text-sm outline-none placeholder:text-main-silverSteel focus:border-main-primary transition-colors resize-none flex-1"
                     />
@@ -90,7 +92,7 @@ const NotificationForm = () => {
                     )}
                 >
                     <Send size={16} />
-                    {submitting ? "Sending..." : "Send Notification"}
+                    {submitting ? t("notifications:sendModal.sending") : t("notifications:sendNotification")}
                 </button>
             </form>
         </div>

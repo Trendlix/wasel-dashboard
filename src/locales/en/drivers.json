@@ -63,7 +63,12 @@
       "save": "Save status",
       "saving": "Saving...",
       "saved": "Driver status updated successfully.",
-      "saveFailed": "Failed to update driver status."
+      "saveFailed": "Failed to update driver status.",
+      "confirmTitle": "Confirm status update",
+      "confirmDescription": "You are about to change the driver status to {{status}}.",
+      "approveMessageHint": "Optional approval message",
+      "rejectMessageHint": "Optional rejection message",
+      "messagePlaceholder": "Write an optional message..."
     },
     "documents": {
       "title": "Documents",
@@ -86,13 +91,39 @@
     },
     "expiries": {
       "title": "Expiration Control",
-      "description": "Expand to edit National ID and License expiry dates.",
-      "nationalIdLabel": "National ID expiry date",
-      "licenseLabel": "License expiry date",
+      "description": "Expand to edit National ID and License expiry date and time.",
+      "nationalIdLabel": "National ID expiry date and time",
+      "licenseLabel": "License expiry date and time",
       "save": "Save expiry dates",
       "saving": "Saving...",
       "saved": "Expiry dates updated successfully.",
       "saveFailed": "Failed to update expiry dates."
+    },
+    "trucks": {
+      "title": "Truck Data",
+      "description": "Review linked trucks for this driver.",
+      "empty": "No trucks linked to this driver.",
+      "truck": "Truck",
+      "idLabel": "Truck ID",
+      "type": "Truck type",
+      "brand": "Brand",
+      "plate": "License plate",
+      "license": "License number",
+      "year": "Year",
+      "status": "Truck status",
+      "statusValues": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "suspended": "Suspended"
+      }
+    },
+    "notes": {
+      "title": "Notes",
+      "description": "Review current status reason and latest verification/admin note.",
+      "statusReasonLabel": "Status reason note",
+      "verificationNoteLabel": "Verification/admin note",
+      "statusReasonFallback": "No status reason available for current status ({{status}}).",
+      "verificationNoteFallback": "No verification note has been added yet."
     }
   },
   "statuses": {

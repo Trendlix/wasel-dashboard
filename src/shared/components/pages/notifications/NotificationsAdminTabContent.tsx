@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { formatAppDateTime } from "@/lib/formatLocaleDate";
@@ -19,7 +20,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { CheckCheck, Eye, ExternalLink, RotateCcw, Search, Send } from "lucide-react";
+import { CheckCheck, Eye, ExternalLink, RotateCcw, Search } from "lucide-react";
 import TablePagination from "@/shared/components/common/TablePagination";
 import {
     CommonModal,
@@ -29,15 +30,8 @@ import {
 } from "@/shared/components/common/CommonModal";
 import NoDataFound from "@/shared/components/common/NoDataFound";
 import { formInputWrapperClass, formSelectTriggerClass } from "@/shared/components/common/formStyles";
-import SendNotificationModal from "./SendNotificationModal";
 import type { TAdminNotificationTabType, IAdminNotificationTabRow, TReadFilter, TSortValue, AdminNotificationsTabState } from "@/shared/hooks/store/createAdminNotificationsTabStore";
-import type { TNotificationManagementTab } from "@/shared/core/pages/notifications";
-
-const typeToManagementTab: Record<TAdminNotificationTabType, TNotificationManagementTab> = {
-    driver: "driver-admin",
-    user: "user-admin",
-    trip: "trip-admin",
-};
+import { driverNotificationBusinessCategoryOptions, type TDriverNotificationBusinessCategory } from "@/shared/core/pages/notifications";
 
 const typeToDetailPath: Record<TAdminNotificationTabType, string> = {
     driver: "drivers",
@@ -56,11 +50,28 @@ interface Props {
     store: AdminNotificationsTabState;
 }
 
+type TDriverCategoryFilter = "all" | TDriverNotificationBusinessCategory;
+
+const detectDriverBusinessCategory = (row: IAdminNotificationTabRow): TDriverNotificationBusinessCategory => {
+    const payload = row.payload ?? {};
+    const event = String(payload.event ?? payload.type ?? "").toLowerCase();
+    const title = String(row.title ?? "").toLowerCase();
+    const description = String(row.description ?? "").toLowerCase();
+    const combined = `${event} ${title} ${description}`;
+    if (combined.includes("deleted")) return "account_deleted";
+    if (combined.includes("suspend")) return "account_suspended";
+    if (combined.includes("approve")) return "account_approved";
+    if (combined.includes("reject")) return "account_rejected";
+    if (combined.includes("expiry") || combined.includes("expire")) return "document_expiry";
+    return "other";
+};
+
 const NotificationsAdminTabContent = ({ type, store }: Props) => {
     const navigate = useNavigate();
     const { t, i18n } = useTranslation(["notifications", "common"]);
 
     const formatDate = (value: string | null | undefined) => formatAppDateTime(value, i18n.language);
+    const [driverCategoryFilter, setDriverCategoryFilter] = useState<TDriverCategoryFilter>("all");
 
     const {
         rows,
@@ -71,7 +82,6 @@ const NotificationsAdminTabContent = ({ type, store }: Props) => {
         sortValue,
         page,
         viewItem,
-        sendModalOpen,
         itemActionLoading,
         markAllLoading,
         setSearch,
@@ -79,14 +89,21 @@ const NotificationsAdminTabContent = ({ type, store }: Props) => {
         setSortValue,
         setPage,
         setViewItem,
-        setSendModalOpen,
         resetFilters,
-        fetchNotifications,
         markAsRead,
         handleMarkAllAsRead,
     } = store;
 
-    const hasUnread = rows.some((r) => !r.is_read);
+    const filteredRows = useMemo(() => {
+        if (type !== "driver") return rows;
+        return rows.filter((row) => {
+            const rowCategory = detectDriverBusinessCategory(row);
+            if (driverCategoryFilter !== "all" && rowCategory !== driverCategoryFilter) return false;
+            return true;
+        });
+    }, [rows, type, driverCategoryFilter]);
+
+    const hasUnread = filteredRows.some((r) => !r.is_read);
 
     const handleViewDetail = (row: IAdminNotificationTabRow) => {
         navigate(`/notifications/${typeToDetailPath[type]}/${row.id}`);
@@ -112,13 +129,6 @@ const NotificationsAdminTabContent = ({ type, store }: Props) => {
                                 {markAllLoading ? t("common:marking") : t("common:markAllRead")}
                             </Button>
                         )}
-                        <Button
-                            className="h-11 px-5 bg-main-primary text-main-white hover:bg-main-primary/90 font-semibold"
-                            onClick={() => setSendModalOpen(true)}
-                        >
-                            <Send size={16} />
-                            {t("notifications:sendNotification")}
-                        </Button>
                     </div>
                 </div>
 
@@ -159,9 +169,30 @@ const NotificationsAdminTabContent = ({ type, store }: Props) => {
                             </SelectContent>
                         </Select>
 
+                        {type === "driver" && (
+                            <>
+                                <Select value={driverCategoryFilter} onValueChange={(v) => setDriverCategoryFilter(v as TDriverCategoryFilter)}>
+                                    <SelectTrigger className={`${formSelectTriggerClass} w-fit`}>
+                                        <SelectValue placeholder={t("notifications:driverBusinessCategoryFilter")} />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">{t("common:all")}</SelectItem>
+                                        {driverNotificationBusinessCategoryOptions.map((category) => (
+                                            <SelectItem key={category} value={category}>
+                                                {t(`notifications:driverBusinessCategories.${category}`)}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </>
+                        )}
+
                         <Button
                             variant="outline"
-                            onClick={resetFilters}
+                            onClick={() => {
+                                resetFilters();
+                                setDriverCategoryFilter("all");
+                            }}
                             className="h-11 px-4 border-main-whiteMarble text-main-hydrocarbon"
                         >
                             <RotateCcw size={16} />
@@ -193,7 +224,7 @@ const NotificationsAdminTabContent = ({ type, store }: Props) => {
                                     </TableRow>
                                 ))}
 
-                                {!loading && rows.map((row) => (
+                                {!loading && filteredRows.map((row) => (
                                     <TableRow
                                         key={row.id}
                                         className={clsx(
@@ -243,6 +274,24 @@ const NotificationsAdminTabContent = ({ type, store }: Props) => {
                                                 >
                                                     <span className="inline-flex items-center gap-1"><ExternalLink size={13} />{t("notifications:detail")}</span>
                                                 </button>
+                                                {row.user_id && (
+                                                    <button
+                                                        type="button"
+                                                        className="h-8 px-2.5 common-rounded text-main-secondary hover:bg-main-secondary/10 text-xs font-semibold"
+                                                        onClick={() => navigate(`/users/${row.user_id}`)}
+                                                    >
+                                                        <span className="inline-flex items-center gap-1">{t("notifications:goToUser")}</span>
+                                                    </button>
+                                                )}
+                                                {row.driver_id && (
+                                                    <button
+                                                        type="button"
+                                                        className="h-8 px-2.5 common-rounded text-main-secondary hover:bg-main-secondary/10 text-xs font-semibold"
+                                                        onClick={() => navigate(`/drivers/${row.driver_id}`)}
+                                                    >
+                                                        <span className="inline-flex items-center gap-1">{t("notifications:goToDriver")}</span>
+                                                    </button>
+                                                )}
                                                 {!row.is_read && (
                                                     <button
                                                         type="button"
@@ -261,7 +310,7 @@ const NotificationsAdminTabContent = ({ type, store }: Props) => {
                                     </TableRow>
                                 ))}
 
-                                {!loading && rows.length === 0 && (
+                                {!loading && filteredRows.length === 0 && (
                                     <TableRow>
                                         <TableCell colSpan={5} className="p-2">
                                             <NoDataFound
@@ -280,16 +329,6 @@ const NotificationsAdminTabContent = ({ type, store }: Props) => {
                     )}
                 </div>
             </div>
-
-            {/* Send modal */}
-            <SendNotificationModal
-                open={sendModalOpen}
-                onOpenChange={setSendModalOpen}
-                onSent={fetchNotifications}
-                initialTab={typeToManagementTab[type]}
-                initialTitle=""
-                initialMessage=""
-            />
 
             {/* View details modal */}
             <CommonModal open={Boolean(viewItem)} onOpenChange={(open) => !open && setViewItem(null)} maxWidth="sm:max-w-[620px]">

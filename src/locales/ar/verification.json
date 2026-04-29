@@ -4,17 +4,20 @@
   "statuses": {
     "pending": "قيد المراجعة",
     "approved": "مقبول",
-    "rejected": "مرفوض"
+    "rejected": "مرفوض",
+    "suspended": "معلّق"
   },
   "analytics": {
     "pendingReviews": "قيد المراجعة",
     "approved": "المقبولة",
-    "rejected": "المرفوضة"
+    "rejected": "المرفوضة",
+    "suspended": "المعلّقة"
   },
   "list": {
     "tabWithCount": "{{label}} ({{count}})",
     "searchPlaceholder": "ابحث بالاسم أو النوع…",
     "empty": "لا توجد طلبات تحقق.",
+    "emptyDescription": "جرّب تعديل البحث أو عوامل التصفية.",
     "driverLabel": "سائق",
     "submittedDocuments": "المستندات المرفوعة:",
     "docId": "الهوية",
@@ -24,7 +27,10 @@
     "fullView": "العرض الكامل",
     "viewDocuments": "عرض المستندات",
     "approve": "قبول",
-    "reject": "رفض"
+    "reject": "رفض",
+    "reverification": "إعادة التحقق",
+    "registration": "التسجيل",
+    "docsReverification": "إعادة التحقق من المستندات"
   },
   "confirm": {
     "nameFallback": "هذا الطلب",
@@ -34,6 +40,7 @@
     "rejectDescription": "هل تريد رفض التحقق لـ {{name}}؟",
     "fallbackDescription": "يرجى تأكيد الإجراء.",
     "note": "سيتم تحديث حالة التحقق فوراً.",
+    "messagePlaceholder": "اكتب رسالة اختيارية...",
     "confirmApprove": "تأكيد القبول",
     "confirmReject": "تأكيد الرفض",
     "saving": "جاري الحفظ…"
@@ -55,10 +62,11 @@
     "pdfPreviewLabel": "يمكن معاينة ملف PDF داخل النافذة.",
     "previewUnavailable": "المعاينة غير متاحة",
     "noDocuments": "لا توجد مستندات مرفوعة.",
+    "noDocumentsDescription": "لا توجد ملفات مرفوعة لهذا الطلب حتى الآن.",
     "nationalIdExpiry": "انتهاء الهوية",
-    "nationalIdExpiryRequired": "انتهاء الهوية (مطلوب عند القبول)",
+    "nationalIdExpiryRequired": "تاريخ ووقت انتهاء الهوية (مطلوب عند القبول)",
     "licenseExpiry": "انتهاء الرخصة",
-    "licenseExpiryRequired": "انتهاء الرخصة (مطلوب عند القبول)",
+    "licenseExpiryRequired": "تاريخ ووقت انتهاء الرخصة (مطلوب عند القبول)",
     "address": "العنوان",
     "addressPlaceholder": "أدخل العنوان (اختياري)",
     "additionalPhone": "هاتف إضافي",
@@ -69,10 +77,13 @@
     "rejectionLabel": "سبب الرفض",
     "rejectionPlaceholder": "مطلوب عند رفض التحقق…",
     "loadError": "تعذّر تحميل تفاصيل التحقق.",
+    "loadErrorDescription": "يرجى المحاولة مرة أخرى أو تحديث الصفحة.",
     "reject": "رفض",
     "approve": "قبول",
     "rejecting": "جاري الرفض…",
-    "approving": "جاري القبول…"
+    "approving": "جاري القبول…",
+    "viewerZoom": "عدسة وتكبير",
+    "viewerCrop": "قص"
   },
   "documents": {
     "profileImage": "صورة الملف",

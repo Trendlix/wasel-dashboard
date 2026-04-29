@@ -1,7 +1,15 @@
 export type TNotificationAudience = "all" | "users" | "drivers";
 export type TNotificationsFilterTab = "user" | "driver" | "trip";
-export type TNotificationManagementTab = "driver-admin" | "user-admin" | "trip-admin" | "offers-updates";
+export type TNotificationManagementTab = "driver-admin" | "user-admin" | "trip-admin" | "offers-updates" | "driver-offers-updates";
 export type TNotificationDeliveryStatus = "sent" | "scheduled" | "failed";
+export type TAdminDriverNotificationType = "message" | "error" | "issue" | "account_actions_alert" | "warning" | "success" | "any";
+export type TDriverNotificationBusinessCategory =
+    | "account_deleted"
+    | "account_suspended"
+    | "account_approved"
+    | "account_rejected"
+    | "document_expiry"
+    | "other";
 
 export const notificationsFilterTabs: { value: TNotificationsFilterTab; label: string }[] = [
     { value: "user", label: "Users" },
@@ -21,6 +29,25 @@ export const notificationDeliveryStatuses: { value: TNotificationDeliveryStatus 
     { value: "sent", label: "Sent" },
     { value: "scheduled", label: "Scheduled" },
     { value: "failed", label: "Failed" },
+];
+
+export const adminDriverNotificationTypeOptions: TAdminDriverNotificationType[] = [
+    "message",
+    "error",
+    "issue",
+    "account_actions_alert",
+    "warning",
+    "success",
+    "any",
+];
+
+export const driverNotificationBusinessCategoryOptions: TDriverNotificationBusinessCategory[] = [
+    "account_deleted",
+    "account_suspended",
+    "account_approved",
+    "account_rejected",
+    "document_expiry",
+    "other",
 ];
 
 export const audienceOptions: { value: TNotificationAudience; label: string; icon: string }[] = [

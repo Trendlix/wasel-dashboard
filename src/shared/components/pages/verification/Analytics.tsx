@@ -5,26 +5,27 @@ import { verificationAnalyticsConfig } from "@/shared/core/pages/verification";
 import useVerificationStore from "@/shared/hooks/store/useVerificationStore";
 
 const countKeyByTitleKey: Record<
-  "pendingReviews" | "approved" | "rejected",
-  "pending" | "approved" | "rejected"
+  "pendingReviews" | "approved" | "rejected" | "suspended",
+  "pending" | "approved" | "rejected" | "suspended"
 > = {
   pendingReviews: "pending",
   approved: "approved",
   rejected: "rejected",
+  suspended: "suspended",
 };
 
 const Analytics = () => {
   const { t } = useTranslation("verification");
-  const { counts, countsLoading, fetchVerificationCounts } = useVerificationStore();
+  const { counts, countsLoading, fetchVerificationCounts, query } = useVerificationStore();
 
   useEffect(() => {
     fetchVerificationCounts();
-  }, []);
+  }, [fetchVerificationCounts, query.flow_type]);
 
   if (countsLoading) {
     return (
-      <div className="grid grid-cols-3 gap-4">
-        {Array.from({ length: 3 }).map((_, i) => (
+      <div className="grid grid-cols-4 gap-4">
+        {Array.from({ length: 4 }).map((_, i) => (
           <div
             key={i}
             className="bg-main-white border border-main-whiteMarble common-rounded p-4 flex items-center justify-between animate-pulse"
@@ -41,7 +42,7 @@ const Analytics = () => {
   }
 
   return (
-    <div className="grid grid-cols-3 gap-4">
+    <div className="grid grid-cols-4 gap-4">
       {verificationAnalyticsConfig.map((card) => {
         const Icon = card.icon;
         const countKey = countKeyByTitleKey[card.titleKey];

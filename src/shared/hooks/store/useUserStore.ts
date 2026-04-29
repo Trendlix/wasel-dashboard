@@ -50,6 +50,19 @@ export interface IUsersAnalytics {
     blocked_users: number;
 }
 
+export interface IUserAddress {
+    id: number;
+    label: string;
+    type: string;
+    location: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface IAppUserDetails extends IAppUser {
+    addresses: IUserAddress[];
+}
+
 // ─── State ────────────────────────────────────────────────────────────────────
 
 interface UserState {
@@ -60,10 +73,14 @@ interface UserState {
     loading: boolean;
     updating: boolean;
     exporting: boolean;
+    detailsLoading: boolean;
     error: string | null;
+    details: IAppUserDetails | null;
     query: IUserQuery;
 
     fetchUsers: (query?: IUserQuery) => Promise<void>;
+    fetchUserDetails: (id: number) => Promise<void>;
+    clearUserDetails: () => void;
     fetchUsersAnalytics: () => Promise<void>;
     setPage: (page: number) => void;
     setQuery: (query: Partial<IUserQuery>) => void;
@@ -95,7 +112,9 @@ const useUserStore = create<UserState>((set, get) => ({
     loading: false,
     updating: false,
     exporting: false,
+    detailsLoading: false,
     error: null,
+    details: null,
     query: defaultQuery,
 
     fetchUsers: async (query) => {
@@ -132,6 +151,28 @@ const useUserStore = create<UserState>((set, get) => ({
         }
     },
 
+    fetchUserDetails: async (id) => {
+        set({ detailsLoading: true, error: null });
+        try {
+            const response = await axiosNormalApiClient.get(`/dashboard/users/${id}`);
+            set({
+                details: response.data.data,
+                detailsLoading: false,
+            });
+        } catch (error) {
+            set({
+                details: null,
+                error: extractErrorMessage(error, "Failed to fetch user details"),
+                detailsLoading: false,
+            });
+            throw error;
+        }
+    },
+
+    clearUserDetails: () => {
+        set({ details: null, detailsLoading: false });
+    },
+
     setPage: (page) => {
         const next = { ...get().query, page };
         set({ query: next });
@@ -156,6 +197,7 @@ const useUserStore = create<UserState>((set, get) => ({
             // Optimistically update the local list
             set((state) => ({
                 users: state.users.map((u) => u.id === id ? { ...u, status } : u),
+                details: state.details?.id === id ? { ...state.details, status } : state.details,
                 updating: false,
             }));
         } catch (error) {

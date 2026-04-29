@@ -2,6 +2,8 @@ import { create } from "zustand";
 import { isAxiosError } from "axios";
 import axiosNormalApiClient from "@/shared/utils/axios";
 import {
+    type TAdminDriverNotificationType,
+    type TDriverNotificationBusinessCategory,
     type TNotificationDeliveryStatus,
     type TNotificationManagementTab,
 } from "@/shared/core/pages/notifications";
@@ -11,6 +13,8 @@ export type TRowSource = "user" | "driver" | "trip" | "offer" | "update";
 export type TDateFilter = "all" | "today" | "last7" | "last30";
 export type TSortValue = "created-desc" | "created-asc" | "title-asc" | "title-desc";
 export type TReadFilter = "all" | "read" | "unread";
+export type TDriverTypeFilter = "all" | TAdminDriverNotificationType;
+export type TDriverBusinessCategoryFilter = "all" | TDriverNotificationBusinessCategory;
 
 export interface INotificationRow {
     id: number;
@@ -24,6 +28,9 @@ export interface INotificationRow {
     created_at: string;
     status: TNotificationDeliveryStatus;
     is_read: boolean;
+    driver_id?: number;
+    driver_notification_type?: TAdminDriverNotificationType;
+    driver_business_category?: TDriverNotificationBusinessCategory;
 }
 
 interface IAdminNotificationPayload {
@@ -38,7 +45,23 @@ interface IAdminNotificationPayload {
     driver_id?: number;
     trip_id?: number;
     payload?: Record<string, unknown> | null;
+    type?: TAdminDriverNotificationType;
 }
+
+const detectDriverBusinessCategory = (item: IAdminNotificationPayload): TDriverNotificationBusinessCategory => {
+    const payload = item.payload ?? {};
+    const event = String(payload.event ?? payload.type ?? "").toLowerCase();
+    const title = String(item.title ?? "").toLowerCase();
+    const description = String(item.description ?? "").toLowerCase();
+    const combined = `${event} ${title} ${description}`;
+
+    if (combined.includes("deleted")) return "account_deleted";
+    if (combined.includes("suspend")) return "account_suspended";
+    if (combined.includes("approve")) return "account_approved";
+    if (combined.includes("reject")) return "account_rejected";
+    if (combined.includes("expiry") || combined.includes("expire")) return "document_expiry";
+    return "other";
+};
 
 interface IOfferOrUpdatePayload {
     id: number;
@@ -56,6 +79,7 @@ const emptyRowsByTab: Record<TNotificationManagementTab, INotificationRow[]> = {
     "user-admin": [],
     "trip-admin": [],
     "offers-updates": [],
+    "driver-offers-updates": [],
 };
 
 const getDeliveryStatus = (payload?: Record<string, unknown> | null): TNotificationDeliveryStatus => {
@@ -84,6 +108,8 @@ interface NotificationManagementState {
     dateFilter: TDateFilter;
     readFilter: TReadFilter;
     sortValue: TSortValue;
+    driverTypeFilter: TDriverTypeFilter;
+    driverBusinessCategoryFilter: TDriverBusinessCategoryFilter;
     page: number;
 
     viewItem: INotificationRow | null;
@@ -98,6 +124,8 @@ interface NotificationManagementState {
     setDateFilter: (filter: TDateFilter) => void;
     setReadFilter: (filter: TReadFilter) => void;
     setSortValue: (sort: TSortValue) => void;
+    setDriverTypeFilter: (filter: TDriverTypeFilter) => void;
+    setDriverBusinessCategoryFilter: (filter: TDriverBusinessCategoryFilter) => void;
     setPage: (page: number) => void;
     setViewItem: (item: INotificationRow | null) => void;
     setSendModalOpen: (open: boolean) => void;
@@ -146,6 +174,8 @@ const useNotificationManagementStore = create<NotificationManagementState>((set,
     dateFilter: "all",
     readFilter: "all",
     sortValue: "created-desc",
+    driverTypeFilter: "all",
+    driverBusinessCategoryFilter: "all",
     page: 1,
 
     viewItem: null,
@@ -160,11 +190,21 @@ const useNotificationManagementStore = create<NotificationManagementState>((set,
     setDateFilter: (dateFilter) => set({ dateFilter, page: 1 }),
     setReadFilter: (readFilter) => set({ readFilter, page: 1 }),
     setSortValue: (sortValue) => set({ sortValue, page: 1 }),
+    setDriverTypeFilter: (driverTypeFilter) => set({ driverTypeFilter, page: 1 }),
+    setDriverBusinessCategoryFilter: (driverBusinessCategoryFilter) => set({ driverBusinessCategoryFilter, page: 1 }),
     setPage: (page) => set({ page }),
     setViewItem: (viewItem) => set({ viewItem }),
     setSendModalOpen: (sendModalOpen) => set({ sendModalOpen }),
     setSendModalInitial: (sendModalInitial) => set({ sendModalInitial }),
-    resetFilters: () => set({ search: "", dateFilter: "all", readFilter: "all", sortValue: "created-desc", page: 1 }),
+    resetFilters: () => set({
+        search: "",
+        dateFilter: "all",
+        readFilter: "all",
+        sortValue: "created-desc",
+        driverTypeFilter: "all",
+        driverBusinessCategoryFilter: "all",
+        page: 1,
+    }),
 
     fetchNotifications: async () => {
         set({ loading: true });
@@ -209,6 +249,9 @@ const useNotificationManagementStore = create<NotificationManagementState>((set,
                     created_at: item.created_at,
                     status: getDeliveryStatus(item.payload),
                     is_read: Boolean(item.is_read ?? item.read_at),
+                    driver_id: item.driver_id,
+                    driver_notification_type: item.type ?? "any",
+                    driver_business_category: detectDriverBusinessCategory(item),
                 }));
 
                 nextRows["trip-admin"] = trips.map((item) => ({

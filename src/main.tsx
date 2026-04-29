@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
-import { Toaster } from "react-hot-toast";
+import { Toaster } from "sonner";
 import { router } from "./app/router";
 import "./index.css";
 import { i18nInitPromise } from "./i18n";
@@ -17,13 +17,15 @@ const RootChrome = () => {
             {backendUnavailable ? <BackendUnavailablePage /> : <RouterProvider router={router} />}
             <Toaster
                 position={isRTL ? "top-left" : "top-right"}
-                gutter={12}
-                containerStyle={isRTL ? { top: 20, left: 20 } : { top: 20, right: 20 }}
+                visibleToasts={4}
+                gap={12}
+                dir={isRTL ? "rtl" : "ltr"}
+                offset={20}
+                closeButton={false}
                 toastOptions={{
+                    unstyled: true,
+                    className: "wasel-toast-shell",
                     duration: 4200,
-                    style: {
-                        fontFamily: "inherit",
-                    },
                 }}
             />
         </>

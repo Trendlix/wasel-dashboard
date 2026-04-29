@@ -1,6 +1,5 @@
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Trash2 } from "lucide-react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
@@ -9,10 +8,8 @@ import {
     PageShell,
     BilingualStringArrayEditor,
     SectionVisibilityToggle,
-    InputError,
     destructiveButtonClass,
     sectionCardClass,
-    cmsImageUrl,
     CmsFieldLabel,
 } from "./_shared";
 
@@ -22,7 +19,6 @@ const AboutFuturePage = () => {
         future,
         loading,
         savingPart,
-        futureDraftImages,
         error,
         fieldErrors,
         fetchPart,
@@ -30,21 +26,10 @@ const AboutFuturePage = () => {
         addFutureCard,
         updateFutureCard,
         removeFutureCard,
-        setFutureCardImage,
-        clearFutureCardImage,
         savePart,
     } = useCmsAboutStore();
 
     useEffect(() => { fetchPart("future"); }, [fetchPart]);
-
-    const futureDraftPreviews = useMemo(
-        () => futureDraftImages.map((file) => (file ? URL.createObjectURL(file) : "")),
-        [futureDraftImages],
-    );
-
-    useEffect(() => {
-        return () => { futureDraftPreviews.forEach((p) => { if (p) URL.revokeObjectURL(p); }); };
-    }, [futureDraftPreviews]);
 
     const getEnError = (path: string) => fieldErrors[`future.en.${path}`];
     const getArError = (path: string) => fieldErrors[`future.ar.${path}`];
@@ -77,7 +62,7 @@ const AboutFuturePage = () => {
                     </div>
                 </div>
 
-                {/* Cards — image is shared; text arrays are bilingual */}
+                {/* Cards — text arrays are bilingual */}
                 {future.en.cards.map((_, index) => (
                     <div key={`future-card-${index}`} className={clsx(sectionCardClass, "space-y-4")}>
                         <div className="flex items-center justify-between">
@@ -94,62 +79,6 @@ const AboutFuturePage = () => {
                                 {t("aboutEditor.future.removeCard")}
                             </Button>
                         </div>
-
-                        {/* Shared image */}
-                        <div className="space-y-2">
-                            <CmsFieldLabel
-                                label={t("aboutEditor.future.cardImage")}
-                                hint={t("aboutEditor.future.cardImageHint")}
-                            />
-                            <div className="h-[280px] w-[280px] max-w-full overflow-hidden rounded-xl border border-main-whiteMarble bg-main-titaniumWhite/30">
-                                {futureDraftPreviews[index] ? (
-                                    <img src={futureDraftPreviews[index]} alt={t("aboutEditor.future.cardImage")} className="h-full w-full object-contain" />
-                                ) : future.en.cards[index]?.img ? (
-                                    <img src={cmsImageUrl(future.en.cards[index].img)} alt={t("aboutEditor.future.cardImage")} className="h-full w-full object-contain" />
-                                ) : (
-                                    <div className="flex h-full w-full items-center justify-center px-4 text-center text-sm text-main-coolGray">
-                                        {t("aboutEditor.future.cardImageEmpty")}
-                                    </div>
-                                )}
-                            </div>
-                            {futureDraftPreviews[index] && (
-                                <p className="text-xs text-main-primary">{t("aboutEditor.future.cardImageSelected")}</p>
-                            )}
-                        </div>
-
-                        <div className="rounded-xl border border-main-whiteMarble bg-main-titaniumWhite/30 p-3">
-                            <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-                                <div className="flex-1 space-y-2">
-                                    <CmsFieldLabel
-                                        label={t("aboutEditor.future.uploadCardImage")}
-                                        hint={t("aboutEditor.future.uploadCardImageHint")}
-                                    />
-                                    <Input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={(e) => {
-                                            const file = e.target.files?.[0];
-                                            if (!file) return;
-                                            setFutureCardImage(index, file);
-                                        }}
-                                        disabled={savingPart === "future"}
-                                    />
-                                </div>
-                                {(future.en.cards[index]?.img || futureDraftImages[index]) && (
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        className={destructiveButtonClass}
-                                        onClick={() => clearFutureCardImage(index)}
-                                        disabled={savingPart === "future"}
-                                    >
-                                        <Trash2 size={14} />
-                                        {t("aboutEditor.future.removeImage")}
-                                    </Button>
-                                )}
-                            </div>
-                        </div>
-                        <InputError message={getEnError(`cards.${index}.img`) ?? getArError(`cards.${index}.img`)} />
 
                         {/* Bilingual text arrays */}
                         <BilingualStringArrayEditor

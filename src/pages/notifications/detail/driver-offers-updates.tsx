@@ -30,7 +30,7 @@ interface CampaignNotificationDetail {
     created_at: string;
     payload: Record<string, unknown> | null;
     made_by_admin_id: number;
-    sent_users_count: number;
+    sent_drivers_count: number;
 }
 
 interface CampaignItemsMeta {
@@ -46,13 +46,13 @@ interface CampaignNotificationItem {
     title: string;
     description: string;
     created_at: string;
-    user_id: number;
+    driver_id: number;
     made_by_admin_id: number;
 }
 
 const PAGE_SIZE = 15;
 
-const NotificationsOffersUpdatesDetail = () => {
+const NotificationsDriverOffersUpdatesDetail = () => {
     const navigate = useNavigate();
     const { t, i18n } = useTranslation(["notifications", "common"]);
     const { source, campaignId } = useParams<{ source: CampaignSource; campaignId: string }>();
@@ -105,8 +105,8 @@ const NotificationsOffersUpdatesDetail = () => {
                 }
                 const endpoint =
                     source === "offer"
-                        ? `/dashboard/offers-notifications/campaigns/${encodeURIComponent(normalizedCampaignId)}/latest`
-                        : `/dashboard/updates-notifications/campaigns/${encodeURIComponent(normalizedCampaignId)}/latest`;
+                        ? `/dashboard/driver-offers-notifications/campaigns/${encodeURIComponent(normalizedCampaignId)}/latest`
+                        : `/dashboard/driver-updates-notifications/campaigns/${encodeURIComponent(normalizedCampaignId)}/latest`;
                 const response = await axiosNormalApiClient.get(endpoint);
                 setHeaderData(response.data?.data ?? null);
             } catch (e: unknown) {
@@ -131,8 +131,8 @@ const NotificationsOffersUpdatesDetail = () => {
 
                 const endpoint =
                     source === "offer"
-                        ? `/dashboard/offers-notifications/campaigns/${encodeURIComponent(normalizedCampaignId)}/items`
-                        : `/dashboard/updates-notifications/campaigns/${encodeURIComponent(normalizedCampaignId)}/items`;
+                        ? `/dashboard/driver-offers-notifications/campaigns/${encodeURIComponent(normalizedCampaignId)}/items`
+                        : `/dashboard/driver-updates-notifications/campaigns/${encodeURIComponent(normalizedCampaignId)}/items`;
                 const response = await axiosNormalApiClient.get(endpoint, {
                     params: { page, limit: PAGE_SIZE },
                 });
@@ -177,7 +177,7 @@ const NotificationsOffersUpdatesDetail = () => {
                 <div className="space-y-6">
                     <BackButton
                         label={t("common:back")}
-                        onClick={() => navigate("/notifications/offers-updates/users")}
+                        onClick={() => navigate("/notifications/offers-updates/drivers")}
                     />
                     <NoDataFound
                         title={t("notifications:notFoundTitle")}
@@ -193,7 +193,7 @@ const NotificationsOffersUpdatesDetail = () => {
             <div className="space-y-6">
                 <BackButton
                     label={t("common:back")}
-                    onClick={() => navigate("/notifications/offers-updates/users")}
+                    onClick={() => navigate("/notifications/offers-updates/drivers")}
                 />
 
                 <PageHeader
@@ -215,8 +215,8 @@ const NotificationsOffersUpdatesDetail = () => {
                             </p>
                             <p className="text-sm text-main-hydrocarbon inline-flex items-center gap-2">
                                 <Users size={14} />
-                                {t("notifications:sentToUsersCount", {
-                                    count: headerData?.sent_users_count ?? meta.total,
+                                {t("notifications:sentToDriversCount", {
+                                    count: headerData?.sent_drivers_count ?? meta.total,
                                 })}
                             </p>
                         </div>
@@ -298,7 +298,7 @@ const NotificationsOffersUpdatesDetail = () => {
                                                 {item.description}
                                             </TableCell>
                                             <TableCell className="py-4 px-6 text-sm text-main-hydrocarbon">
-                                                User #{item.user_id}
+                                                Driver #{item.driver_id}
                                             </TableCell>
                                             <TableCell className="py-4 px-6 text-sm text-main-hydrocarbon">
                                                 {item.made_by_admin_id
@@ -318,7 +318,7 @@ const NotificationsOffersUpdatesDetail = () => {
                                     <TableRow>
                                         <TableCell colSpan={6} className="p-2">
                                             <NoDataFound
-                                                title={t("notifications:noOffersUpdates")}
+                                                title={t("notifications:noDriverOffersUpdates")}
                                                 description={t("notifications:adjustFilters")}
                                             />
                                         </TableCell>
@@ -341,4 +341,4 @@ const NotificationsOffersUpdatesDetail = () => {
     );
 };
 
-export default NotificationsOffersUpdatesDetail;
+export default NotificationsDriverOffersUpdatesDetail;

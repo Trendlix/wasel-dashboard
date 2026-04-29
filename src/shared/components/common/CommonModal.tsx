@@ -22,7 +22,7 @@ interface CommonModalProps {
 
 const stripeClasses: Record<CommonModalVariant, string> = {
     default: "from-main-primary/40 via-main-primary to-main-primary/40",
-    danger:  "from-main-remove/40 via-main-remove to-main-remove/40",
+    danger: "from-main-remove/40 via-main-remove to-main-remove/40",
     success: "from-main-vividMint/40 via-main-vividMint to-main-vividMint/40",
 };
 
@@ -48,7 +48,7 @@ export const CommonModal = ({
         >
             {/* Accent stripe */}
             <div className={cn("h-[3px] w-full bg-linear-to-r shrink-0", stripeClasses[variant])} />
-            <div className="flex flex-col">{children}</div>
+            <div className="flex flex-col" style={{ wordBreak: "break-word" }}>{children}</div>
         </DialogContent>
     </Dialog>
 );

@@ -167,6 +167,8 @@ const playSupportNotificationSound = () => {
 
 // ─── Store ────────────────────────────────────────────────────────────────────
 
+const ADMIN_TICKET_BASE = "/admin/ticket";
+
 const useTicketStore = create<TicketState>((set, get) => ({
     tickets: [],
     meta: null,
@@ -315,7 +317,7 @@ const useTicketStore = create<TicketState>((set, get) => ({
         );
         set({ loading: true, error: null });
         try {
-            const response = await axiosNormalApiClient.get("/ticket", { params: cleanParams });
+            const response = await axiosNormalApiClient.get(ADMIN_TICKET_BASE, { params: cleanParams });
             set({
                 tickets: response.data.data,
                 meta: response.data.meta,
@@ -332,7 +334,7 @@ const useTicketStore = create<TicketState>((set, get) => ({
     fetchStats: async () => {
         set({ statsLoading: true });
         try {
-            const response = await axiosNormalApiClient.get("/ticket/stats");
+            const response = await axiosNormalApiClient.get(`${ADMIN_TICKET_BASE}/stats`);
             set({ stats: response.data.data, statsLoading: false });
         } catch (error) {
             set({ statsLoading: false });
@@ -395,7 +397,7 @@ const useTicketStore = create<TicketState>((set, get) => ({
     fetchTicketDetail: async (id) => {
         set({ detailLoading: true, selectedTicket: null });
         try {
-            const response = await axiosNormalApiClient.get(`/ticket/${id}`);
+            const response = await axiosNormalApiClient.get(`${ADMIN_TICKET_BASE}/${id}`);
             set({ selectedTicket: response.data.data, detailLoading: false });
         } catch {
             set({ detailLoading: false });
@@ -403,7 +405,7 @@ const useTicketStore = create<TicketState>((set, get) => ({
     },
 
     closeTicket: async (id) => {
-        await axiosNormalApiClient.patch(`/ticket/${id}/close`);
+        await axiosNormalApiClient.patch(`${ADMIN_TICKET_BASE}/${id}/close`);
         // Optimistically update list and detail
         set((state) => ({
             tickets: state.tickets.map((t) =>
@@ -418,7 +420,7 @@ const useTicketStore = create<TicketState>((set, get) => ({
     },
 
     solveTicket: async (id) => {
-        await axiosNormalApiClient.patch(`/ticket/${id}/solve`);
+        await axiosNormalApiClient.patch(`${ADMIN_TICKET_BASE}/${id}/solve`);
         set((state) => ({
             tickets: state.tickets.map((t) =>
                 t.id === id ? { ...t, status: "solved" as const } : t
@@ -433,7 +435,7 @@ const useTicketStore = create<TicketState>((set, get) => ({
 
     replyOnTicket: async (id, title, description) => {
         const response = await axiosNormalApiClient.post(
-            `/ticket/${id}/reply`,
+            `${ADMIN_TICKET_BASE}/${id}/reply`,
             { title, description },
             { meta: { showToast: false } },
         );
@@ -458,7 +460,7 @@ const useTicketStore = create<TicketState>((set, get) => ({
     fetchSupportNotifications: async (page = 1) => {
         set({ supportNotificationsLoading: true });
         try {
-            const response = await axiosNormalApiClient.get("/ticket/notifications", {
+            const response = await axiosNormalApiClient.get(`${ADMIN_TICKET_BASE}/notifications`, {
                 params: { page, limit: 20 },
             });
             set({
@@ -473,7 +475,7 @@ const useTicketStore = create<TicketState>((set, get) => ({
 
     markSupportNotificationAsRead: async (id) => {
         try {
-            await axiosNormalApiClient.patch(`/ticket/notifications/${id}/mark-as-read`);
+            await axiosNormalApiClient.patch(`${ADMIN_TICKET_BASE}/notifications/${id}/mark-as-read`);
             set((state) => ({
                 supportNotifications: state.supportNotifications.map((n) =>
                     n.id === id ? { ...n, is_read: true, read_at: new Date().toISOString() } : n
@@ -486,7 +488,7 @@ const useTicketStore = create<TicketState>((set, get) => ({
 
     markAllSupportNotificationsAsRead: async () => {
         try {
-            await axiosNormalApiClient.patch("/ticket/notifications/mark-all-as-read");
+            await axiosNormalApiClient.patch(`${ADMIN_TICKET_BASE}/notifications/mark-all-as-read`);
             set((state) => ({
                 supportNotifications: state.supportNotifications.map((n) => ({
                     ...n,
@@ -502,7 +504,7 @@ const useTicketStore = create<TicketState>((set, get) => ({
     markSupportNotificationsForTicketAsRead: async (ticketId) => {
         try {
             await axiosNormalApiClient.patch(
-                `/ticket/notifications/ticket/${ticketId}/mark-as-read`,
+                `${ADMIN_TICKET_BASE}/notifications/ticket/${ticketId}/mark-as-read`,
                 {},
                 { meta: { showToast: false } },
             );

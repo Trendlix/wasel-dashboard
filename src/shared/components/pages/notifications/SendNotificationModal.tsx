@@ -25,11 +25,13 @@ import type { TNotificationManagementTab } from "@/shared/core/pages/notificatio
 
 type TNotificationAudienceMode = "all" | "specific";
 type TNotificationColor = "blue" | "green" | "yellow" | "red" | "gray";
+type TAudienceTarget = "user" | "driver";
 
 interface IUserLite {
     id: number;
-    full_name: string;
-    email: string;
+    full_name?: string;
+    name?: string;
+    email: string | null;
     phone: string;
 }
 
@@ -74,6 +76,7 @@ const SendNotificationModal = ({
     const [title, setTitle] = useState(initialTitle);
     const [message, setMessage] = useState(initialMessage);
     const [audienceMode, setAudienceMode] = useState<TNotificationAudienceMode>("all");
+    const [audienceTarget, setAudienceTarget] = useState<TAudienceTarget>("user");
     const [usersQuery, setUsersQuery] = useState("");
     const [usersLoading, setUsersLoading] = useState(false);
     const [userOptions, setUserOptions] = useState<IUserLite[]>([]);
@@ -113,7 +116,8 @@ const SendNotificationModal = ({
 
     useEffect(() => {
         if (!open) return;
-        setKind(initialTab === "offers-updates" ? "offer" : "update");
+        setKind(initialTab === "offers-updates" || initialTab === "driver-offers-updates" ? "offer" : "update");
+        setAudienceTarget(initialTab === "driver-offers-updates" ? "driver" : "user");
         setTitle(initialTitle);
         setMessage(initialMessage);
         setAudienceMode("all");
@@ -139,7 +143,8 @@ const SendNotificationModal = ({
         const timer = setTimeout(async () => {
             try {
                 setUsersLoading(true);
-                const response = await axiosNormalApiClient.get("/dashboard/users", {
+                const endpoint = audienceTarget === "driver" ? "/dashboard/drivers" : "/dashboard/users";
+                const response = await axiosNormalApiClient.get(endpoint, {
                     params: {
                         page: 1,
                         limit: 8,
@@ -157,7 +162,7 @@ const SendNotificationModal = ({
         }, 350);
 
         return () => clearTimeout(timer);
-    }, [open, audienceMode, usersQuery]);
+    }, [open, audienceMode, usersQuery, audienceTarget]);
 
     useEffect(() => {
         if (!open || !voucherModalOpen || kind !== "offer" || offerType !== "voucher") {
@@ -213,7 +218,12 @@ const SendNotificationModal = ({
         }
 
         if (audienceMode === "specific" && selectedUsers.length === 0) {
-            showToast(t("notifications:sendModal.toast.selectUser"), "alert");
+            showToast(
+                audienceTarget === "driver"
+                    ? t("notifications:sendModal.toast.selectDriver")
+                    : t("notifications:sendModal.toast.selectUser"),
+                "alert",
+            );
             return;
         }
 
@@ -225,26 +235,35 @@ const SendNotificationModal = ({
         try {
             setSending(true);
 
-            const users_ids = selectedUsers.map((user) => String(user.id));
+            const selectedIds = selectedUsers.map((user) => String(user.id));
             const payload = {
                 deep_link: deepLink.trim() || undefined,
                 priority,
                 scheduled_at: asScheduled ? scheduleDateIso : undefined,
             };
+            const recipientPayload = audienceTarget === "driver"
+                ? { drivers_ids: audienceMode === "specific" ? selectedIds : undefined }
+                : { users_ids: audienceMode === "specific" ? selectedIds : undefined };
 
             if (kind === "update") {
-                await axiosNormalApiClient.post("/dashboard/updates-notifications", {
+                const endpoint = audienceTarget === "driver"
+                    ? "/dashboard/driver-updates-notifications"
+                    : "/dashboard/updates-notifications";
+                await axiosNormalApiClient.post(endpoint, {
                     title: title.trim(),
                     description: message.trim(),
                     icon: "megaphone",
                     label: "update",
                     color: notificationColor,
                     for_all: audienceMode === "all",
-                    users_ids: audienceMode === "specific" ? users_ids : undefined,
+                    ...recipientPayload,
                     payload,
                 });
             } else {
-                await axiosNormalApiClient.post("/dashboard/offers-notifications", {
+                const endpoint = audienceTarget === "driver"
+                    ? "/dashboard/driver-offers-notifications"
+                    : "/dashboard/offers-notifications";
+                await axiosNormalApiClient.post(endpoint, {
                     title: title.trim(),
                     description: message.trim(),
                     type: offerType,
@@ -252,7 +271,7 @@ const SendNotificationModal = ({
                     voucher_type: offerType === "voucher" ? offerType : undefined,
                     color: notificationColor,
                     for_all: audienceMode === "all",
-                    users_ids: audienceMode === "specific" ? users_ids : undefined,
+                    ...recipientPayload,
                     payload: {
                         ...payload,
                         ...(offerType === "voucher" && selectedVoucher
@@ -293,6 +312,30 @@ const SendNotificationModal = ({
                                 <SelectContent>
                                     <SelectItem value="offer">{t("notifications:typeOffer")}</SelectItem>
                                     <SelectItem value="update">{t("notifications:typeUpdate")}</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-main-mirage">
+                                {t("notifications:sendModal.recipientTypeLabel")}
+                            </label>
+                            <Select
+                                value={audienceTarget}
+                                onValueChange={(value) => {
+                                    setAudienceTarget(value as TAudienceTarget);
+                                    setAudienceMode("all");
+                                    setUserOptions([]);
+                                    setSelectedUsers([]);
+                                    setUsersQuery("");
+                                }}
+                            >
+                                <SelectTrigger className={`${formSelectTriggerClass} w-full`}>
+                                    <SelectValue placeholder={t("notifications:sendModal.selectRecipientType")} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="user">{t("notifications:sendModal.recipientUsers")}</SelectItem>
+                                    <SelectItem value="driver">{t("notifications:sendModal.recipientDrivers")}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -476,7 +519,9 @@ const SendNotificationModal = ({
                                         : "border-main-whiteMarble text-main-hydrocarbon hover:bg-main-luxuryWhite"
                                         }`}
                                 >
-                                    {t("notifications:sendModal.allUsers")}
+                                    {audienceTarget === "driver"
+                                        ? t("notifications:sendModal.allDrivers")
+                                        : t("notifications:sendModal.allUsers")}
                                 </button>
                                 <button
                                     type="button"
@@ -486,7 +531,9 @@ const SendNotificationModal = ({
                                         : "border-main-whiteMarble text-main-hydrocarbon hover:bg-main-luxuryWhite"
                                         }`}
                                 >
-                                    {t("notifications:sendModal.specificUsers")}
+                                    {audienceTarget === "driver"
+                                        ? t("notifications:sendModal.specificDrivers")
+                                        : t("notifications:sendModal.specificUsers")}
                                 </button>
                             </div>
                         </div>
@@ -498,20 +545,26 @@ const SendNotificationModal = ({
                                     <Input
                                         value={usersQuery}
                                         onChange={(event) => setUsersQuery(event.target.value)}
-                                        placeholder={t("notifications:sendModal.searchUsersPlaceholder")}
+                                        placeholder={audienceTarget === "driver"
+                                            ? t("notifications:sendModal.searchDriversPlaceholder")
+                                            : t("notifications:sendModal.searchUsersPlaceholder")}
                                         className="pl-9 h-11 border-main-whiteMarble focus-visible:ring-main-primary/30"
                                     />
                                 </div>
                                 <div className="max-h-[180px] overflow-y-auto border border-main-whiteMarble common-rounded divide-y divide-main-whiteMarble">
                                     {usersLoading && (
                                         <div className="px-3 py-3 text-sm text-main-sharkGray">
-                                            {t("notifications:sendModal.searchingUsers")}
+                                            {audienceTarget === "driver"
+                                                ? t("notifications:sendModal.searchingDrivers")
+                                                : t("notifications:sendModal.searchingUsers")}
                                         </div>
                                     )}
 
                                     {!usersLoading && userOptions.length === 0 && (
                                         <div className="px-3 py-3 text-sm text-main-sharkGray">
-                                            {t("notifications:sendModal.noUsersFound")}
+                                            {audienceTarget === "driver"
+                                                ? t("notifications:sendModal.noDriversFound")
+                                                : t("notifications:sendModal.noUsersFound")}
                                         </div>
                                     )}
 
@@ -526,8 +579,8 @@ const SendNotificationModal = ({
                                             >
                                                 <div className="flex items-start justify-between gap-3">
                                                     <div>
-                                                        <p className="text-sm font-semibold text-main-mirage">{user.full_name}</p>
-                                                        <p className="text-xs text-main-sharkGray">{user.email}</p>
+                                                        <p className="text-sm font-semibold text-main-mirage">{user.full_name || user.name || "-"}</p>
+                                                        <p className="text-xs text-main-sharkGray">{user.email || "-"}</p>
                                                         <p className="text-xs text-main-sharkGray">{user.phone}</p>
                                                     </div>
                                                     <input type="checkbox" checked={checked} readOnly className="mt-1" />
@@ -544,7 +597,7 @@ const SendNotificationModal = ({
                                                 key={user.id}
                                                 className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-main-primary/10 text-main-primary text-xs font-semibold"
                                             >
-                                                {user.full_name}
+                                                {user.full_name || user.name || "-"}
                                                 <button
                                                     type="button"
                                                     onClick={() => toggleUser(user)}

@@ -26,25 +26,25 @@ import TablePagination from "@/shared/components/common/TablePagination";
 import NoDataFound from "@/shared/components/common/NoDataFound";
 import { formInputWrapperClass, formSelectTriggerClass } from "@/shared/components/common/formStyles";
 import SendNotificationModal from "@/shared/components/pages/notifications/SendNotificationModal";
-import useOffersUpdatesNotificationsStore, {
+import useDriverOffersUpdatesNotificationsStore, {
     type TSortValue,
-    type IOffersUpdatesRow,
-} from "@/shared/hooks/store/useOffersUpdatesNotificationsStore";
+    type IDriverOffersUpdatesRow,
+} from "@/shared/hooks/store/useDriverOffersUpdatesNotificationsStore";
 
-const sourceI18nKey: Record<IOffersUpdatesRow["source"], "typeOffer" | "typeUpdate"> = {
+const sourceI18nKey: Record<IDriverOffersUpdatesRow["source"], "typeOffer" | "typeUpdate"> = {
     offer: "typeOffer",
     update: "typeUpdate",
 };
 
-const sourceBadge: Record<IOffersUpdatesRow["source"], string> = {
+const sourceBadge: Record<IDriverOffersUpdatesRow["source"], string> = {
     offer: "bg-main-secondary/15 text-main-secondary border-main-secondary/30",
     update: "bg-main-primary/10 text-main-primary border-main-primary/20",
 };
 
 const PAGE_SIZE = 15;
-type TTypeFilter = "all" | IOffersUpdatesRow["source"];
+type TTypeFilter = "all" | IDriverOffersUpdatesRow["source"];
 
-const NotificationsOffersUpdatesTab = () => {
+const NotificationsDriverOffersUpdatesTab = () => {
     const navigate = useNavigate();
     const { t, i18n } = useTranslation(["notifications", "common"]);
 
@@ -64,7 +64,7 @@ const NotificationsOffersUpdatesTab = () => {
         setSendModalOpen,
         resetFilters,
         fetchNotifications,
-    } = useOffersUpdatesNotificationsStore();
+    } = useDriverOffersUpdatesNotificationsStore();
 
     useEffect(() => {
         fetchNotifications();
@@ -98,7 +98,6 @@ const NotificationsOffersUpdatesTab = () => {
     return (
         <PageTransition>
             <div className="space-y-6">
-                {/* Header actions */}
                 <div className="flex items-center justify-between gap-4 flex-wrap">
                     <div className="flex items-center gap-3 flex-wrap">
                         <Button
@@ -111,7 +110,6 @@ const NotificationsOffersUpdatesTab = () => {
                     </div>
                 </div>
 
-                {/* Filters */}
                 <div className="bg-main-white border border-main-whiteMarble common-rounded p-6 overflow-x-auto">
                     <div className="flex items-center gap-3 flex-nowrap min-w-max">
                         <div className={clsx("flex items-center gap-2 min-w-[280px] flex-1 shrink-0", formInputWrapperClass)}>
@@ -161,7 +159,6 @@ const NotificationsOffersUpdatesTab = () => {
                     </div>
                 </div>
 
-                {/* Table */}
                 <div className="bg-main-white border border-main-whiteMarble common-rounded overflow-hidden">
                     <div className="overflow-x-auto">
                         <Table>
@@ -216,7 +213,7 @@ const NotificationsOffersUpdatesTab = () => {
                                             </span>
                                         </TableCell>
                                         <TableCell className="py-4 px-6 text-sm text-main-hydrocarbon">
-                                            {t("notifications:sentToUsersCount", { count: row.sent_users_count })}
+                                            {t("notifications:sentToDriversCount", { count: row.sent_drivers_count })}
                                         </TableCell>
                                         <TableCell className="py-4 px-6 text-sm text-main-hydrocarbon">{row.sent_by}</TableCell>
                                         <TableCell className="py-4 px-6 text-sm text-main-sharkGray">{formatDate(row.created_at)}</TableCell>
@@ -227,7 +224,7 @@ const NotificationsOffersUpdatesTab = () => {
                                                     className="h-8 px-2.5 common-rounded text-main-primary hover:bg-main-primary/10 text-xs font-semibold"
                                                     onClick={() =>
                                                         navigate(
-                                                            `/notifications/offers-updates/users/${row.source}/${encodeURIComponent(row.campaign_id)}`,
+                                                            `/notifications/offers-updates/drivers/${row.source}/${encodeURIComponent(row.campaign_id)}`,
                                                         )
                                                     }
                                                 >
@@ -242,7 +239,7 @@ const NotificationsOffersUpdatesTab = () => {
                                     <TableRow>
                                         <TableCell colSpan={7} className="p-2">
                                             <NoDataFound
-                                                title={t("notifications:noOffersUpdates")}
+                                                title={t("notifications:noDriverOffersUpdates")}
                                                 description={t("notifications:adjustFilters")}
                                             />
                                         </TableCell>
@@ -258,12 +255,11 @@ const NotificationsOffersUpdatesTab = () => {
                 </div>
             </div>
 
-            {/* Send modal */}
             <SendNotificationModal
                 open={sendModalOpen}
                 onOpenChange={setSendModalOpen}
                 onSent={fetchNotifications}
-                initialTab="offers-updates"
+                initialTab="driver-offers-updates"
                 initialTitle=""
                 initialMessage=""
             />
@@ -271,4 +267,4 @@ const NotificationsOffersUpdatesTab = () => {
     );
 };
 
-export default NotificationsOffersUpdatesTab;
+export default NotificationsDriverOffersUpdatesTab;

@@ -58,12 +58,21 @@ interface VoucherFormModalProps {
   onSaved: () => Promise<void>;
 }
 
-const toDateInput = (value: string | Date) => {
+const toDateTimeLocalInput = (value: string | Date) => {
   const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
+
+const toIsoDateTimeString = (value: string) => {
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return parsed.toISOString();
 };
 
 const VoucherFormModal = ({ open, voucher, onOpenChange, onSaved }: VoucherFormModalProps) => {
@@ -103,8 +112,8 @@ const VoucherFormModal = ({ open, voucher, onOpenChange, onSaved }: VoucherFormM
         max_discount: voucher.max_discount ?? undefined,
         usage_limit: voucher.usage_limit ?? undefined,
         usage_per_user: voucher.usage_per_user,
-        valid_from: toDateInput(voucher.valid_from),
-        valid_to: toDateInput(voucher.valid_to),
+        valid_from: toDateTimeLocalInput(voucher.valid_from),
+        valid_to: toDateTimeLocalInput(voucher.valid_to),
         status: voucher.status,
       });
     } else {
@@ -134,8 +143,8 @@ const VoucherFormModal = ({ open, voucher, onOpenChange, onSaved }: VoucherFormM
       max_discount: values.max_discount,
       usage_limit: values.usage_limit,
       usage_per_user: Number(values.usage_per_user),
-      valid_from: values.valid_from,
-      valid_to: values.valid_to,
+      valid_from: toIsoDateTimeString(values.valid_from),
+      valid_to: toIsoDateTimeString(values.valid_to),
       status: values.status as TVoucherStatus,
     };
 
@@ -303,7 +312,7 @@ const VoucherFormModal = ({ open, voucher, onOpenChange, onSaved }: VoucherFormM
               render={({ field, fieldState }) => (
                 <div className="space-y-1.5">
                   <Label className="font-semibold text-main-mirage">{t("voucher:form.validFrom")}</Label>
-                  <Input type="date" {...field} className="h-11 border-main-whiteMarble focus-visible:ring-main-primary/30" />
+                  <Input type="datetime-local" {...field} className="h-11 border-main-whiteMarble focus-visible:ring-main-primary/30" />
                   {fieldState.error && <p className="text-xs font-medium text-main-red mt-1">{fieldState.error.message}</p>}
                 </div>
               )}
@@ -315,7 +324,7 @@ const VoucherFormModal = ({ open, voucher, onOpenChange, onSaved }: VoucherFormM
               render={({ field, fieldState }) => (
                 <div className="space-y-1.5">
                   <Label className="font-semibold text-main-mirage">{t("voucher:form.validTo")}</Label>
-                  <Input type="date" {...field} className="h-11 border-main-whiteMarble focus-visible:ring-main-primary/30" />
+                  <Input type="datetime-local" {...field} className="h-11 border-main-whiteMarble focus-visible:ring-main-primary/30" />
                   {fieldState.error && <p className="text-xs font-medium text-main-red mt-1">{fieldState.error.message}</p>}
                 </div>
               )}

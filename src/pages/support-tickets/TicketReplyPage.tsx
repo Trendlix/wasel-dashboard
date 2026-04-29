@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import clsx from "clsx";
-import { CheckCircle, Send, XCircle } from "lucide-react";
+import { CheckCircle, Download, FileText, Image as ImageIcon, Send, XCircle } from "lucide-react";
 import { isAxiosError } from "axios";
 import { Button } from "@/components/ui/button";
 import PageTransition from "@/shared/components/common/PageTransition";
@@ -358,6 +358,7 @@ const TicketReplyPage = () => {
                                     senderName={ownerName}
                                     timestamp={ticket.created_at}
                                     text={ticket.description}
+                                    attachments={ticket.attachments_urls}
                                 />
 
                                 {ticket.supports?.map((s) => (
@@ -488,14 +489,37 @@ const CustomerBubble = ({
     senderName,
     timestamp,
     text,
+    attachments,
 }: {
     initial: string;
     senderName: string;
     timestamp: string;
     text: string;
+    attachments?: string[];
 }) => {
-    const { i18n } = useTranslation("support");
+    const { t, i18n } = useTranslation("support");
     const time = formatAppDateTime(timestamp, i18n.language);
+
+    const getFileTypeFromUrl = (url: string): "image" | "document" => {
+        const lowered = url.toLowerCase();
+        if (lowered.match(/\.(jpg|jpeg|png|gif|webp)/)) return "image";
+        return "document";
+    };
+
+    const getFileNameFromUrl = (url: string): string => {
+        try {
+            const urlObj = new URL(url);
+            const pathname = urlObj.pathname;
+            const parts = pathname.split("/");
+            const filename = parts[parts.length - 1];
+            const decodedName = decodeURIComponent(filename);
+            const nameWithoutTimestamp = decodedName.replace(/^\d+-\d+-/, "");
+            return nameWithoutTimestamp || t("chat.attachment");
+        } catch {
+            return t("chat.attachment");
+        }
+    };
+
     return (
         <div className="flex justify-end">
             <div className="bg-main-primary rounded-2xl rounded-tr-sm px-5 py-4 max-w-[65%]">
@@ -509,6 +533,41 @@ const CustomerBubble = ({
                     </div>
                 </div>
                 <p className="text-main-white text-sm leading-relaxed whitespace-pre-wrap wrap-break-word">{text}</p>
+
+                {attachments && attachments.length > 0 && (
+                    <div className="mt-3 space-y-2">
+                        <p className="text-main-white/70 text-xs font-semibold uppercase tracking-wide">
+                            {t("chat.attachments", { count: attachments.length })}
+                        </p>
+                        <div className="grid gap-2">
+                            {attachments.map((url, idx) => {
+                                const fileType = getFileTypeFromUrl(url);
+                                const fileName = getFileNameFromUrl(url);
+                                const isImage = fileType === "image";
+
+                                return (
+                                    <a
+                                        key={idx}
+                                        href={url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-2 bg-main-white/10 hover:bg-main-white/20 rounded-lg px-3 py-2 transition-colors group"
+                                    >
+                                        {isImage ? (
+                                            <ImageIcon size={16} className="text-main-white/70 shrink-0" />
+                                        ) : (
+                                            <FileText size={16} className="text-main-white/70 shrink-0" />
+                                        )}
+                                        <span className="text-main-white text-xs truncate flex-1">
+                                            {fileName}
+                                        </span>
+                                        <Download size={14} className="text-main-white/50 group-hover:text-main-white shrink-0" />
+                                    </a>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

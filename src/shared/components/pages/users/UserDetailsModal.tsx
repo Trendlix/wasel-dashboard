@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import { ArrowUpRight } from "lucide-react";
 import { formatAppDateLong } from "@/lib/formatLocaleDate";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,6 +31,7 @@ const STATUS_OPTIONS: TUserStatus[] = ["active", "inactive", "blocked", "deleted
 
 const UserDetailsModal = ({ user, open, onOpenChange }: UserDetailsModalProps) => {
     const { t, i18n } = useTranslation(["users", "common"]);
+    const navigate = useNavigate();
     const { updateStatus, updating } = useUserStore();
     const [selected, setSelected] = useState<TUserStatus>(user?.status ?? "active");
 
@@ -117,6 +120,19 @@ const UserDetailsModal = ({ user, open, onOpenChange }: UserDetailsModalProps) =
             </CommonModalBody>
 
             <CommonModalFooter>
+                <Button
+                    type="button"
+                    variant="ghost"
+                    className="me-auto h-11 px-4 bg-main-primary/10 text-main-primary hover:bg-main-primary/15 border border-main-primary/20 common-rounded font-semibold"
+                    onClick={() => {
+                        onOpenChange(false);
+                        navigate(`/users/${user.id}`);
+                    }}
+                    disabled={updating}
+                >
+                    <ArrowUpRight size={16} />
+                    <span>{t("users:fullView.button")}</span>
+                </Button>
                 <Button
                     type="button"
                     variant="ghost"

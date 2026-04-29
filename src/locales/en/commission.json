@@ -34,6 +34,8 @@
     "addRate": "Add rate"
   },
   "empty": "No commission rates found. Use “Add rate” to get started.",
+  "emptyTitle": "No commission rates found",
+  "emptyDescription": "Use “Add rate” to create your first commission rule.",
   "delete": {
     "title": "Delete commission rate?",
     "cannotDelete": "Cannot delete — this is the only active commission rate for the \"{{category}}\" category. Deactivate it first or add another active rate.",

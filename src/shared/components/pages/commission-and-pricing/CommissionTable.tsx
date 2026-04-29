@@ -15,6 +15,7 @@ import {
     CommonModalBody,
     CommonModalFooter,
 } from "@/shared/components/common/CommonModal";
+import NoDataFound from "@/shared/components/common/NoDataFound";
 
 const categoryStyles: Record<TCommissionCategory, { bg: string; text: string }> = {
     trip: { bg: "bg-main-primary", text: "text-main-white" },
@@ -265,8 +266,11 @@ const CommissionTable = () => {
                             Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} />)
                         ) : commissions.length === 0 ? (
                             <tr>
-                                <td colSpan={6} className="py-12 text-center text-main-sharkGray text-sm">
-                                    {t("empty")}
+                                <td colSpan={6} className="p-2">
+                                    <NoDataFound
+                                        title={t("emptyTitle")}
+                                        description={t("emptyDescription")}
+                                    />
                                 </td>
                             </tr>
                         ) : (
