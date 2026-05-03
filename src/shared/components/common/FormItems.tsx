@@ -495,6 +495,14 @@ type RichTextEditorProps = {
     onUploadFile?: (file: File, type: "image" | "video") => Promise<string | null>;
 };
 
+function hasMeaningfulRichContent(raw: string | undefined): boolean {
+    const v = raw ?? "";
+    if (!v.trim()) return false;
+    if (/<img\b/i.test(v) || /<video\b/i.test(v) || /<iframe\b/i.test(v)) return true;
+    const textOnly = v.replace(/<[^>]*>/g, "").replace(/&nbsp;/gi, " ").trim();
+    return textOnly.length > 0;
+}
+
 export function RichTextEditor({
     label,
     value = "",
@@ -502,6 +510,19 @@ export function RichTextEditor({
     onUploadFile,
 }: RichTextEditorProps) {
     const [isCode, setIsCode] = React.useState(false);
+    /** reactjs-tiptap-editor only applies `content` on mount; remount when async data arrives (empty → HTML). */
+    const [editorHydrateKey, setEditorHydrateKey] = React.useState(0);
+    const wasContentEmptyRef = React.useRef(true);
+
+    React.useLayoutEffect(() => {
+        const meaningful = hasMeaningfulRichContent(value);
+        if (wasContentEmptyRef.current && meaningful) {
+            wasContentEmptyRef.current = false;
+            setEditorHydrateKey((k) => k + 1);
+        } else if (!meaningful) {
+            wasContentEmptyRef.current = true;
+        }
+    }, [value]);
 
     const extensions = React.useMemo(
         () => [
@@ -618,6 +639,7 @@ export function RichTextEditor({
                 ) : (
                     <div className="wasel-richtext">
                         <RichTextEditorLib
+                            key={editorHydrateKey}
                             output="html"
                             contentClass="min-h-[270px]"
                             content={value}

@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CreatableTagCombobox, RichTextEditor } from "@/shared/components/common/FormItems";
+import { RichTextEditor } from "@/shared/components/common/FormItems";
 import {
     InputError,
     PageShell,
@@ -17,6 +18,7 @@ import {
     useCmsBlogsStore,
     type BlogFormPayload,
     type BlogItem,
+    type BlogCategory,
 } from "@/shared/hooks/store/useCmsBlogsStore";
 import { Trash2, X } from "lucide-react";
 import { CommonModal, CommonModalFooter, CommonModalHeader } from "@/shared/components/common/CommonModal";
@@ -117,10 +119,11 @@ const isDescriptionEmpty = (value: string) => {
 
 const BlogItemForm = ({ mode, initialItem, onBack }: BlogItemFormProps) => {
     const { t } = useTranslation(["cms", "common"]);
+    const navigate = useNavigate();
     const {
-        categories,
-        loadingCategories,
-        fetchCategories,
+        info,
+        getCategoriesFromInfo,
+        fetchBlogInfoCards,
         savingItem,
         error,
         uploadRichTextMedia,
@@ -128,10 +131,15 @@ const BlogItemForm = ({ mode, initialItem, onBack }: BlogItemFormProps) => {
         updateItem,
     } = useCmsBlogsStore();
 
+    useEffect(() => {
+        void fetchBlogInfoCards();
+    }, [fetchBlogInfoCards]);
+
     const [draft, setDraft] = useState<BlogFormPayload>(
         initialItem
             ? {
                 category: initialItem.category,
+                category_slug: initialItem.category_slug,
                 locale: initialItem.locale ?? "en",
                 title: initialItem.title,
                 description: initialItem.description,
@@ -163,8 +171,6 @@ const BlogItemForm = ({ mode, initialItem, onBack }: BlogItemFormProps) => {
             : [""],
     );
 
-    useEffect(() => { void fetchCategories(); }, [fetchCategories]);
-
     const handleSchemaChange = (next: string[]) => {
         setRawSchemas(next);
         const parsed = next
@@ -173,15 +179,32 @@ const BlogItemForm = ({ mode, initialItem, onBack }: BlogItemFormProps) => {
         setDraft((prev) => ({ ...prev, seo: { ...prev.seo, schema: parsed } }));
     };
 
-    // Categories list — include current value if it's not in the fetched list
-    const categoryOptions = [
-        ...categories,
-        ...(draft.category && !categories.includes(draft.category) ? [draft.category] : []),
-    ];
+    // Categories derived from info cards - value is slug, display is locale-aware label
+    const infoCardsKey = `${info.en.cards.length}-${info.ar.cards.map((c) => c.tag_slug).join("|")}`;
+    // Zustand getter is stable; recompute when hero cards change after fetchBlogInfoCards
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- infoCardsKey tracks card updates from API
+    const categoryOptions = useMemo(() => getCategoriesFromInfo(draft.locale), [
+        getCategoriesFromInfo,
+        draft.locale,
+        infoCardsKey,
+    ]);
+
+    // Handle category selection - stores slug as category_slug; label is tag_en / tag_ar for current locale
+    const handleCategoryChange = (slug: string) => {
+        const selected = categoryOptions.find((c: BlogCategory) => c.slug === slug);
+        setDraft((prev) => ({
+            ...prev,
+            category_slug: slug,
+            category: selected?.label || prev.category,
+        }));
+    };
+
+    // Check if categories exist
+    const hasCategories = categoryOptions.length > 0;
 
     const validateBaseFields = () => {
         if (!draft.title.trim()) return t("cms:blogItemEditor.errors.titleRequired");
-        if (!draft.category.trim()) return t("cms:blogItemEditor.errors.categoryRequired");
+        if (!draft.category_slug?.trim()) return t("cms:blogItemEditor.errors.categoryRequired");
         if (isDescriptionEmpty(draft.description)) return t("cms:blogItemEditor.errors.descriptionRequired");
         const mins = Number(draft.time_to_read);
         if (!draft.time_to_read || isNaN(mins) || mins < 1) return t("cms:blogItemEditor.errors.timeToReadMin");
@@ -222,8 +245,12 @@ const BlogItemForm = ({ mode, initialItem, onBack }: BlogItemFormProps) => {
         const releaseDate = publishChoice === "scheduled"
             ? (scheduledAt ? new Date(scheduledAt).toISOString() : null)
             : null;
+        const resolvedCategory =
+            categoryOptions.find((c: BlogCategory) => c.slug === draft.category_slug)?.label
+            ?? draft.category;
         const payload: BlogFormPayload = {
             ...draft,
+            category: resolvedCategory,
             status: nextStatus,
             is_schedualed: publishChoice === "scheduled",
             release_date: releaseDate,
@@ -330,9 +357,20 @@ const BlogItemForm = ({ mode, initialItem, onBack }: BlogItemFormProps) => {
                             />
                             <Select
                                 value={draft.locale}
-                                onValueChange={(value) =>
-                                    setDraft((p) => ({ ...p, locale: value as "en" | "ar" }))
-                                }
+                                onValueChange={(value) => {
+                                    const loc = value as "en" | "ar";
+                                    setDraft((p) => {
+                                        const opts = getCategoriesFromInfo(loc);
+                                        const match = p.category_slug
+                                            ? opts.find((c: BlogCategory) => c.slug === p.category_slug)
+                                            : undefined;
+                                        return {
+                                            ...p,
+                                            locale: loc,
+                                            category: match?.label ?? p.category,
+                                        };
+                                    });
+                                }}
                             >
                                 <SelectTrigger>
                                     <SelectValue placeholder={t("cms:blogItemEditor.selectLocale")} />
@@ -356,20 +394,62 @@ const BlogItemForm = ({ mode, initialItem, onBack }: BlogItemFormProps) => {
                         </div>
                     </div>
 
+                    {/* Show read-only slug when editing existing item */}
+                    {mode === "edit" && initialItem?.slug && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <div className="space-y-1.5">
+                                <CmsFieldLabel
+                                    label={t("cms:blogItemEditor.slug")}
+                                    hint={t("cms:blogItemEditor.slugHint")}
+                                />
+                                <Input
+                                    value={initialItem.slug}
+                                    readOnly
+                                    disabled
+                                    className="bg-main-titaniumWhite/50 text-main-sharkGray"
+                                />
+                            </div>
+                        </div>
+                    )}
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                         <div className="space-y-1.5">
                             <CmsFieldLabel
                                 label={t("cms:blogItemEditor.category")}
                                 hint={t("cms:blogItemEditor.categoryHint")}
                             />
-                            {loadingCategories ? (
-                                <div className="h-11 w-full common-rounded border border-main-whiteMarble bg-main-titaniumWhite animate-pulse" />
+                            {!hasCategories ? (
+                                <div className="p-3 rounded-lg border border-amber-200 bg-amber-50 text-amber-800 text-sm space-y-2">
+                                    <p className="font-medium">{t("cms:blogItemEditor.noCategories")}</p>
+                                    <p className="text-xs">{t("cms:blogItemEditor.createInfoCardsFirst")}</p>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        className="border-amber-300 text-amber-900 hover:bg-amber-100"
+                                        onClick={() => navigate("/cms/blogs/info")}
+                                    >
+                                        {t("cms:blogItemEditor.goToInfoCards")}
+                                    </Button>
+                                </div>
                             ) : (
-                                <CreatableTagCombobox
-                                    value={draft.category}
-                                    onChange={(cat) => setDraft((p) => ({ ...p, category: cat }))}
-                                    options={categoryOptions}
-                                />
+                                <Select
+                                    key={`blog-category-${draft.locale}-${infoCardsKey}`}
+                                    value={draft.category_slug || ""}
+                                    onValueChange={handleCategoryChange}
+                                    disabled={!hasCategories}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder={t("cms:blogItemEditor.selectCategory")} />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {categoryOptions.map((cat: BlogCategory) => (
+                                            <SelectItem key={cat.slug} value={cat.slug}>
+                                                {cat.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             )}
                         </div>
                         <div className="space-y-1.5">

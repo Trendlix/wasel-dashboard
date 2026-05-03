@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,11 +7,10 @@ import { useCmsBlogsStore, type BlogStatus, type CmsLocale } from "@/shared/hook
 import NoDataFound from "@/shared/components/common/NoDataFound";
 import TablePagination from "@/shared/components/common/TablePagination";
 import { formInputWrapperClass } from "@/shared/components/common/formStyles";
-import { FileText, RotateCcw, Search, Send, Trash2 } from "lucide-react";
+import {  RotateCcw, Search } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
     CommonModal,
-    CommonModalBody,
     CommonModalFooter,
     CommonModalHeader,
 } from "@/shared/components/common/CommonModal";
@@ -50,16 +49,28 @@ const BlogItemsListPage = () => {
     const {
         items,
         itemsMeta,
-        categories,
+        info,
+        getCategoriesFromInfo,
+        fetchBlogInfoCards,
         loadingItems,
-        loadingCategories,
         error,
         fetchItems,
-        fetchCategories,
         deleteItem,
         publishItem,
         draftItem,
     } = useCmsBlogsStore();
+
+    useEffect(() => {
+        void fetchBlogInfoCards();
+    }, [fetchBlogInfoCards]);
+
+    // Categories derived from info cards based on selected locale
+    const categories = useMemo(() => {
+        const locale = selectedLocale === "all" ? "en" : selectedLocale;
+        return getCategoriesFromInfo(locale);
+    }, [getCategoriesFromInfo, selectedLocale, info]);
+
+    const hasCategories = categories.length > 0;
 
     const filterTabs: Array<{ value: StatusFilter; labelKey: "filterAll" | "filterDrafts" | "filterScheduled" | "filterPublished" }> = [
         { value: "all", labelKey: "filterAll" },
@@ -76,10 +87,6 @@ const BlogItemsListPage = () => {
         }, 350);
         return () => clearTimeout(timer);
     }, [searchQuery]);
-
-    useEffect(() => {
-        void fetchCategories();
-    }, [fetchCategories]);
 
     useEffect(() => {
         setCurrentPage(1);
@@ -167,7 +174,7 @@ const BlogItemsListPage = () => {
             title: t("cms:blogItemsList.confirmPublishTitle"),
             description: t("cms:blogItemsList.confirmPublishBody", { title: confirmAction.itemTitle }),
             buttonLabel: t("cms:blogItemsList.confirmPublishButton"),
-            buttonClassName: "bg-main-primary hover:bg-main-primary/90 text-white",
+            buttonClassName: "bg-main-vividMint hover:bg-main-vividMint/90 text-white",
         };
     };
 
@@ -179,9 +186,21 @@ const BlogItemsListPage = () => {
                 <h3 className="text-lg font-semibold text-main-mirage">
                     {t("cms:blogItemsList.title")}
                 </h3>
-                <Button type="button" onClick={() => navigate("/cms/blogs/blog-items/new")}>
-                    {t("cms:blogItemsList.addBlog")}
-                </Button>
+                <div className="flex items-center gap-2">
+                    {!hasCategories && (
+                        <span className="text-xs text-amber-600">
+                            {t("cms:blogItemsList.noCategoriesWarning")}
+                        </span>
+                    )}
+                    <Button
+                        type="button"
+                        onClick={() => navigate("/cms/blogs/blog-items/new")}
+                        disabled={!hasCategories}
+                        title={!hasCategories ? t("cms:blogItemsList.createInfoCardsFirst") : undefined}
+                    >
+                        {t("cms:blogItemsList.addBlog")}
+                    </Button>
+                </div>
             </div>
 
             <div className="space-y-3 rounded-2xl border border-main-whiteMarble bg-main-luxuryWhite/40 p-3">
@@ -224,9 +243,9 @@ const BlogItemsListPage = () => {
                         </SelectTrigger>
                         <SelectContent align="end">
                             <SelectItem value="all">{t("cms:blogItemsList.allCategories")}</SelectItem>
-                            {categories.map((category) => (
-                                <SelectItem key={category} value={category}>
-                                    {category}
+                            {categories.map((cat) => (
+                                <SelectItem key={cat.slug} value={cat.label}>
+                                    {cat.label}
                                 </SelectItem>
                             ))}
                         </SelectContent>
@@ -253,9 +272,6 @@ const BlogItemsListPage = () => {
                         <RotateCcw size={14} />
                     </Button>
                 </div>
-                {loadingCategories && (
-                    <p className="text-xs text-main-coolGray">{t("cms:blogItemsList.loadingCategories")}</p>
-                )}
             </div>
 
             {error && (
@@ -419,28 +435,9 @@ const BlogItemsListPage = () => {
                 onOpenChange={(open) => !open && handleCloseConfirm()}
                 loading={confirmLoading}
                 maxWidth="sm:max-w-[460px]"
-                variant={confirmAction?.type === "delete" ? "danger" : confirmAction?.type === "publish" ? "success" : "default"}
+                variant={confirmAction?.type === "delete" ? "danger" : confirmAction?.type === "publish" ? "success" : confirmAction?.type === "draft" ? "warning" : "default"}
             >
                 <CommonModalHeader title={confirmCopy.title} description={confirmCopy.description} />
-                <CommonModalBody className="pt-0 pb-0 flex items-center justify-center">
-                    <div
-                        className={
-                            confirmAction?.type === "delete"
-                                ? "w-16 h-16 bg-main-remove/10 rounded-2xl flex items-center justify-center ring-8 ring-main-remove/5"
-                                : confirmAction?.type === "publish"
-                                  ? "w-16 h-16 bg-main-vividMint/10 rounded-2xl flex items-center justify-center ring-8 ring-main-vividMint/5"
-                                  : "w-16 h-16 bg-main-primary/10 rounded-2xl flex items-center justify-center ring-8 ring-main-primary/5"
-                        }
-                    >
-                        {confirmAction?.type === "delete" ? (
-                            <Trash2 className="w-8 h-8 text-main-remove" />
-                        ) : confirmAction?.type === "publish" ? (
-                            <Send className="w-8 h-8 text-main-vividMint" />
-                        ) : (
-                            <FileText className="w-8 h-8 text-main-primary" />
-                        )}
-                    </div>
-                </CommonModalBody>
                 <CommonModalFooter className="mt-0 py-5">
                     <Button
                         type="button"

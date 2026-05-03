@@ -17,9 +17,21 @@ import { useTranslation } from "react-i18next";
 
 type Localized<T> = { en: T; ar: T };
 
+const slugify = (value: string): string => {
+    return value
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "");
+};
+
 const createEmptyCard = (): BlogInfoCard => ({
     id: `card-${Date.now()}-${Math.random().toString(16).slice(2)}`,
-    tag: "",
+    tag_slug: "",
+    tag_en: "",
+    tag_ar: "",
     title: "",
     description: "",
     created_at: new Date().toISOString(),
@@ -43,9 +55,27 @@ const CmsBlogsInfoPage = () => {
         if (!draft.ar.title.trim()) return t("blogsInfoEditor.validationArTitle");
         if (!draft.en.description.trim()) return t("blogsInfoEditor.validationEnDescription");
         if (!draft.ar.description.trim()) return t("blogsInfoEditor.validationArDescription");
+
+        // Track tag_en values for uniqueness
+        const tagEnSet = new Set<string>();
+
         for (const [index, card] of draft.en.cards.entries()) {
             if (!card.title.trim()) return t("blogsInfoEditor.validationCardEnTitle", { n: index + 1 });
             if (!draft.ar.cards[index]?.title.trim()) return t("blogsInfoEditor.validationCardArTitle", { n: index + 1 });
+
+            // Tag validation
+            const tagEn = card.tag_en?.trim() || "";
+            const tagAr = draft.ar.cards[index]?.tag_ar?.trim() || "";
+
+            if (!tagEn) return t("blogsInfoEditor.validationCardEnTag", { n: index + 1 });
+            if (!tagAr) return t("blogsInfoEditor.validationCardArTag", { n: index + 1 });
+
+            // Check tag_en uniqueness
+            const tagEnKey = tagEn.toLowerCase();
+            if (tagEnSet.has(tagEnKey)) {
+                return t("blogsInfoEditor.validationDuplicateTag", { n: index + 1 });
+            }
+            tagEnSet.add(tagEnKey);
         }
         return null;
     };
@@ -159,20 +189,56 @@ const CmsBlogsInfoPage = () => {
                             </Button>
                         </div>
 
-                        {/* Shared fields (tag, time_to_read) */}
+                        {/* Tag EN/AR — one bilingual row (ltr / rtl, same pattern as title/description) */}
+                        <div className="mb-4">
+                            <BilingualField
+                                label={t("blogsInfoEditor.tag")}
+                                hint={t("blogsInfoEditor.tagHint")}
+                                en={
+                                    <div dir="ltr">
+                                        <Input
+                                            className="text-left"
+                                            value={draft.en.cards[index]?.tag_en ?? ""}
+                                            onChange={(e) => {
+                                                const value = e.target.value;
+                                                const slug = slugify(value);
+                                                updateCard("en", index, { tag_en: value, tag_slug: slug });
+                                                updateCard("ar", index, { tag_en: value, tag_slug: slug });
+                                            }}
+                                            placeholder={t("blogsInfoEditor.tagEnPlaceholder")}
+                                        />
+                                    </div>
+                                }
+                                ar={
+                                    <div dir="rtl">
+                                        <Input
+                                            className="text-right"
+                                            value={draft.ar.cards[index]?.tag_ar ?? ""}
+                                            onChange={(e) => {
+                                                const value = e.target.value;
+                                                updateCard("ar", index, { tag_ar: value });
+                                                updateCard("en", index, { tag_ar: value });
+                                            }}
+                                            placeholder={t("blogsInfoEditor.tagArPlaceholder")}
+                                        />
+                                    </div>
+                                }
+                            />
+                        </div>
+
                         <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mb-4">
+                            {/* Computed read-only slug */}
                             <div className="space-y-2">
                                 <CmsFieldLabel
-                                    label={t("blogsInfoEditor.tagShared")}
-                                    hint={t("blogsInfoEditor.tagSharedHint")}
+                                    label={t("blogsInfoEditor.tagSlug")}
+                                    hint={t("blogsInfoEditor.tagSlugHint")}
                                 />
                                 <Input
-                                    value={draft.en.cards[index]?.tag ?? ""}
-                                    onChange={(e) => {
-                                        updateCard("en", index, { tag: e.target.value });
-                                        updateCard("ar", index, { tag: e.target.value });
-                                    }}
-                                    placeholder={t("blogsInfoEditor.tagPlaceholder")}
+                                    value={slugify(draft.en.cards[index]?.tag_en ?? "")}
+                                    readOnly
+                                    disabled
+                                    className="bg-main-titaniumWhite/50 text-main-sharkGray"
+                                    placeholder={t("blogsInfoEditor.tagSlugPlaceholder")}
                                 />
                             </div>
                             <div className="space-y-2">

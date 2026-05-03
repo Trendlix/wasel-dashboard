@@ -14,11 +14,15 @@ export interface BlogSeoData {
 
 export interface BlogInfoCard {
     id: string;
-    tag: string;
+    tag_slug: string;
+    tag_en: string;
+    tag_ar: string;
     title: string;
     description: string;
     created_at: string;
     time_to_read: string;
+    // Legacy field for migration compatibility
+    tag?: string;
 }
 
 export interface BlogInfoSection {
@@ -29,8 +33,10 @@ export interface BlogInfoSection {
 
 export interface BlogItem {
     id: string;
+    slug: string;
     locale: CmsLocale;
     category: string;
+    category_slug: string;
     title: string;
     description: string;
     time_to_read: string;
@@ -48,6 +54,7 @@ export interface BlogItem {
 export interface BlogFormPayload {
     locale: CmsLocale;
     category: string;
+    category_slug?: string;
     title: string;
     description: string;
     time_to_read: string;
@@ -72,6 +79,11 @@ export interface BlogItemsMeta {
     is_last_page: boolean;
 }
 
+export interface BlogCategory {
+    slug: string;
+    label: string;
+}
+
 export interface BlogItemsQuery {
     status?: BlogStatus;
     locale?: CmsLocale;
@@ -83,6 +95,15 @@ export interface BlogItemsQuery {
 
 const DEFAULT_INFO: BlogInfoSection = { title: "", description: "", cards: [] };
 const DEFAULT_SEO: BlogSeoData = { title: "", description: "", keyword: [], schema: [] };
+
+/** True if string contains Arabic letters (common BMP range). */
+const hasArabicChars = (value: string) => /[\u0600-\u06FF]/.test(value);
+
+const truncateCategoryLabel = (value: string, max = 52) => {
+    const t = value.trim();
+    if (!t) return "";
+    return t.length > max ? `${t.slice(0, max - 1)}…` : t;
+};
 
 const asLocalizedInfo = (value: unknown): Localized<BlogInfoSection> => {
     if (value && typeof value === "object" && ("en" in (value as Record<string, unknown>) || "ar" in (value as Record<string, unknown>))) {
@@ -112,7 +133,7 @@ interface CmsBlogsState {
     items: BlogItem[];
     itemsMeta: BlogItemsMeta | null;
     itemsQuery: BlogItemsQuery;
-    categories: string[];
+    categories: BlogCategory[];
     loadingInfo: boolean;
     loadingItems: boolean;
     loadingCategories: boolean;
@@ -121,6 +142,8 @@ interface CmsBlogsState {
     error: string | null;
 
     fetchInfo: () => Promise<void>;
+    /** Loads hero info cards for blog item forms / list filters (tag_slug, tag_en, tag_ar). */
+    fetchBlogInfoCards: () => Promise<void>;
     saveInfo: (payload: Localized<BlogInfoSection>) => Promise<boolean>;
     fetchItems: (query?: BlogItemsQuery) => Promise<void>;
     fetchCategories: () => Promise<void>;
@@ -133,6 +156,9 @@ interface CmsBlogsState {
     draftItem: (id: string) => Promise<boolean>;
     uploadCover: (file: File) => Promise<string | null>;
     uploadRichTextMedia: (file: File, type: "image" | "video") => Promise<string | null>;
+
+    // Derived categories from info cards
+    getCategoriesFromInfo: (locale: CmsLocale) => BlogCategory[];
 }
 
 export const useCmsBlogsStore = create<CmsBlogsState>((set, get) => ({
@@ -140,7 +166,7 @@ export const useCmsBlogsStore = create<CmsBlogsState>((set, get) => ({
     items: [],
     itemsMeta: null,
     itemsQuery: { page: 1, limit: 10 },
-    categories: [],
+    categories: [] as BlogCategory[],
     loadingInfo: false,
     loadingItems: false,
     loadingCategories: false,
@@ -155,6 +181,40 @@ export const useCmsBlogsStore = create<CmsBlogsState>((set, get) => ({
             set({ info: asLocalizedInfo(response.data?.data), loadingInfo: false });
         } catch (error) {
             set({ loadingInfo: false, error: extractErrorMessage(error, "Failed to fetch blogs info.") });
+        }
+    },
+
+    fetchBlogInfoCards: async () => {
+        set({ error: null });
+        try {
+            const response = await axiosNormalApiClient.get("/dashboard/cms/blogs/info-cards");
+            const data = response.data?.data as
+                | { en?: BlogInfoCard[]; ar?: BlogInfoCard[] }
+                | undefined;
+            const normalize = (cards: unknown): BlogInfoCard[] => {
+                if (!Array.isArray(cards)) return [];
+                return cards.map((raw) => {
+                    const c = (raw ?? {}) as Record<string, unknown>;
+                    return {
+                        id: typeof c.id === "string" ? c.id : "",
+                        tag_slug: typeof c.tag_slug === "string" ? c.tag_slug : "",
+                        tag_en: typeof c.tag_en === "string" ? c.tag_en : "",
+                        tag_ar: typeof c.tag_ar === "string" ? c.tag_ar : "",
+                        title: typeof c.title === "string" ? c.title : "",
+                        description: typeof c.description === "string" ? c.description : "",
+                        created_at: typeof c.created_at === "string" ? c.created_at : "",
+                        time_to_read: typeof c.time_to_read === "string" ? c.time_to_read : "",
+                    };
+                });
+            };
+            set((state) => ({
+                info: {
+                    en: { ...state.info.en, cards: normalize(data?.en) },
+                    ar: { ...state.info.ar, cards: normalize(data?.ar) },
+                },
+            }));
+        } catch (error) {
+            set({ error: extractErrorMessage(error, "Failed to fetch blog info cards.") });
         }
     },
 
@@ -303,5 +363,45 @@ export const useCmsBlogsStore = create<CmsBlogsState>((set, get) => ({
             set({ error: extractErrorMessage(error, "Failed to upload rich-text media.") });
             return null;
         }
+    },
+
+    // Derive categories from hero info cards: union by tag_slug, merge EN+AR rows so AR locale shows tag_ar when present on either side
+    getCategoriesFromInfo: (locale) => {
+        const state = get();
+        const enCards = state.info.en?.cards ?? [];
+        const arCards = state.info.ar?.cards ?? [];
+        const slugOrder: string[] = [];
+        const seen = new Set<string>();
+        for (const c of enCards) {
+            if (c.tag_slug && !seen.has(c.tag_slug)) {
+                seen.add(c.tag_slug);
+                slugOrder.push(c.tag_slug);
+            }
+        }
+        for (const c of arCards) {
+            if (c.tag_slug && !seen.has(c.tag_slug)) {
+                seen.add(c.tag_slug);
+                slugOrder.push(c.tag_slug);
+            }
+        }
+        return slugOrder.map((slug) => {
+            const enCard = enCards.find((c) => c.tag_slug === slug);
+            const arCard = arCards.find((c) => c.tag_slug === slug);
+            const tag_en = (enCard?.tag_en || arCard?.tag_en || "").trim();
+            const tag_ar = (arCard?.tag_ar || enCard?.tag_ar || "").trim();
+            let label: string;
+            if (locale === "ar") {
+                // Real Arabic tag → use it. If tag_ar is English/duplicate of tag_en, show AR hero card title (Arabic) instead.
+                if (hasArabicChars(tag_ar)) {
+                    label = tag_ar || tag_en || slug;
+                } else {
+                    const fromTitle = truncateCategoryLabel(arCard?.tag_ar || "");
+                    label = fromTitle || tag_ar || tag_en || slug;
+                }
+            } else {
+                label = tag_en || tag_ar || slug;
+            }
+            return { slug, label };
+        });
     },
 }));
