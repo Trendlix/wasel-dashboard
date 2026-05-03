@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useCmsBlogsStore, BlogInfoBanner } from "@/shared/hooks/store/useCmsBlogsStore";
+import {
+    useCmsBlogsStore,
+    BlogInfoBanner,
+    BlogInfoCard,
+} from "@/shared/hooks/store/useCmsBlogsStore";
 import {
     BilingualField,
     CmsFieldLabel,
     destructiveButtonClass,
     fieldLabelClass,
     sectionCardClass,
-    InputError,
 } from "@/shared/components/pages/cms/outlet/about/_shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,17 +20,22 @@ import clsx from "clsx";
 
 const BannerManagerPage = () => {
     const { t } = useTranslation("blogs");
-    const { banner, bannerLoading, bannerSaving, fetchBanner, syncBanner } = useCmsBlogsStore();
+    const { info, loadingInfo, savingInfo, fetchInfo, saveInfo } = useCmsBlogsStore();
     const [items, setItems] = useState<BlogInfoBanner[]>([]);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        fetchBanner();
-    }, []);
+        void fetchInfo();
+    }, [fetchInfo]);
 
     useEffect(() => {
-        setItems(banner.en);
-    }, [banner]);
+        setItems(
+            (info.en.cards ?? []).map((c) => ({
+                ...c,
+                slug: c.tag_slug,
+            })),
+        );
+    }, [info.en.cards]);
 
     const handleAdd = () => {
         const newItem: BlogInfoBanner = {
@@ -56,9 +64,6 @@ const BannerManagerPage = () => {
 
     const handleDelete = (id: string) => {
         setItems(items.filter((item) => item.id !== id));
-        if (editingId === id) {
-            setEditingId(null);
-        }
     };
 
     const handleUpdate = (id: string, field: keyof BlogInfoBanner, value: string) => {
@@ -121,9 +126,13 @@ const BannerManagerPage = () => {
             }
         }
 
-        const success = await syncBanner(normalizedItems);
+        const cardsForEn: BlogInfoCard[] = normalizedItems.map(({ slug: _slug, ...card }) => card);
+        const snapshot = useCmsBlogsStore.getState().info;
+        const success = await saveInfo({
+            en: { ...snapshot.en, cards: cardsForEn },
+            ar: snapshot.ar,
+        });
         if (success) {
-            setEditingId(null);
             setError(null);
         }
     };
@@ -168,7 +177,7 @@ const BannerManagerPage = () => {
                 </Button>
             </div>
 
-            {bannerLoading ? (
+            {loadingInfo ? (
                 <div className="space-y-4 animate-pulse">
                     <div className="h-32 rounded-xl bg-main-titaniumWhite" />
                     <div className="h-32 rounded-xl bg-main-titaniumWhite" />
@@ -290,10 +299,10 @@ const BannerManagerPage = () => {
                             <Button
                                 type="button"
                                 onClick={handleSave}
-                                disabled={bannerSaving}
+                                disabled={savingInfo}
                                 className="bg-main-primary hover:bg-main-primary/90 text-main-white"
                             >
-                                {bannerSaving ? (
+                                {savingInfo ? (
                                     <>
                                         <span className="animate-spin mr-2">⏳</span>
                                         {t("common.saving", "Saving...")}

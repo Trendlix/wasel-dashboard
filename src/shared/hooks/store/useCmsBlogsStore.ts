@@ -25,6 +25,9 @@ export interface BlogInfoCard {
     tag?: string;
 }
 
+/** UI row type for hero banner editor (slug mirrors tag_slug for legacy forms). */
+export type BlogInfoBanner = BlogInfoCard & { slug?: string };
+
 export interface BlogInfoSection {
     title: string;
     description: string;
