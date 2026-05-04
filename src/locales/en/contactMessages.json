@@ -1,0 +1,25 @@
+{
+  "pageTitle": "Contact messages",
+  "pageDescription": "Submissions from the website contact form. Filter by field and search text.",
+  "searchPlaceholder": "Search by value (partial match)...",
+  "filters": {
+    "allFields": "All fields",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "message": "Message"
+  },
+  "table": {
+    "index": "#",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "message": "Message"
+  },
+  "emptyTitle": "No messages yet",
+  "emptyDescription": "No rows match your filters, or the sheet has no data.",
+  "refresh": "Refresh",
+  "errorTitle": "Could not load messages",
+  "errorRetry": "Try again",
+  "countResults": "{{count}} result(s)"
+}

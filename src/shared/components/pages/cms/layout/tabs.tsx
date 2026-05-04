@@ -3,6 +3,7 @@ import {
     CreativeCommons,
     LucideIcon,
     ConciergeBell,
+    Inbox,
     Phone,
     SearchCheck,
     BookOpen,
@@ -21,6 +22,7 @@ interface ITabItem {
         | "about"
         | "services"
         | "contact"
+        | "contactMessages"
         | "seo"
         | "blogs"
         | "legalHelp"
@@ -35,6 +37,7 @@ const tabs: ITabItem[] = [
     { id: 1, nameKey: "about", icon: Blocks, to: "/cms/about" },
     { id: 2, nameKey: "services", icon: ConciergeBell, to: "/cms/services" },
     { id: 3, nameKey: "contact", icon: Phone, to: "/cms/contact" },
+    { id: 9, nameKey: "contactMessages", icon: Inbox, to: "/cms/contact-messages" },
     { id: 4, nameKey: "seo", icon: SearchCheck, to: "/cms/seo" },
     { id: 5, nameKey: "blogs", icon: BookOpen, to: "/cms/blogs" },
     { id: 6, nameKey: "legalHelp", icon: FileText, to: "/cms/legal-help" },

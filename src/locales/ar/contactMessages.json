@@ -1,0 +1,25 @@
+{
+  "pageTitle": "رسائل التواصل",
+  "pageDescription": "الطلبات الواردة من نموذج التواصل على الموقع. صفّ حسب الحقل وابحث بالنص.",
+  "searchPlaceholder": "ابحث بالقيمة (مطابقة جزئية)...",
+  "filters": {
+    "allFields": "كل الحقول",
+    "name": "الاسم",
+    "email": "البريد",
+    "phone": "الهاتف",
+    "message": "الرسالة"
+  },
+  "table": {
+    "index": "#",
+    "name": "الاسم",
+    "email": "البريد",
+    "phone": "الهاتف",
+    "message": "الرسالة"
+  },
+  "emptyTitle": "لا توجد رسائل",
+  "emptyDescription": "لا توجد صفوف تطابق المرشحات، أو الجدول فارغ.",
+  "refresh": "تحديث",
+  "errorTitle": "تعذر تحميل الرسائل",
+  "errorRetry": "إعادة المحاولة",
+  "countResults": "{{count}} نتيجة"
+}

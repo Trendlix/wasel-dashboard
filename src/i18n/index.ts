@@ -49,6 +49,8 @@ import enOrders from "@/locales/en/orders.json";
 import arOrders from "@/locales/ar/orders.json";
 import enCustomers from "@/locales/en/customers.json";
 import arCustomers from "@/locales/ar/customers.json";
+import enContactMessages from "@/locales/en/contactMessages.json";
+import arContactMessages from "@/locales/ar/contactMessages.json";
 
 const resources = {
     en: {
@@ -76,6 +78,7 @@ const resources = {
         storageOwners: enStorageOwners,
         orders: enOrders,
         customers: enCustomers,
+        contactMessages: enContactMessages,
     },
     ar: {
         common: arCommon,
@@ -102,6 +105,7 @@ const resources = {
         storageOwners: arStorageOwners,
         orders: arOrders,
         customers: arCustomers,
+        contactMessages: arContactMessages,
     },
 } as const;
 
