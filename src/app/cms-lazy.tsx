@@ -20,6 +20,7 @@ export const ServicesHeroPage = lazy(() => import("@/shared/components/pages/cms
 export const ServicesWarehousePage = lazy(() => import("@/shared/components/pages/cms/outlet/services/warehouse"));
 export const ServicesAdvertisingPage = lazy(() => import("@/shared/components/pages/cms/outlet/services/advertising"));
 export const ContactPage = lazy(() => import("@/shared/components/pages/cms/outlet/contact"));
+export const FooterPage = lazy(() => import("@/shared/components/pages/cms/outlet/footer"));
 export const SeoPage = lazy(() => import("@/shared/components/pages/cms/outlet/seo"));
 export const SeoHomePage = lazy(() => import("@/shared/components/pages/cms/outlet/seo/home"));
 export const SeoAboutPage = lazy(() => import("@/shared/components/pages/cms/outlet/seo/about"));

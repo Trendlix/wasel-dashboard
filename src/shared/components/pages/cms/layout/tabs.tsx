@@ -1,4 +1,15 @@
-import { Blocks, CreativeCommons, LucideIcon, ConciergeBell, Phone, SearchCheck, BookOpen, FileText, House } from "lucide-react";
+import {
+    Blocks,
+    CreativeCommons,
+    LucideIcon,
+    ConciergeBell,
+    Phone,
+    SearchCheck,
+    BookOpen,
+    FileText,
+    House,
+    LayoutTemplate,
+} from "lucide-react";
 import { NavLink } from "react-router-dom";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
@@ -13,7 +24,8 @@ interface ITabItem {
         | "seo"
         | "blogs"
         | "legalHelp"
-        | "common";
+        | "common"
+        | "footer";
     icon: LucideIcon;
     to: string;
 }
@@ -27,6 +39,7 @@ const tabs: ITabItem[] = [
     { id: 5, nameKey: "blogs", icon: BookOpen, to: "/cms/blogs" },
     { id: 6, nameKey: "legalHelp", icon: FileText, to: "/cms/legal-help" },
     { id: 7, nameKey: "common", icon: CreativeCommons, to: "/cms/common" },
+    { id: 8, nameKey: "footer", icon: LayoutTemplate, to: "/cms/footer" },
 ];
 
 const Tabs = () => {

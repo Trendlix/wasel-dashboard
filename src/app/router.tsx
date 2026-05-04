@@ -71,6 +71,7 @@ import {
     CommonFaqsPage,
     CommonPage,
     ContactPage,
+    FooterPage,
     MarketingFaqHeroPage,
     MarketingFaqIndexRedirect,
     MarketingFaqItemsPage,
@@ -208,6 +209,7 @@ export const router = createBrowserRouter([
                         ],
                     },
                     { path: "contact", element: <ContactPage /> },
+                    { path: "footer", element: <FooterPage /> },
                     {
                         path: "seo",
                         element: <SeoPage />,

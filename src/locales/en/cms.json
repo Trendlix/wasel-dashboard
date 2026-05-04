@@ -14,7 +14,8 @@
     "seo": "SEO",
     "blogs": "Blogs",
     "legalHelp": "Legal and help",
-    "common": "Common"
+    "common": "Common",
+    "footer": "Footer"
   },
   "home": {
     "intro": "Manage the four bilingual sections of the home page: hero screens, platform cards, transport cards, and the maximizing benefits block.",
@@ -284,6 +285,26 @@
     "businessHours": "Business hours",
     "businessHoursHint": "Human-readable hours string (for example Sun–Thu 9:00–17:00).",
     "businessHoursPlaceholder": "Sun – Thu, 9 AM – 5 PM"
+  },
+  "footerEditor": {
+    "pageTitle": "Footer",
+    "subtitle": "Site footer",
+    "description": "Social profile links and mobile app store URLs shown in the marketing site footer. One save updates both sections.",
+    "hint": "Icons are chosen from an approved Lucide set. Links must use http(s)://, start with /, or be empty.",
+    "socialSectionTitle": "Social links",
+    "socialSectionHint": "Each row: Lucide icon + URL. Shown as icon buttons next to the copyright line.",
+    "socialEmpty": "No social rows yet. Add a row to publish links.",
+    "iconLabel": "Icon",
+    "linkLabel": "URL",
+    "linkHint": "https://… or /internal-path",
+    "removeRow": "Remove row",
+    "addSocial": "Add social link",
+    "appSectionTitle": "App store links",
+    "appSectionHint": "Used for the App Store and Google Play badges in the footer.",
+    "iosCta": "iOS App Store URL",
+    "iosCtaHint": "Full App Store listing URL.",
+    "androidCta": "Google Play URL",
+    "androidCtaHint": "Full Play Store listing URL."
   },
   "seo": {
     "intro": "Per-route meta tags and JSON-LD. Pick a page tab, edit English and Arabic fields, then save. Invalid schema JSON is flagged before publish.",
