@@ -72,9 +72,11 @@ export interface IVerificationDetails {
     profile_image: string | null;
     national_id_front: string | null;
     national_id_back: string | null;
+    national_id_number: string | null;
     national_id_expiry: string | null;
     license_front: string | null;
     license_back: string | null;
+    license_number: string | null;
     license_expiry: string | null;
     criminal_record: string | null;
     address: string | null;
@@ -87,6 +89,7 @@ export interface IVerificationDetails {
     license: string;
     year: number;
     status: "pending" | "approved" | "suspended";
+    accepts_ads: boolean;
     truck_type_id: number;
     truck_type_name: string | null;
   }>;
@@ -96,14 +99,18 @@ interface IUpdateVerificationPayload {
   status: TVerificationStatus;
   reason_for_rejection?: string;
   verification_notes?: string;
+  national_id_number?: string;
   national_id_expiry?: string;
+  license_number?: string;
   license_expiry?: string;
   address?: string;
   additional_phone?: string;
 }
 
 interface IUpdateVerificationExpiriesPayload {
+  national_id_number?: string;
   national_id_expiry?: string;
+  license_number?: string;
   license_expiry?: string;
 }
 
@@ -275,8 +282,16 @@ const useVerificationStore = create<VerificationState>((set, get) => ({
                 },
                 documents: {
                   ...state.details.documents,
+                  national_id_number:
+                    Object.prototype.hasOwnProperty.call(payload, "national_id_number")
+                      ? payload.national_id_number ?? null
+                      : state.details.documents.national_id_number,
                   national_id_expiry:
                     payload.national_id_expiry ?? state.details.documents.national_id_expiry,
+                  license_number:
+                    Object.prototype.hasOwnProperty.call(payload, "license_number")
+                      ? payload.license_number ?? null
+                      : state.details.documents.license_number,
                   license_expiry:
                     payload.license_expiry ?? state.details.documents.license_expiry,
                   address: Object.prototype.hasOwnProperty.call(payload, "address")
@@ -306,7 +321,12 @@ const useVerificationStore = create<VerificationState>((set, get) => ({
     try {
       const response = await axiosNormalApiClient.patch(`/dashboard/verifications/${id}/expiries`, payload);
       const updatedExpiries = response.data?.data as
-        | { national_id_expiry?: string | null; license_expiry?: string | null }
+        | {
+            national_id_number?: string | null;
+            national_id_expiry?: string | null;
+            license_number?: string | null;
+            license_expiry?: string | null;
+          }
         | undefined;
 
       set((state) => ({
@@ -316,8 +336,12 @@ const useVerificationStore = create<VerificationState>((set, get) => ({
                 ...state.details,
                 documents: {
                   ...state.details.documents,
+                  national_id_number:
+                    updatedExpiries?.national_id_number ?? state.details.documents.national_id_number,
                   national_id_expiry:
                     updatedExpiries?.national_id_expiry ?? state.details.documents.national_id_expiry,
+                  license_number:
+                    updatedExpiries?.license_number ?? state.details.documents.license_number,
                   license_expiry:
                     updatedExpiries?.license_expiry ?? state.details.documents.license_expiry,
                 },

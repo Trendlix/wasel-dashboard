@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { AlertTriangle, Trash2 } from "lucide-react";
 import clsx from "clsx";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -164,7 +163,7 @@ const ManageCategoriesModal = ({ open, onOpenChange }: ManageCategoriesModalProp
                                         title={t("categories.deleteCategory")}
                                         aria-label={t("categories.deleteCategory")}
                                     >
-                                        <Trash2 size={15} />
+                                        {t("categories.deleteCategory")}
                                     </button>
                                 </div>
                             ))}
@@ -192,9 +191,7 @@ const ManageCategoriesModal = ({ open, onOpenChange }: ManageCategoriesModalProp
                 maxWidth="sm:max-w-[420px]"
             >
                 <CommonModalBody className="flex flex-col items-center text-center space-y-4 pt-6 pb-2">
-                    <div className="w-16 h-16 bg-main-remove/10 rounded-2xl flex items-center justify-center ring-8 ring-main-remove/5">
-                        <AlertTriangle className="w-8 h-8 text-main-remove" />
-                    </div>
+                    <div aria-hidden="true" />
                 </CommonModalBody>
                 <CommonModalHeader
                     title={t("categories.deleteConfirmTitle")}

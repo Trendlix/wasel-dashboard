@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { ArrowUpRight } from "lucide-react";
 import { formatAppDateLong } from "@/lib/formatLocaleDate";
 import { Button } from "@/components/ui/button";
 import {
@@ -130,8 +129,7 @@ const UserDetailsModal = ({ user, open, onOpenChange }: UserDetailsModalProps) =
                     }}
                     disabled={updating}
                 >
-                    <ArrowUpRight size={16} />
-                    <span>{t("users:fullView.button")}</span>
+                    {t("users:fullView.button")}
                 </Button>
                 <Button
                     type="button"

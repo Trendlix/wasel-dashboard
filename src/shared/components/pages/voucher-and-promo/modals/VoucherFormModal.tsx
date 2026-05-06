@@ -4,7 +4,6 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
-import { Info, WandSparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -181,23 +180,17 @@ const VoucherFormModal = ({ open, voucher, onOpenChange, onSaved }: VoucherFormM
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2">
                     <Label className="font-semibold text-main-mirage">{t("voucher:table.code")}</Label>
-                    <div className="relative group">
-                      <Info className="size-3.5 text-main-sharkGray" />
-                      <div className="pointer-events-none absolute inset-s-1/2 top-full z-20 mt-1 w-max -translate-x-1/2 rounded-md bg-main-mirage px-2 py-1 text-[11px] text-main-white opacity-0 shadow-md transition-opacity group-hover:opacity-100">
-                        {t("voucher:form.generateTooltip")}
-                      </div>
-                    </div>
                   </div>
                   <div className="relative">
-                    <Input {...field} placeholder={t("voucher:form.codePlaceholder")} className="h-11 border-main-whiteMarble pe-11 focus-visible:ring-main-primary/30" />
+                    <Input {...field} placeholder={t("voucher:form.codePlaceholder")} className="h-11 border-main-whiteMarble focus-visible:ring-main-primary/30" />
                     <button
                       type="button"
                       onClick={handleGenerateCode}
-                      className="absolute inset-e-1 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-main-primary hover:bg-main-primary/10 transition-colors"
+                      className="absolute inset-e-1 top-1/2 inline-flex h-8 -translate-y-1/2 items-center justify-center rounded-md text-main-primary hover:bg-main-primary/10 transition-colors px-2"
                       title={t("voucher:form.generateTooltip")}
                       aria-label={t("voucher:form.generateTooltip")}
                     >
-                      <WandSparkles className="size-4" />
+                      {t("voucher:form.generateTooltip")}
                     </button>
                   </div>
                   {fieldState.error && <p className="text-xs font-medium text-main-red mt-1">{fieldState.error.message}</p>}

@@ -15,6 +15,7 @@ export type UnifiedDashboardNotificationBucket =
 
 const offerEventKeys = new Set<string>([
   "offer.campaign.by_admin",
+  "driver.offer.campaign.by_admin",
   "offer.quoted.by_driver",
   "offer.accepted.by_user",
   "offer.rejected.by_user",
@@ -24,6 +25,7 @@ const offerEventKeys = new Set<string>([
 
 const updateEventKeys = new Set<string>([
   "update.campaign.by_admin",
+  "driver.update.campaign.by_admin",
   "driver.verification.approved",
   "driver.verification.rejected",
   "user.status.changed",

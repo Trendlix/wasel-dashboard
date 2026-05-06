@@ -7,20 +7,20 @@ export type TTicketPriority = "low" | "medium" | "high";
 
 export const ticketStatusStyles: Record<TTicketStatus, { bg: string; text: string }> = {
     pending: {
-        bg: "bg-main-vividMint/15",
-        text: "text-main-vividMint",
-    },
-    reply: {
         bg: "bg-main-mustardGold/15",
         text: "text-main-mustardGold",
+    },
+    reply: {
+        bg: "bg-main-vividMint/15",
+        text: "text-main-vividMint",
     },
     closed: {
         bg: "bg-main-sharkGray/15",
         text: "text-main-sharkGray",
     },
     solved: {
-        bg: "bg-main-vividMint/15",
-        text: "text-main-vividMint",
+        bg: "bg-main-primary/15",
+        text: "text-main-primary",
     },
 };
 

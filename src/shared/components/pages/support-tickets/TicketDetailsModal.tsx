@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import clsx from "clsx";
 import { isAxiosError } from "axios";
-import { CheckCircle, MessageSquare, XCircle, } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     CommonModal,
@@ -147,7 +146,6 @@ const TicketDetailsModal = ({ open, onOpenChange }: TicketDetailsModalProps) => 
 
                             {replyCount > 0 && (
                                 <div className="flex items-center gap-2 p-3 rounded-xl bg-main-primary/5 border border-main-primary/10">
-                                    <MessageSquare size={15} className="text-main-primary shrink-0" />
                                     <p className="text-sm text-main-primary font-medium">
                                         {t("support:details.replySummary", { count: replyCount })}
                                     </p>
@@ -201,7 +199,6 @@ const TicketDetailsModal = ({ open, onOpenChange }: TicketDetailsModalProps) => 
                                     onClick={() => setConfirmAction("close")}
                                     className="h-10 px-4 border-main-sharkGray/30 text-main-sharkGray font-semibold"
                                 >
-                                    <XCircle size={14} />
                                     {t("support:details.close")}
                                 </Button>
                             )}
@@ -212,7 +209,6 @@ const TicketDetailsModal = ({ open, onOpenChange }: TicketDetailsModalProps) => 
                                     onClick={() => setConfirmAction("solve")}
                                     className="h-10 px-4 border-main-vividMint/40 text-main-vividMint font-semibold"
                                 >
-                                    <CheckCircle size={14} />
                                     {t("support:details.solved")}
                                 </Button>
                             )}
@@ -224,7 +220,6 @@ const TicketDetailsModal = ({ open, onOpenChange }: TicketDetailsModalProps) => 
                             disabled={isLockedForCurrentAdmin}
                             className="h-10 px-5 bg-main-primary text-main-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            <MessageSquare size={14} />
                             {t("support:details.openChat")}
                         </Button>
                     </CommonModalFooter>

@@ -2,7 +2,6 @@ import { useState } from "react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Select,
@@ -125,8 +124,7 @@ const DriverDetailsModal = ({ driver, open, onOpenChange }: DriverDetailsModalPr
                     }}
                     disabled={updating}
                 >
-                    <ArrowUpRight size={16} />
-                    <span>{t("fullView.button")}</span>
+                    {t("fullView.button")}
                 </Button>
                 <Button
                     type="button"

@@ -4,6 +4,12 @@ import { isAxiosError } from "axios";
 import { io, type Socket } from "socket.io-client";
 import { getCookie } from "@/shared/utils/cookieUtils";
 import { showToast } from "@/shared/utils/toast";
+import { shouldUseFcmRealtime } from "@/shared/core/notifications/fcm/fcm-env";
+import { fcmEventBus } from "@/shared/core/notifications/fcm/fcm-event-bus";
+import {
+    emitChatPresence,
+    getChatPresenceSocket,
+} from "@/shared/core/notifications/fcm/chat-presence-gateway";
 import type {
     ITicket,
     ITicketCategory,
@@ -53,9 +59,10 @@ export interface ISupportNotification {
 // ─── Support socket (module-level singleton) ──────────────────────────────────
 
 let supportSocket: Socket | null = null;
+let fcmSupportUnsub: (() => void) | null = null;
 
 /** Exposed so TicketReplyPage can attach ticket-scoped listeners without reconnecting. */
-export const getSupportSocket = () => supportSocket;
+export const getSupportSocket = () => (shouldUseFcmRealtime() ? getChatPresenceSocket() : supportSocket);
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
@@ -129,6 +136,10 @@ const defaultQuery: ITicketQuery = {
 
 let supportNotificationAudio: HTMLAudioElement | null = null;
 let isSupportAudioUnlocked = false;
+const SUPPORT_NOTIFICATION_SOUND_CANDIDATES = [
+    "/sound/ElevenLabs_sound_of_traffic_and_then_a_car_honking_the_horn_for_someone_to_move_out_of_the_way_aggressively.mp3",
+    "/sound/mixkit-digital-quick-tone-2866.wav",
+];
 
 const ensureSupportAudioUnlocked = () => {
     if (typeof window === "undefined" || isSupportAudioUnlocked) return;
@@ -141,20 +152,24 @@ const ensureSupportAudioUnlocked = () => {
                 supportNotificationAudio?.pause();
                 if (supportNotificationAudio) supportNotificationAudio.currentTime = 0;
                 isSupportAudioUnlocked = true;
+                window.removeEventListener("pointerdown", unlock);
             })
             .catch(() => {})
-            .finally(() => {
-                window.removeEventListener("pointerdown", unlock);
-            });
+            .finally(() => {});
     };
 
-    window.addEventListener("pointerdown", unlock, { once: true });
+    window.addEventListener("pointerdown", unlock);
 };
 
 const playSupportNotificationSound = () => {
     if (typeof window === "undefined") return;
     if (!supportNotificationAudio) {
-        supportNotificationAudio = new Audio("/sound/mixkit-digital-quick-tone-2866.wav");
+        supportNotificationAudio = new Audio(SUPPORT_NOTIFICATION_SOUND_CANDIDATES[0]);
+        supportNotificationAudio.onerror = () => {
+            if (supportNotificationAudio && supportNotificationAudio.src.includes(".mp3")) {
+                supportNotificationAudio.src = SUPPORT_NOTIFICATION_SOUND_CANDIDATES[1];
+            }
+        };
         supportNotificationAudio.preload = "auto";
         supportNotificationAudio.volume = 1;
         ensureSupportAudioUnlocked();
@@ -194,6 +209,28 @@ const useTicketStore = create<TicketState>((set, get) => ({
     // ── Support socket ──────────────────────────────────────────────────────
 
     initializeSupportSocket: (adminId: number) => {
+        if (shouldUseFcmRealtime()) {
+            if (fcmSupportUnsub) return;
+            fcmSupportUnsub = fcmEventBus.subscribe({ categories: ["SUPPORT", "CHAT"] }, (payload) => {
+                const state = useTicketStore.getState();
+                const activeTicketId = state.activeSupportChatTicketId;
+                const entityId = Number(payload.entity_id);
+                const entityType = String(payload.entity_type ?? "").toLowerCase();
+                if (
+                    entityType === "ticket" &&
+                    activeTicketId !== null &&
+                    Number.isInteger(entityId) &&
+                    entityId > 0 &&
+                    entityId === activeTicketId
+                ) {
+                    return;
+                }
+                // Keep FCM banner-only UX; play sound without toast noise.
+                playSupportNotificationSound();
+            });
+            return;
+        }
+
         if (supportSocket) return;
 
         const token = getCookie("wasel_admin_access_token");
@@ -241,14 +278,14 @@ const useTicketStore = create<TicketState>((set, get) => ({
                 state.fetchStats();
                 state.fetchTickets();
                 state.fetchSupportNotifications();
-            }
+            },
         );
 
         supportSocket.on(
             "ticket:new_message",
             (payload: { ticketId: number; support: ITicketSupport }) => {
                 useTicketStore.getState().appendSupportMessage(payload.ticketId, payload.support);
-            }
+            },
         );
 
         supportSocket.on("connect_error", (err) => {
@@ -257,6 +294,17 @@ const useTicketStore = create<TicketState>((set, get) => ({
     },
 
     teardownSupportSocket: () => {
+        if (shouldUseFcmRealtime()) {
+            fcmSupportUnsub?.();
+            fcmSupportUnsub = null;
+            const activeTicketId = get().activeSupportChatTicketId;
+            if (activeTicketId) {
+                emitChatPresence(activeTicketId, false);
+            }
+            set({ activeSupportChatTicketId: null });
+            return;
+        }
+
         if (!supportSocket) return;
         const activeTicketId = get().activeSupportChatTicketId;
         if (activeTicketId) {
@@ -287,6 +335,10 @@ const useTicketStore = create<TicketState>((set, get) => ({
 
     setActiveSupportChatTicket: (ticketId) => {
         set({ activeSupportChatTicketId: ticketId });
+        if (shouldUseFcmRealtime()) {
+            emitChatPresence(ticketId, true);
+            return;
+        }
         if (supportSocket?.connected) {
             supportSocket.emit("ticket:chat_presence", {
                 ticket_id: ticketId,
@@ -301,11 +353,17 @@ const useTicketStore = create<TicketState>((set, get) => ({
 
         const ticketIdToClear = ticketId ?? activeTicketId;
         set({ activeSupportChatTicketId: null });
-        if (supportSocket?.connected && ticketIdToClear) {
-            supportSocket.emit("ticket:chat_presence", {
-                ticket_id: ticketIdToClear,
-                active: false,
-            });
+        if (ticketIdToClear) {
+            if (shouldUseFcmRealtime()) {
+                emitChatPresence(ticketIdToClear, false);
+                return;
+            }
+            if (supportSocket?.connected) {
+                supportSocket.emit("ticket:chat_presence", {
+                    ticket_id: ticketIdToClear,
+                    active: false,
+                });
+            }
         }
     },
 
@@ -336,7 +394,7 @@ const useTicketStore = create<TicketState>((set, get) => ({
         try {
             const response = await axiosNormalApiClient.get(`${ADMIN_TICKET_BASE}/stats`);
             set({ stats: response.data.data, statsLoading: false });
-        } catch (error) {
+        } catch {
             set({ statsLoading: false });
         }
     },
@@ -463,10 +521,13 @@ const useTicketStore = create<TicketState>((set, get) => ({
             const response = await axiosNormalApiClient.get(`${ADMIN_TICKET_BASE}/notifications`, {
                 params: { page, limit: 20 },
             });
+            const list = (response.data.data ?? []) as ISupportNotification[];
+            const unread = list.filter((n) => !n.is_read).length;
             set({
-                supportNotifications: response.data.data ?? [],
+                supportNotifications: list,
                 supportNotificationsMeta: response.data.meta ?? null,
                 supportNotificationsLoading: false,
+                supportUnreadCount: unread,
             });
         } catch {
             set({ supportNotificationsLoading: false });
@@ -476,11 +537,15 @@ const useTicketStore = create<TicketState>((set, get) => ({
     markSupportNotificationAsRead: async (id) => {
         try {
             await axiosNormalApiClient.patch(`${ADMIN_TICKET_BASE}/notifications/${id}/mark-as-read`);
-            set((state) => ({
-                supportNotifications: state.supportNotifications.map((n) =>
-                    n.id === id ? { ...n, is_read: true, read_at: new Date().toISOString() } : n
-                ),
-            }));
+            set((state) => {
+                const supportNotifications = state.supportNotifications.map((n) =>
+                    n.id === id ? { ...n, is_read: true, read_at: new Date().toISOString() } : n,
+                );
+                return {
+                    supportNotifications,
+                    supportUnreadCount: supportNotifications.filter((n) => !n.is_read).length,
+                };
+            });
         } catch {
             // silently fail
         }
@@ -489,13 +554,17 @@ const useTicketStore = create<TicketState>((set, get) => ({
     markAllSupportNotificationsAsRead: async () => {
         try {
             await axiosNormalApiClient.patch(`${ADMIN_TICKET_BASE}/notifications/mark-all-as-read`);
-            set((state) => ({
-                supportNotifications: state.supportNotifications.map((n) => ({
+            set((state) => {
+                const supportNotifications = state.supportNotifications.map((n) => ({
                     ...n,
                     is_read: true,
                     read_at: n.read_at ?? new Date().toISOString(),
-                })),
-            }));
+                }));
+                return {
+                    supportNotifications,
+                    supportUnreadCount: 0,
+                };
+            });
         } catch {
             // silently fail
         }
@@ -503,18 +572,18 @@ const useTicketStore = create<TicketState>((set, get) => ({
 
     markSupportNotificationsForTicketAsRead: async (ticketId) => {
         try {
-            await axiosNormalApiClient.patch(
-                `${ADMIN_TICKET_BASE}/notifications/ticket/${ticketId}/mark-as-read`,
-                {},
-                { meta: { showToast: false } },
-            );
-            set((state) => ({
-                supportNotifications: state.supportNotifications.map((n) =>
+            await axiosNormalApiClient.patch(`/dashboard/notifications/ticket/${ticketId}/read`, {});
+            set((state) => {
+                const supportNotifications = state.supportNotifications.map((n) =>
                     n.ticket_id === ticketId
                         ? { ...n, is_read: true, read_at: n.read_at ?? new Date().toISOString() }
-                        : n
-                ),
-            }));
+                        : n,
+                );
+                return {
+                    supportNotifications,
+                    supportUnreadCount: supportNotifications.filter((n) => !n.is_read).length,
+                };
+            });
         } catch {
             // silently fail
         }
@@ -544,8 +613,10 @@ const useTicketStore = create<TicketState>((set, get) => ({
                 is_read: false,
                 read_at: null,
             };
+            const supportNotifications = [newNotification, ...state.supportNotifications].slice(0, 50);
             return {
-                supportNotifications: [newNotification, ...state.supportNotifications].slice(0, 50),
+                supportNotifications,
+                supportUnreadCount: supportNotifications.filter((n) => !n.is_read).length,
             };
         });
     },

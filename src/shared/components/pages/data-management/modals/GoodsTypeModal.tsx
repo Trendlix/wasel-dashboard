@@ -3,7 +3,6 @@ import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslation } from "react-i18next";
-import { Check } from "lucide-react";
 import clsx from "clsx";
 import {
     CommonModal,
@@ -91,11 +90,16 @@ const GoodsTypeModal = ({ open, onOpenChange, goodsType }: GoodsTypeModalProps) 
 
     const onSubmit = async (values: GoodsTypeFormValues) => {
         setRequestError(null);
+        const payload = {
+            ...values,
+            truck_type_ids: Array.from(new Set(values.truck_type_ids)).map(Number).filter((id) => Number.isFinite(id)),
+            is_active: Boolean(values.is_active),
+        };
         try {
             if (goodsType) {
-                await updateGoodType(goodsType.id, values);
+                await updateGoodType(goodsType.id, payload);
             } else {
-                await addGoodType(values);
+                await addGoodType(payload);
             }
             fetchGoodTypes();
             fetchAnalytics();
@@ -106,7 +110,7 @@ const GoodsTypeModal = ({ open, onOpenChange, goodsType }: GoodsTypeModalProps) 
         }
     };
 
-    const selectedTruckIds = watch("truck_type_ids");
+    const selectedTruckIds = watch("truck_type_ids") || [];
 
     const toggleTruckId = (id: number) => {
         const current = [...selectedTruckIds];
@@ -116,7 +120,7 @@ const GoodsTypeModal = ({ open, onOpenChange, goodsType }: GoodsTypeModalProps) 
         } else {
             current.push(id);
         }
-        setValue("truck_type_ids", current);
+        setValue("truck_type_ids", current, { shouldValidate: true });
     };
 
     return (
@@ -233,9 +237,7 @@ const GoodsTypeModal = ({ open, onOpenChange, goodsType }: GoodsTypeModalProps) 
                                                 "w-5 h-5 rounded-full flex items-center justify-center shrink-0 transition-all duration-150",
                                                 isChecked ? "bg-main-primary" : "border border-main-whiteMarble",
                                             )}
-                                        >
-                                            {isChecked ? <Check className="w-3 h-3 text-white stroke-3" /> : null}
-                                        </div>
+                                        />
                                         <span
                                             className={clsx(
                                                 "text-sm font-medium leading-tight transition-colors",

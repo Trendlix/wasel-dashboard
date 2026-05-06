@@ -8,6 +8,22 @@ import { i18nInitPromise } from "./i18n";
 import useLanguageStore from "./shared/hooks/store/useLanguageStore";
 import useBackendHealthStore from "./shared/hooks/store/useBackendHealthStore";
 import BackendUnavailablePage from "./shared/components/common/BackendUnavailablePage";
+import FcmTopBanner from "./shared/components/common/FcmTopBanner";
+import { fcmEventBus } from "./shared/core/notifications/fcm/fcm-event-bus";
+import useFcmTopBannerStore from "./shared/hooks/store/useFcmTopBannerStore";
+
+const FcmTopBannerBridge = () => {
+    const show = useFcmTopBannerStore((s) => s.show);
+
+    React.useEffect(() => {
+        const unsub = fcmEventBus.subscribe(undefined, (payload) => {
+            show(payload);
+        });
+        return () => unsub();
+    }, [show]);
+
+    return <FcmTopBanner />;
+};
 
 const RootChrome = () => {
     const isRTL = useLanguageStore((s) => s.isRTL);
@@ -15,6 +31,7 @@ const RootChrome = () => {
     return (
         <>
             {backendUnavailable ? <BackendUnavailablePage /> : <RouterProvider router={router} />}
+            <FcmTopBannerBridge />
             <Toaster
                 position={isRTL ? "top-left" : "top-right"}
                 visibleToasts={4}

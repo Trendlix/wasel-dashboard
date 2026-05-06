@@ -33,8 +33,8 @@
     "oldestFirst": "Oldest first"
   },
   "statuses": {
-    "pending": "Open",
-    "reply": "Pending reply",
+    "pending": "Pending",
+    "reply": "reply",
     "closed": "Closed",
     "solved": "Solved"
   },

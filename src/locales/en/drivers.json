@@ -92,7 +92,9 @@
     "expiries": {
       "title": "Expiration Control",
       "description": "Expand to edit National ID and License expiry date and time.",
+      "nationalIdNumberLabel": "National ID number",
       "nationalIdLabel": "National ID expiry date and time",
+      "licenseNumberLabel": "License number",
       "licenseLabel": "License expiry date and time",
       "save": "Save expiry dates",
       "saving": "Saving...",
@@ -109,8 +111,13 @@
       "brand": "Brand",
       "plate": "License plate",
       "license": "License number",
+      "adsOnTruck": "Ads on truck",
       "year": "Year",
       "status": "Truck status",
+      "adsValues": {
+        "yes": "Yes",
+        "no": "No"
+      },
       "statusValues": {
         "pending": "Pending",
         "approved": "Approved",

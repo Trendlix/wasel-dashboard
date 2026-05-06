@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { CalendarRange, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -61,14 +60,10 @@ const UsersExportModal = ({
 
             <CommonModalBody className="space-y-4">
                 <div className="flex items-center gap-3 px-4 py-3 bg-main-primary/5 border border-main-primary/15 rounded-xl">
-                    <div className="w-9 h-9 bg-main-primary/10 rounded-lg flex items-center justify-center shrink-0">
-                        <CalendarRange className="w-4 h-4 text-main-primary" />
-                    </div>
                     <div className="min-w-0 flex-1">
                         <p className="text-sm font-semibold text-main-mirage">{t("common:exportDateRange.title")}</p>
                         <p className="text-xs text-main-sharkGray">{t("users:export.dateHint")}</p>
                     </div>
-                    <FileDown className="w-4 h-4 text-main-primary/50 ms-auto shrink-0" />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
@@ -115,9 +110,8 @@ const UsersExportModal = ({
                 <Button
                     onClick={handleConfirm}
                     disabled={disableConfirm}
-                    className="bg-main-primary hover:bg-main-primary/90 text-white font-bold h-11 px-10 common-rounded shadow-lg shadow-main-primary/20 inline-flex items-center gap-2"
+                    className="bg-main-primary hover:bg-main-primary/90 text-white font-bold h-11 px-10 common-rounded shadow-lg shadow-main-primary/20"
                 >
-                    <FileDown className="w-4 h-4" />
                     {loading ? t("common:exporting") : t("common:export")}
                 </Button>
             </CommonModalFooter>

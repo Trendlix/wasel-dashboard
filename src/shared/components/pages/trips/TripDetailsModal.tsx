@@ -1,13 +1,6 @@
 import clsx from "clsx";
 import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  CarFront,
-  CreditCard,
-  Navigation,
-  Package,
-  Phone,
-} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   CommonModal,
@@ -191,7 +184,7 @@ const TripDetailsModal = ({ open, trip, onOpenChange }: TripDetailsModalProps) =
                   </div>
                 </div>
                 <p className="text-main-mirage font-semibold">{tripDetails?.user.full_name ?? trip.user_name}</p>
-                <p className="mt-2 text-main-sharkGray text-sm flex items-center gap-2"><Phone size={14} /> {tripDetails?.user.phone ?? "-"}</p>
+                <p className="mt-2 text-main-sharkGray text-sm">{tripDetails?.user.phone ?? "-"}</p>
               </div>
 
               <div className="rounded-2xl border border-main-whiteMarble bg-main-luxuryWhite p-5">
@@ -205,15 +198,12 @@ const TripDetailsModal = ({ open, trip, onOpenChange }: TripDetailsModalProps) =
                   </div>
                 </div>
                 <p className="text-main-mirage font-semibold">{tripDetails?.driver.name ?? trip.driver_name ?? "-"}</p>
-                <p className="mt-2 text-main-sharkGray text-sm flex items-center gap-2"><Phone size={14} /> {tripDetails?.driver.phone ?? "-"}</p>
+                <p className="mt-2 text-main-sharkGray text-sm">{tripDetails?.driver.phone ?? "-"}</p>
               </div>
             </div>
 
             <div className="rounded-2xl border border-[#A7CDF7] bg-[#EEF5FF] p-4">
-              <p className="text-main-mirage font-bold text-lg flex items-center gap-2">
-                <Navigation size={18} className="text-main-primary" />
-                {t("trips:details.routeSection")}
-              </p>
+              <p className="text-main-mirage font-bold text-lg">{t("trips:details.routeSection")}</p>
 
               <div className="mt-4">
                 <div className="flex gap-4">
@@ -259,7 +249,7 @@ const TripDetailsModal = ({ open, trip, onOpenChange }: TripDetailsModalProps) =
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="rounded-2xl border border-main-whiteMarble bg-main-luxuryWhite p-5">
-                <p className="text-main-mirage font-bold flex items-center gap-2"><CarFront size={18} /> {t("trips:details.vehicleGoods")}</p>
+                <p className="text-main-mirage font-bold">{t("trips:details.vehicleGoods")}</p>
                 <div className="mt-4 space-y-3">
                   <InfoRow label={t("trips:details.truckType")} value={truckType} />
                   <InfoRow label={t("trips:details.goodsType")} value={goodsType} />
@@ -268,7 +258,7 @@ const TripDetailsModal = ({ open, trip, onOpenChange }: TripDetailsModalProps) =
               </div>
 
               <div className="rounded-2xl border border-main-vividMint/35 bg-main-vividMint/10 p-5">
-                <p className="text-main-mirage font-bold flex items-center gap-2"><CreditCard size={18} /> {t("trips:details.payment")}</p>
+                <p className="text-main-mirage font-bold">{t("trips:details.payment")}</p>
                 <div className="mt-4 space-y-3">
                   <InfoRow
                     label={t("trips:details.totalPrice")}
@@ -282,7 +272,7 @@ const TripDetailsModal = ({ open, trip, onOpenChange }: TripDetailsModalProps) =
             </div>
 
             <div className="rounded-2xl border border-main-mustardGold/45 bg-main-mustardGold/10 p-5">
-              <p className="text-main-mirage font-bold flex items-center gap-2"><Package size={18} /> {t("trips:details.notes")}</p>
+              <p className="text-main-mirage font-bold">{t("trips:details.notes")}</p>
               <p className="text-main-hydrocarbon mt-2 whitespace-pre-wrap break-words">{specialNotes}</p>
             </div>
           </>

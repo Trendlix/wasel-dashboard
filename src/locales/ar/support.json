@@ -33,7 +33,7 @@
     "oldestFirst": "الأقدم أولاً"
   },
   "statuses": {
-    "pending": "مفتوحة",
+    "pending": "قيد الانتظار",
     "reply": "بانتظار الرد",
     "closed": "مغلقة",
     "solved": "تم الحل"

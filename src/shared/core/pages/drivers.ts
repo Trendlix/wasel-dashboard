@@ -10,7 +10,7 @@ export type TDriverStatus =
     | "deleted";
 
 export const driverStatusStyles: Record<TDriverStatus, { bg: string; text: string }> = {
-    pending: { bg: "bg-main-mustardGold/10", text: "text-main-mustardGold" },
+    pending: { bg: "bg-main-vividAmber/15", text: "text-main-vividAmber" },
     approved: { bg: "bg-main-vividMint/10", text: "text-main-vividMint" },
     suspended: { bg: "bg-main-ladyBlue/10", text: "text-main-ladyBlue" },
     blocked: { bg: "bg-main-remove/10", text: "text-main-remove" },

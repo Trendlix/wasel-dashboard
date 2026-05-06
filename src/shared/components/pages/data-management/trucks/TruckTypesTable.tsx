@@ -128,7 +128,7 @@ const TruckTypesTable = () => {
                                         {truck.price_per_km} {t("currencySuffix")}
                                     </td>
                                     <td className="py-5 px-6">
-                                        <StatusBadge status={truck.is_active} />
+                                        <StatusBadge status={Boolean(truck.is_active)} />
                                     </td>
                                     <td className="py-5 px-6">
                                         <div className="flex items-center gap-3">

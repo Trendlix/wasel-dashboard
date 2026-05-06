@@ -10,6 +10,8 @@ import {
   getUnifiedEventDisplayTitle,
   mapUnifiedEventToDashboardBucket,
 } from "@/shared/core/notifications/notification-events";
+import { shouldUseFcmRealtime } from "@/shared/core/notifications/fcm/fcm-env";
+import { fcmEventBus } from "@/shared/core/notifications/fcm/fcm-event-bus";
 
 export type TDashboardNotificationTab = "user" | "driver" | "trip";
 
@@ -81,7 +83,12 @@ let dashboardNotificationsSocket: Socket | null = null;
 let dashboardUnifiedNotificationsSocket: Socket | null = null;
 let dashboardNotificationAudio: HTMLAudioElement | null = null;
 let isDashboardAudioUnlocked = false;
+const DASHBOARD_NOTIFICATION_SOUND_CANDIDATES = [
+  "/sound/ElevenLabs_sound_of_traffic_and_then_a_car_honking_the_horn_for_someone_to_move_out_of_the_way_aggressively.mp3",
+  "/sound/mixkit-digital-quick-tone-2866.wav",
+];
 const recentUnifiedNotificationKeys = new Set<string>();
+const dashboardFcmUnsubs: Array<() => void> = [];
 
 const pushRecentUnifiedKey = (key: string) => {
   recentUnifiedNotificationKeys.add(key);
@@ -104,22 +111,25 @@ const ensureDashboardAudioUnlocked = () => {
         dashboardNotificationAudio?.pause();
         if (dashboardNotificationAudio) dashboardNotificationAudio.currentTime = 0;
         isDashboardAudioUnlocked = true;
+        window.removeEventListener("pointerdown", unlock);
       })
       .catch(() => {
         // User interaction may still be required in some browsers.
-      })
-      .finally(() => {
-        window.removeEventListener("pointerdown", unlock);
       });
   };
 
-  window.addEventListener("pointerdown", unlock, { once: true });
+  window.addEventListener("pointerdown", unlock);
 };
 
 const playDashboardNotificationSound = () => {
   if (typeof window === "undefined") return;
   if (!dashboardNotificationAudio) {
-    dashboardNotificationAudio = new Audio("/sound/mixkit-digital-quick-tone-2866.wav");
+    dashboardNotificationAudio = new Audio(DASHBOARD_NOTIFICATION_SOUND_CANDIDATES[0]);
+    dashboardNotificationAudio.onerror = () => {
+      if (dashboardNotificationAudio && dashboardNotificationAudio.src.includes(".mp3")) {
+        dashboardNotificationAudio.src = DASHBOARD_NOTIFICATION_SOUND_CANDIDATES[1];
+      }
+    };
     dashboardNotificationAudio.preload = "auto";
     dashboardNotificationAudio.volume = 1;
     ensureDashboardAudioUnlocked();
@@ -249,7 +259,21 @@ const useDashboardNotificationsStore = create<DashboardNotificationsState>((set)
   },
 
   initializeRealtime: () => {
-    if (dashboardNotificationsSocket && dashboardUnifiedNotificationsSocket) return;
+    if (shouldUseFcmRealtime()) {
+      if (dashboardFcmUnsubs.length) return;
+      const unsubToast = fcmEventBus.subscribe(
+        { categories: ["OFFERS", "UPDATES", "ADMIN_EVENT"] },
+        (p) => {
+          if (p.silent) return;
+          // Keep FCM banner-only UX; play sound without toast noise.
+          playDashboardNotificationSound();
+        },
+      );
+      dashboardFcmUnsubs.push(unsubToast);
+      return;
+    }
+
+    if (dashboardNotificationsSocket) return;
 
     const token = getCookie("wasel_admin_access_token");
     const apiBase = import.meta.env.VITE_API_BASE_URL;
@@ -351,6 +375,12 @@ const useDashboardNotificationsStore = create<DashboardNotificationsState>((set)
   },
 
   teardownRealtime: () => {
+    if (shouldUseFcmRealtime()) {
+      dashboardFcmUnsubs.forEach((u) => u());
+      dashboardFcmUnsubs.length = 0;
+      return;
+    }
+
     if (dashboardNotificationsSocket) {
       dashboardNotificationsSocket.disconnect();
       dashboardNotificationsSocket = null;

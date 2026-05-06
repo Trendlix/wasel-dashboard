@@ -29,6 +29,13 @@ type TruckTypeFormValues = {
     is_active: boolean;
 };
 
+const optionalPositiveNumber = (errorMessage: string) =>
+    z.preprocess((value) => {
+        if (value === "" || value === null || value === undefined) return undefined;
+        const parsed = Number(value);
+        return Number.isNaN(parsed) ? value : parsed;
+    }, z.number().positive(errorMessage).optional());
+
 interface TruckTypeModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
@@ -49,9 +56,9 @@ const TruckTypeModal = ({ open, onOpenChange, truckType }: TruckTypeModalProps) 
                 capacity: z.coerce.number().min(1, t("dataManagement:validation.capacityRequired")),
                 capacity_unit: z.string().min(1, t("dataManagement:validation.unitRequired")),
                 price_per_km: z.coerce.number().min(1, t("dataManagement:validation.priceRequired")),
-                length_in_cm: z.coerce.number().optional(),
-                width_in_cm: z.coerce.number().optional(),
-                height_in_cm: z.coerce.number().optional(),
+                length_in_cm: optionalPositiveNumber(t("dataManagement:validation.capacityRequired")),
+                width_in_cm: optionalPositiveNumber(t("dataManagement:validation.capacityRequired")),
+                height_in_cm: optionalPositiveNumber(t("dataManagement:validation.capacityRequired")),
                 is_active: z.boolean(),
             }),
         [t],
@@ -72,7 +79,6 @@ const TruckTypeModal = ({ open, onOpenChange, truckType }: TruckTypeModalProps) 
 
     useEffect(() => {
         if (!open) return;
-        setRequestError(null);
         if (truckType) {
             reset({
                 name: truckType.name,
@@ -81,10 +87,10 @@ const TruckTypeModal = ({ open, onOpenChange, truckType }: TruckTypeModalProps) 
                 capacity: truckType.capacity || 0,
                 capacity_unit: truckType.capacity_unit || "kg",
                 price_per_km: Number(truckType.price_per_km) || 0,
-                length_in_cm: truckType.length_in_cm || undefined,
-                width_in_cm: truckType.width_in_cm || undefined,
-                height_in_cm: truckType.height_in_cm || undefined,
-                is_active: truckType.is_active,
+                length_in_cm: truckType.length_in_cm ?? undefined,
+                width_in_cm: truckType.width_in_cm ?? undefined,
+                height_in_cm: truckType.height_in_cm ?? undefined,
+                is_active: Boolean(truckType.is_active),
             });
         } else {
             reset({
@@ -101,11 +107,18 @@ const TruckTypeModal = ({ open, onOpenChange, truckType }: TruckTypeModalProps) 
 
     const onSubmit = async (values: TruckTypeFormValues) => {
         setRequestError(null);
+        const payload = {
+            ...values,
+            length_in_cm: values.length_in_cm ?? undefined,
+            width_in_cm: values.width_in_cm ?? undefined,
+            height_in_cm: values.height_in_cm ?? undefined,
+            is_active: Boolean(values.is_active),
+        };
         try {
             if (truckType) {
-                await updateTruckType(truckType.id, values);
+                await updateTruckType(truckType.id, payload);
             } else {
-                await addTruckType(values);
+                await addTruckType(payload);
             }
             fetchTruckTypes();
             fetchAnalytics();

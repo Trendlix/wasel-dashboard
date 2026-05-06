@@ -253,10 +253,32 @@ const DriverRow = ({
     );
 };
 
+const normalizeDriverStatus = (rawStatus: string): TDriverStatus => {
+    const normalized = rawStatus.trim().toLowerCase();
+    if (normalized === "pending" || normalized === "pending_review" || normalized === "pending-approval") {
+        return "pending";
+    }
+    if (normalized === "approved") return "approved";
+    if (normalized === "suspended") return "suspended";
+    if (normalized === "blocked") return "blocked";
+    if (normalized === "rejected") return "rejected";
+    if (normalized === "deleted") return "deleted";
+    return "pending";
+};
+
 const StatusBadge = ({ status }: { status: TDriverStatus }) => {
     const { t } = useTranslation("drivers");
-    const { bg, text } = driverStatusStyles[status];
-    return <span className={clsx("px-3 py-1 rounded-full text-xs font-medium", bg, text)}>{t(`statuses.${status}`)}</span>;
+    const normalizedStatus = normalizeDriverStatus(String(status));
+    const { bg, text } = driverStatusStyles[normalizedStatus];
+    const pendingEnhancer =
+        normalizedStatus === "pending"
+            ? "bg-main-mustardGold/15 text-main-mustardGold"
+            : "";
+    return (
+        <span className={clsx("px-3 py-1 rounded-full text-xs font-medium", bg, text, pendingEnhancer)}>
+            {t(`statuses.${normalizedStatus}`)}
+        </span>
+    );
 };
 
 export default DriversTable;

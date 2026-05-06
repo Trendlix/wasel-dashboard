@@ -13,6 +13,11 @@
   "tabDrivers": "السائقون",
   "recentNotifications": "أحدث الإشعارات",
   "sendNotification": "إرسال إشعار",
+  "topBanner": {
+    "fallbackTitle": "إشعار جديد",
+    "fallbackBody": "لديك إشعار جديد في لوحة التحكم.",
+    "dismiss": "إغلاق"
+  },
   "sendNewNotification": "إرسال إشعار جديد",
   "notificationTitle": "عنوان الإشعار",
   "markAllOffersRead": "تعليم كل العروض كمقروءة",

@@ -13,6 +13,11 @@
   "tabDrivers": "Drivers",
   "recentNotifications": "Recent Notifications",
   "sendNotification": "Send Notification",
+  "topBanner": {
+    "fallbackTitle": "New notification",
+    "fallbackBody": "You have a new dashboard notification.",
+    "dismiss": "Dismiss"
+  },
   "sendNewNotification": "Send New Notification",
   "notificationTitle": "Notification Title",
   "markAllOffersRead": "Mark All Offers Read",

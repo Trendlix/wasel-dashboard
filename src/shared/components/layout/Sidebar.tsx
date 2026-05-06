@@ -6,6 +6,7 @@ import { sidebarItems, type ISidebarItem } from "../../core/layout/sidebar";
 import useDashboardNotificationsStore from "@/shared/hooks/store/useDashboardNotificationsStore";
 import useTicketStore from "@/shared/hooks/store/useTicketStore";
 import useAuthStore from "@/shared/hooks/store/useAuthStore";
+import { initializeFcm, isFcmEnabled } from "@/shared/core/notifications/fcm";
 import { LogOut } from "lucide-react";
 import { canAccessPath } from "@/shared/utils/rolePages";
 
@@ -26,14 +27,37 @@ const Nav = () => {
     const supportUnreadCount = useTicketStore((s) => s.supportUnreadCount);
 
     useEffect(() => {
+        if (userProfile?.id) {
+            void useTicketStore.getState().fetchSupportNotifications(1);
+        }
+    }, [userProfile?.id]);
+
+    useEffect(() => {
         fetchNotificationsCount();
         initializeRealtime();
     }, [fetchNotificationsCount, initializeRealtime]);
 
     useEffect(() => {
-        if (userProfile?.id) {
-            initializeSupportSocket(userProfile.id);
-        }
+        if (!userProfile?.id) return;
+        let cancelled = false;
+        void (async () => {
+            try {
+                if (isFcmEnabled()) {
+                    await initializeFcm(userProfile.id);
+                }
+                if (!cancelled) {
+                    initializeSupportSocket(userProfile.id);
+                }
+            } catch (e) {
+                console.warn("[fcm] bootstrap failed", e);
+                if (!cancelled) {
+                    initializeSupportSocket(userProfile.id);
+                }
+            }
+        })();
+        return () => {
+            cancelled = true;
+        };
     }, [userProfile?.id, initializeSupportSocket]);
 
     return (

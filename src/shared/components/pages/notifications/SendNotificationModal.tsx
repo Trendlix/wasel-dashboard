@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { CalendarClock, Search, TicketPercent, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -395,7 +394,6 @@ const SendNotificationModal = ({
                                         className="h-11 px-3 common-rounded border border-main-whiteMarble text-main-primary hover:bg-main-primary/10 text-xs font-semibold inline-flex items-center gap-1.5 shrink-0"
                                         title={t("notifications:sendModal.chooseVoucherTooltip")}
                                     >
-                                        <TicketPercent size={14} />
                                         {t("notifications:sendModal.choose")}
                                     </button>
                                 </div>
@@ -459,7 +457,6 @@ const SendNotificationModal = ({
                         />
                         {selectedVoucher && kind === "offer" && offerType === "voucher" && (
                             <div className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-full bg-main-primary/10 text-main-primary text-xs font-semibold w-fit">
-                                <TicketPercent size={12} />
                                 {selectedVoucher.code}
                                 <button
                                     type="button"
@@ -470,7 +467,7 @@ const SendNotificationModal = ({
                                     }}
                                     className="hover:text-main-primary/70"
                                 >
-                                    <X size={12} />
+                                    X
                                 </button>
                             </div>
                         )}
@@ -481,13 +478,12 @@ const SendNotificationModal = ({
                             <label className="text-sm font-medium text-main-mirage">
                                 {t("notifications:sendModal.scheduleOptional")}
                             </label>
-                            <div className="relative">
-                                <CalendarClock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-main-sharkGray" />
+                            <div>
                                 <Input
                                     type="datetime-local"
                                     value={scheduleAt}
                                     onChange={(event) => setScheduleAt(event.target.value)}
-                                    className="pl-9 h-11 border-main-whiteMarble focus-visible:ring-main-primary/30"
+                                    className="h-11 border-main-whiteMarble focus-visible:ring-main-primary/30"
                                 />
                             </div>
                         </div>
@@ -540,15 +536,14 @@ const SendNotificationModal = ({
 
                         {audienceMode === "specific" && (
                             <div className="space-y-2">
-                                <div className="relative">
-                                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-main-sharkGray" />
+                                <div>
                                     <Input
                                         value={usersQuery}
                                         onChange={(event) => setUsersQuery(event.target.value)}
                                         placeholder={audienceTarget === "driver"
                                             ? t("notifications:sendModal.searchDriversPlaceholder")
                                             : t("notifications:sendModal.searchUsersPlaceholder")}
-                                        className="pl-9 h-11 border-main-whiteMarble focus-visible:ring-main-primary/30"
+                                        className="h-11 border-main-whiteMarble focus-visible:ring-main-primary/30"
                                     />
                                 </div>
                                 <div className="max-h-[180px] overflow-y-auto border border-main-whiteMarble common-rounded divide-y divide-main-whiteMarble">
@@ -603,7 +598,7 @@ const SendNotificationModal = ({
                                                     onClick={() => toggleUser(user)}
                                                     className="text-main-primary hover:text-main-primary/70"
                                                 >
-                                                    <X size={12} />
+                                                    X
                                                 </button>
                                             </span>
                                         ))}
@@ -654,13 +649,12 @@ const SendNotificationModal = ({
                     description={t("notifications:voucherPicker.description")}
                 />
                 <CommonModalBody className="space-y-4 px-2 sm:px-3 pb-6 pt-1">
-                    <div className="relative">
-                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-main-sharkGray" />
+                    <div>
                         <Input
                             value={voucherQuery}
                             onChange={(event) => setVoucherQuery(event.target.value)}
                             placeholder={t("notifications:voucherPicker.searchPlaceholder")}
-                            className="pl-9 h-11 border-main-whiteMarble focus-visible:ring-main-primary/30"
+                            className="h-11 border-main-whiteMarble focus-visible:ring-main-primary/30"
                         />
                     </div>
 

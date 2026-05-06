@@ -23,53 +23,6 @@ import { CommonInput } from "@/shared/components/common/FormItems";
 import type { AdminRole } from "@/shared/hooks/store/useRolesStore";
 import { ROLE_PAGE_CATALOG } from "@/shared/constants/rolePagesCatalog";
 import { extractEnabledPageKeys } from "@/shared/utils/rolePages";
-import {
-    LayoutDashboard,
-    Users,
-    Car,
-    BadgeCheck,
-    Route,
-    BarChart2,
-    Bell,
-    Settings2,
-    Layers,
-    FileText,
-    ShieldCheck,
-    BadgeDollarSign,
-    Tag,
-    Database,
-    LifeBuoy,
-    ShoppingCart,
-    UserCircle,
-    BookOpen,
-    Wallet,
-    Warehouse,
-    Check,
-    LucideIcon,
-} from "lucide-react";
-
-const PAGE_ICONS: Record<string, LucideIcon> = {
-    dashboard: LayoutDashboard,
-    users: Users,
-    drivers: Car,
-    verification: BadgeCheck,
-    trips: Route,
-    analytics: BarChart2,
-    notifications: Bell,
-    settings: Settings2,
-    cms: Layers,
-    "legal-help": FileText,
-    "roles-and-permissions": ShieldCheck,
-    "commission-and-pricing": BadgeDollarSign,
-    "voucher-and-promo": Tag,
-    "trucks-storages-data": Database,
-    "support-tickets": LifeBuoy,
-    orders: ShoppingCart,
-    customers: UserCircle,
-    blogs: BookOpen,
-    "wallet-and-finance": Wallet,
-    "storage-owners": Warehouse,
-};
 
 interface RoleFormModalProps {
     open: boolean;
@@ -245,7 +198,6 @@ const RoleFormModal = ({ open, onOpenChange, onSubmit, initialData, loading, req
                                                         name="pages"
                                                         render={({ field }) => {
                                                             const isChecked = field.value?.includes(page.id);
-                                                            const Icon = PAGE_ICONS[page.id] ?? Layers;
                                                             const label = pageLabel(page.id, page.label);
                                                             const toggle = () => {
                                                                 const next = isChecked
@@ -264,20 +216,6 @@ const RoleFormModal = ({ open, onOpenChange, onSubmit, initialData, loading, req
                                                                             : "bg-main-titaniumWhite/60 border-main-whiteMarble hover:border-main-sharkGray/20 hover:bg-main-titaniumWhite",
                                                                     )}
                                                                 >
-                                                                    <div
-                                                                        className={clsx(
-                                                                            "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors",
-                                                                            isChecked ? "bg-main-primary/10" : "bg-main-whiteMarble/60",
-                                                                        )}
-                                                                    >
-                                                                        <Icon
-                                                                            className={clsx(
-                                                                                "w-4 h-4",
-                                                                                isChecked ? "text-main-primary" : "text-main-sharkGray/60",
-                                                                            )}
-                                                                        />
-                                                                    </div>
-
                                                                     <span
                                                                         className={clsx(
                                                                             "text-sm font-medium leading-tight flex-1 transition-colors",
@@ -294,9 +232,7 @@ const RoleFormModal = ({ open, onOpenChange, onSubmit, initialData, loading, req
                                                                                 ? "bg-main-primary scale-100 opacity-100"
                                                                                 : "border border-main-whiteMarble scale-90 opacity-60",
                                                                         )}
-                                                                    >
-                                                                        {isChecked ? <Check className="w-3 h-3 text-white stroke-3" /> : null}
-                                                                    </div>
+                                                                    />
 
                                                                     <FormControl>
                                                                         <span className="sr-only">{label}</span>

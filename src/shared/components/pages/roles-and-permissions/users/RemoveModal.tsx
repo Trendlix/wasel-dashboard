@@ -1,4 +1,3 @@
-import { UserX } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import useUserManagementStore, { type AdminUser } from "@/shared/hooks/store/useUserManagementStore";
@@ -27,9 +26,6 @@ const RemoveModal = ({ open, onOpenChange, user }: RemoveModalProps) => {
     return (
         <CommonModal open={open} onOpenChange={onOpenChange} loading={loading} maxWidth="sm:max-w-[420px]" variant="danger">
             <CommonModalBody className="flex flex-col items-center text-center space-y-4 pt-6 pb-2">
-                <div className="w-16 h-16 bg-main-remove/10 rounded-2xl flex items-center justify-center ring-8 ring-main-remove/5">
-                    <UserX className="w-8 h-8 text-main-remove" />
-                </div>
                 <div className="space-y-1.5 max-w-[300px]">
                     <p className="text-xl font-bold text-main-mirage tracking-tight">{t("users.removeTitle")}</p>
                     <p className="text-sm text-main-sharkGray leading-relaxed">

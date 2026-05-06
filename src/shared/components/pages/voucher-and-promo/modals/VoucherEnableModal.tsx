@@ -1,4 +1,3 @@
-import { CheckCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,9 +38,6 @@ const VoucherEnableModal = ({
       variant="success"
     >
       <CommonModalBody className="flex flex-col items-center text-center space-y-4 pt-6 pb-2">
-        <div className="w-16 h-16 bg-main-vividMint/10 rounded-2xl flex items-center justify-center ring-8 ring-main-vividMint/5">
-          <CheckCircle className="w-8 h-8 text-main-vividMint" />
-        </div>
         <div className="space-y-1.5 max-w-[300px]">
           <p className="text-xl font-bold text-main-mirage tracking-tight">{t("enableModal.title")}</p>
           <p className="text-sm text-main-sharkGray leading-relaxed">

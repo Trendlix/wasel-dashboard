@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ExternalLink, FileText, IdCard, ShieldCheck } from "lucide-react";
 import InnerImageZoomModule from "react-inner-image-zoom";
 import "react-inner-image-zoom/lib/styles.min.css";
 import { Button } from "@/components/ui/button";
@@ -89,6 +88,8 @@ const VerificationDetailsModal = ({
   const [reasonError, setReasonError] = useState<string | null>(null);
   const [nationalIdExpiry, setNationalIdExpiry] = useState("");
   const [licenseExpiry, setLicenseExpiry] = useState("");
+  const [nationalIdNumber, setNationalIdNumber] = useState("");
+  const [licenseNumber, setLicenseNumber] = useState("");
   const [address, setAddress] = useState("");
   const [additionalPhone, setAdditionalPhone] = useState("");
   const [nationalIdExpiryError, setNationalIdExpiryError] = useState<string | null>(null);
@@ -104,6 +105,8 @@ const VerificationDetailsModal = ({
       setReasonError(null);
       setNationalIdExpiry("");
       setLicenseExpiry("");
+      setNationalIdNumber("");
+      setLicenseNumber("");
       setAddress("");
       setAdditionalPhone("");
       setNationalIdExpiryError(null);
@@ -129,6 +132,8 @@ const VerificationDetailsModal = ({
       setVerificationNotes(details.verification.notes ?? "");
       setNationalIdExpiry(toDateTimeLocalInput(details.documents.national_id_expiry));
       setLicenseExpiry(toDateTimeLocalInput(details.documents.license_expiry));
+      setNationalIdNumber(details.documents.national_id_number ?? "");
+      setLicenseNumber(details.documents.license_number ?? "");
       setAddress(details.documents.address ?? "");
       setAdditionalPhone(details.documents.additional_phone ?? "");
       setNationalIdExpiryError(null);
@@ -140,12 +145,12 @@ const VerificationDetailsModal = ({
     if (!details) return [];
     const docs = details.documents;
     return [
-      { key: "profile_image", label: t("verification:documents.profileImage"), value: docs.profile_image, icon: ShieldCheck },
-      { key: "national_id_front", label: t("verification:documents.nationalIdFront"), value: docs.national_id_front, icon: IdCard },
-      { key: "national_id_back", label: t("verification:documents.nationalIdBack"), value: docs.national_id_back, icon: IdCard },
-      { key: "license_front", label: t("verification:documents.licenseFront"), value: docs.license_front, icon: IdCard },
-      { key: "license_back", label: t("verification:documents.licenseBack"), value: docs.license_back, icon: IdCard },
-      { key: "criminal_record", label: t("verification:documents.criminalRecord"), value: docs.criminal_record, icon: FileText },
+      { key: "profile_image", label: t("verification:documents.profileImage"), value: docs.profile_image },
+      { key: "national_id_front", label: t("verification:documents.nationalIdFront"), value: docs.national_id_front },
+      { key: "national_id_back", label: t("verification:documents.nationalIdBack"), value: docs.national_id_back },
+      { key: "license_front", label: t("verification:documents.licenseFront"), value: docs.license_front },
+      { key: "license_back", label: t("verification:documents.licenseBack"), value: docs.license_back },
+      { key: "criminal_record", label: t("verification:documents.criminalRecord"), value: docs.criminal_record },
     ].filter((doc) => doc.value);
   }, [details, t]);
 
@@ -174,7 +179,9 @@ const VerificationDetailsModal = ({
     await updateVerificationStatus(verification.id, {
       status: "approved",
       verification_notes: verificationNotes.trim() || undefined,
+      national_id_number: nationalIdNumber,
       national_id_expiry: nationalExpiryIso,
+      license_number: licenseNumber,
       license_expiry: licenseExpiryIso,
       address,
       additional_phone: additionalPhone,
@@ -189,7 +196,9 @@ const VerificationDetailsModal = ({
       status: "rejected";
       reason_for_rejection: string;
       verification_notes?: string;
+      national_id_number?: string;
       national_id_expiry?: string;
+      license_number?: string;
       license_expiry?: string;
       address?: string;
       additional_phone?: string;
@@ -203,9 +212,15 @@ const VerificationDetailsModal = ({
       const iso = toIsoDateTimeString(nationalIdExpiry.trim());
       if (iso) payload.national_id_expiry = iso;
     }
+    if (nationalIdNumber !== (details?.documents.national_id_number ?? "")) {
+      payload.national_id_number = nationalIdNumber;
+    }
     if (licenseExpiry.trim()) {
       const iso = toIsoDateTimeString(licenseExpiry.trim());
       if (iso) payload.license_expiry = iso;
+    }
+    if (licenseNumber !== (details?.documents.license_number ?? "")) {
+      payload.license_number = licenseNumber;
     }
     if (address !== (details?.documents.address ?? "")) payload.address = address;
     if (additionalPhone !== (details?.documents.additional_phone ?? "")) {
@@ -280,13 +295,11 @@ const VerificationDetailsModal = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {documents.length > 0 ? (
                   documents.map((doc) => {
-                    const Icon = doc.icon;
                     const value = doc.value as string;
                     return (
                       <div key={doc.key} className="rounded-2xl border border-main-whiteMarble p-4 bg-main-white">
                         <div className="flex items-center justify-between mb-3 gap-2">
-                          <p className="text-main-mirage font-semibold flex items-center gap-2 min-w-0">
-                            <Icon size={15} className="shrink-0" />
+                          <p className="text-main-mirage font-semibold min-w-0">
                             <span className="truncate">{doc.label}</span>
                           </p>
                           <button
@@ -295,7 +308,6 @@ const VerificationDetailsModal = ({
                             className="text-main-primary text-xs font-semibold inline-flex items-center gap-1 hover:underline shrink-0"
                           >
                             {t("verification:details.openInModal")}
-                            <ExternalLink size={13} />
                           </button>
                         </div>
                         {detectDocumentPreviewType(value) === "image" ? (
@@ -330,8 +342,16 @@ const VerificationDetailsModal = ({
                 )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 *:h-fit">
                 <div className="rounded-2xl border border-main-whiteMarble p-4 space-y-2">
+                  <p className="text-main-sharkGray text-xs">{t("verification:details.nationalIdNumber")}</p>
+                  <Input
+                    value={nationalIdNumber}
+                    onChange={(e) => setNationalIdNumber(e.target.value)}
+                    placeholder={t("verification:details.nationalIdNumberPlaceholder")}
+                    className="h-10"
+                    disabled={updating}
+                  />
                   <p className="text-main-sharkGray text-xs">{t("verification:details.nationalIdExpiryRequired")}</p>
                   <Input
                     type="datetime-local"
@@ -347,6 +367,14 @@ const VerificationDetailsModal = ({
                     <p className="text-xs font-medium text-main-red">{nationalIdExpiryError}</p>
                   ) : null}
 
+                  <p className="text-main-sharkGray text-xs mt-3">{t("verification:details.licenseNumber")}</p>
+                  <Input
+                    value={licenseNumber}
+                    onChange={(e) => setLicenseNumber(e.target.value)}
+                    placeholder={t("verification:details.licenseNumberPlaceholder")}
+                    className="h-10"
+                    disabled={updating}
+                  />
                   <p className="text-main-sharkGray text-xs mt-3">{t("verification:details.licenseExpiryRequired")}</p>
                   <Input
                     type="datetime-local"
@@ -499,7 +527,6 @@ const VerificationDetailsModal = ({
             onClick={() => selectedDocument?.url && window.open(selectedDocument.url, "_blank", "noopener,noreferrer")}
             disabled={!selectedDocument?.url}
           >
-            <ExternalLink size={15} />
             {t("verification:details.openInBrowser")}
           </Button>
           <Button

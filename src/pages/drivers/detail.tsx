@@ -128,8 +128,12 @@ const DriverFullViewPage = () => {
 
   const [documentsExpanded, setDocumentsExpanded] = useState(true);
   const [expiriesExpanded, setExpiriesExpanded] = useState(true);
+  const [nationalIdNumber, setNationalIdNumber] = useState("");
+  const [licenseNumber, setLicenseNumber] = useState("");
   const [nationalIdExpiry, setNationalIdExpiry] = useState("");
   const [licenseExpiry, setLicenseExpiry] = useState("");
+  const [initialNationalIdNumber, setInitialNationalIdNumber] = useState("");
+  const [initialLicenseNumber, setInitialLicenseNumber] = useState("");
   const [initialNationalIdExpiry, setInitialNationalIdExpiry] = useState("");
   const [initialLicenseExpiry, setInitialLicenseExpiry] = useState("");
   const [selectedDocument, setSelectedDocument] = useState<ISelectedDocument | null>(null);
@@ -149,8 +153,12 @@ const DriverFullViewPage = () => {
     const nextNational = toInputDateTimeLocal(details.documents.national_id_expiry);
     const nextLicense = toInputDateTimeLocal(details.documents.license_expiry);
     queueMicrotask(() => {
+      setNationalIdNumber(details.documents.national_id_number ?? "");
+      setLicenseNumber(details.documents.license_number ?? "");
       setNationalIdExpiry(nextNational);
       setLicenseExpiry(nextLicense);
+      setInitialNationalIdNumber(details.documents.national_id_number ?? "");
+      setInitialLicenseNumber(details.documents.license_number ?? "");
       setInitialNationalIdExpiry(nextNational);
       setInitialLicenseExpiry(nextLicense);
       const nextStatus = isDriverStatus(details.verification.status) ? details.verification.status : "pending";
@@ -203,17 +211,37 @@ const DriverFullViewPage = () => {
   }, [details, t]);
 
   const payload = useMemo(() => {
-    const next: { national_id_expiry?: string; license_expiry?: string } = {};
+    const next: {
+      national_id_number?: string;
+      national_id_expiry?: string;
+      license_number?: string;
+      license_expiry?: string;
+    } = {};
+    if (nationalIdNumber !== initialNationalIdNumber) {
+      next.national_id_number = nationalIdNumber;
+    }
     if (nationalIdExpiry && nationalIdExpiry !== initialNationalIdExpiry) {
       const iso = toIsoDateTimeString(nationalIdExpiry);
       if (iso) next.national_id_expiry = iso;
+    }
+    if (licenseNumber !== initialLicenseNumber) {
+      next.license_number = licenseNumber;
     }
     if (licenseExpiry && licenseExpiry !== initialLicenseExpiry) {
       const iso = toIsoDateTimeString(licenseExpiry);
       if (iso) next.license_expiry = iso;
     }
     return next;
-  }, [initialLicenseExpiry, initialNationalIdExpiry, licenseExpiry, nationalIdExpiry]);
+  }, [
+    initialLicenseExpiry,
+    initialLicenseNumber,
+    initialNationalIdExpiry,
+    initialNationalIdNumber,
+    licenseExpiry,
+    licenseNumber,
+    nationalIdExpiry,
+    nationalIdNumber,
+  ]);
 
   const canSaveExpiries = Object.keys(payload).length > 0 && !expiriesUpdating;
 
@@ -286,6 +314,7 @@ const DriverFullViewPage = () => {
   const statusStyle = driverStatusStyles[statusKey] ?? driverStatusStyles.pending;
   const notesVisualStyle = noteStatusStyles[statusKey] ?? noteStatusStyles.pending;
   const statusReasonNote = details?.verification.rejected_reason?.trim() ?? "";
+  const isStatusReasonMissing = statusReasonNote.length === 0;
   const verificationAdminNote = details?.verification.notes?.trim() ?? "";
 
   return (
@@ -409,38 +438,68 @@ const DriverFullViewPage = () => {
                       <InfoCard label={t("fullView.trucks.plate")} value={truck.license_plate || "—"} />
                       <InfoCard label={t("fullView.trucks.license")} value={truck.license || "—"} />
                     </div>
+                    <div className="mt-3">
+                      <p className="text-xs text-main-sharkGray mb-1">{t("fullView.trucks.adsOnTruck")}</p>
+                      <span
+                        className={clsx(
+                          "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium",
+                          truck.accepts_ads
+                            ? "bg-main-vividMint/15 text-main-vividMint"
+                            : "bg-main-whiteMarble text-main-sharkGray",
+                        )}
+                      >
+                        {truck.accepts_ads
+                          ? t("fullView.trucks.adsValues.yes")
+                          : t("fullView.trucks.adsValues.no")}
+                      </span>
+                    </div>
                   </div>
                 ))}
               </div>
             )}
           </section>
 
-          <section className="rounded-2xl border border-main-whiteMarble bg-main-white p-5">
-            <div className="mb-4 flex items-start justify-between gap-3">
+          <section className="rounded-2xl border border-main-whiteMarble bg-main-white p-5 shadow-sm">
+            <div className="mb-4 flex items-start justify-between gap-3 rounded-xl border border-main-whiteMarble bg-linear-to-r from-main-luxuryWhite to-main-white p-4">
               <div>
                 <p className="text-main-mirage font-semibold">{t("fullView.notes.title")}</p>
                 <p className="text-main-sharkGray text-sm">{t("fullView.notes.description")}</p>
               </div>
-              <span className={clsx("px-3 py-1 rounded-full text-xs font-medium", notesVisualStyle.badge)}>
+              <span className={clsx("px-3 py-1 rounded-full text-xs font-semibold", notesVisualStyle.badge)}>
                 {t(`statuses.${statusKey}`)}
               </span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className={clsx("rounded-xl border p-4", notesVisualStyle.panel)}>
-                <p className={clsx("text-sm font-semibold mb-2", notesVisualStyle.title)}>
+              <div
+                className={clsx(
+                  "rounded-xl border p-4 shadow-sm transition-all",
+                  notesVisualStyle.panel,
+                  isStatusReasonMissing ? "border-dashed" : "",
+                )}
+              >
+                <p className={clsx("text-sm font-semibold mb-2 tracking-wide flex items-center gap-2", notesVisualStyle.title)}>
                   {t("fullView.notes.statusReasonLabel")}
                 </p>
-                <p className="text-sm text-main-mirage leading-6 whitespace-pre-wrap wrap-break-word">
-                  {statusReasonNote || t("fullView.notes.statusReasonFallback", { status: t(`statuses.${statusKey}`) })}
+                <p
+                  className={clsx(
+                    "text-sm leading-6 whitespace-pre-wrap wrap-break-word min-h-[56px] rounded-lg px-3 py-2",
+                    isStatusReasonMissing
+                      ? "text-main-sharkGray bg-main-white/70 border border-main-whiteMarble/70 italic"
+                      : "text-main-mirage bg-main-white/40 border border-main-white/70",
+                  )}
+                >
+                  {isStatusReasonMissing
+                    ? t("fullView.notes.statusReasonFallback", { status: t(`statuses.${statusKey}`) })
+                    : statusReasonNote}
                 </p>
               </div>
 
-              <div className="rounded-xl border border-main-whiteMarble bg-main-luxuryWhite p-4">
-                <p className="text-sm font-semibold text-main-mirage mb-2">
+              <div className="rounded-xl border border-main-whiteMarble bg-main-luxuryWhite p-4 shadow-sm transition-all">
+                <p className="text-sm font-semibold text-main-mirage mb-2 tracking-wide">
                   {t("fullView.notes.verificationNoteLabel")}
                 </p>
-                <p className="text-sm text-main-mirage leading-6 whitespace-pre-wrap wrap-break-word">
+                <p className="text-sm text-main-mirage leading-6 whitespace-pre-wrap wrap-break-word min-h-[56px]">
                   {verificationAdminNote || t("fullView.notes.verificationNoteFallback")}
                 </p>
               </div>
@@ -518,6 +577,24 @@ const DriverFullViewPage = () => {
             {expiriesExpanded ? (
               <div className="p-5 pt-0">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-main-sharkGray mb-2">{t("fullView.expiries.nationalIdNumberLabel")}</p>
+                    <Input
+                      value={nationalIdNumber}
+                      onChange={(e) => setNationalIdNumber(e.target.value)}
+                      className="h-11"
+                      disabled={expiriesUpdating}
+                    />
+                  </div>
+                  <div>
+                    <p className="text-xs text-main-sharkGray mb-2">{t("fullView.expiries.licenseNumberLabel")}</p>
+                    <Input
+                      value={licenseNumber}
+                      onChange={(e) => setLicenseNumber(e.target.value)}
+                      className="h-11"
+                      disabled={expiriesUpdating}
+                    />
+                  </div>
                   <div>
                     <p className="text-xs text-main-sharkGray mb-2">{t("fullView.expiries.nationalIdLabel")}</p>
                     <Input
