@@ -117,6 +117,7 @@ interface TicketState {
     closeTicket: (id: number) => Promise<void>;
     solveTicket: (id: number) => Promise<void>;
     replyOnTicket: (id: number, title: string, description: string) => Promise<void>;
+    refreshTicketDetail: (id: number) => Promise<void>;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -130,6 +131,21 @@ const defaultQuery: ITicketQuery = {
     page: 1,
     limit: 10,
     sorting: "desc",
+};
+
+const getTicketIdFromRealtimePayload = (payload: {
+    entity_id?: string | number | null;
+    entity_type?: string | null;
+    meta?: Record<string, unknown>;
+    ticket_id?: number | string | null;
+}) => {
+    const entityType = String(payload.entity_type ?? "").toLowerCase();
+    const rawTicketId =
+        entityType === "ticket"
+            ? payload.entity_id
+            : payload.ticket_id ?? payload.meta?.ticket_id ?? payload.meta?.ticket_number;
+    const ticketId = Number(rawTicketId);
+    return Number.isInteger(ticketId) && ticketId > 0 ? ticketId : null;
 };
 
 // ─── Support notification sound ──────────────────────────────────────────────
@@ -214,15 +230,10 @@ const useTicketStore = create<TicketState>((set, get) => ({
             fcmSupportUnsub = fcmEventBus.subscribe({ categories: ["SUPPORT", "CHAT"] }, (payload) => {
                 const state = useTicketStore.getState();
                 const activeTicketId = state.activeSupportChatTicketId;
-                const entityId = Number(payload.entity_id);
-                const entityType = String(payload.entity_type ?? "").toLowerCase();
-                if (
-                    entityType === "ticket" &&
-                    activeTicketId !== null &&
-                    Number.isInteger(entityId) &&
-                    entityId > 0 &&
-                    entityId === activeTicketId
-                ) {
+                const incomingTicketId = getTicketIdFromRealtimePayload(payload);
+                if (activeTicketId !== null && incomingTicketId === activeTicketId) {
+                    void state.refreshTicketDetail(activeTicketId);
+                    void state.markSupportNotificationsForTicketAsRead(activeTicketId);
                     return;
                 }
                 // Keep FCM banner-only UX; play sound without toast noise.
@@ -258,6 +269,39 @@ const useTicketStore = create<TicketState>((set, get) => ({
         supportSocket.on("support:count", (payload: { total: number; unread: number }) => {
             set({ supportUnreadCount: payload?.unread ?? 0 });
         });
+
+        supportSocket.on("dashboard:refresh_hint", (payload: { scope?: string }) => {
+            const scope = String(payload?.scope ?? "");
+            if (scope !== "support") return;
+            const state = useTicketStore.getState();
+            const activeTicketId = state.activeSupportChatTicketId;
+            if (activeTicketId) {
+                void state.refreshTicketDetail(activeTicketId);
+                void state.markSupportNotificationsForTicketAsRead(activeTicketId);
+                return;
+            }
+            void state.fetchStats();
+            void state.fetchTickets();
+            void state.fetchSupportNotifications();
+        });
+
+        supportSocket.on(
+            "notifications:new",
+            (payload: { payload?: Record<string, unknown>; ticket_id?: number | string | null; entity_id?: number | string | null; entity_type?: string | null }) => {
+                const state = useTicketStore.getState();
+                const activeTicketId = state.activeSupportChatTicketId;
+                const incomingTicketId = getTicketIdFromRealtimePayload({
+                    ticket_id: payload.ticket_id,
+                    entity_id: payload.entity_id ?? payload.payload?.entity_id as number | string | null | undefined,
+                    entity_type: payload.entity_type ?? payload.payload?.entity_type as string | null | undefined,
+                    meta: payload.payload?.meta as Record<string, unknown> | undefined,
+                });
+                if (activeTicketId !== null && incomingTicketId === activeTicketId) {
+                    void state.refreshTicketDetail(activeTicketId);
+                    void state.markSupportNotificationsForTicketAsRead(activeTicketId);
+                }
+            },
+        );
 
         supportSocket.on(
             "support_notification:new",
@@ -459,6 +503,18 @@ const useTicketStore = create<TicketState>((set, get) => ({
             set({ selectedTicket: response.data.data, detailLoading: false });
         } catch {
             set({ detailLoading: false });
+        }
+    },
+
+    refreshTicketDetail: async (id) => {
+        try {
+            const response = await axiosNormalApiClient.get(`${ADMIN_TICKET_BASE}/${id}`);
+            set((state) => {
+                if (!state.selectedTicket || state.selectedTicket.id !== id) return {};
+                return { selectedTicket: response.data.data };
+            });
+        } catch {
+            // Keep the current chat visible on transient refresh failures.
         }
     },
 
