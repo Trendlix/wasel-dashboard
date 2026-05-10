@@ -29,6 +29,9 @@
     "driverShare": "Driver % ({{currency}} {{amount}})"
   },
   "viewDetails": "View details",
+  "detailPageDescription": "Trip #{{id}}",
+  "detailNotFoundTitle": "Trip not found",
+  "detailNotFoundDescription": "This trip link is invalid or the trip no longer exists.",
   "emptyTitle": "No trips found",
   "emptyDescription": "Try adjusting your search or filters.",
   "analytics": {
@@ -79,8 +82,10 @@
     "commission": "Commission (10%)",
     "paymentMethod": "Payment method",
     "close": "Close",
+    "openFullPage": "Full view",
     "cancelTrip": "Cancel trip",
     "cancelling": "Cancelling…",
-    "trackTrip": "Track trip"
+    "trackTrip": "Track trip",
+    "noActionsForTerminalStatus": "This trip is finished — cancel is not available."
   }
 }

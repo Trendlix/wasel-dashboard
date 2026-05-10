@@ -23,8 +23,12 @@ export interface IAppTrip {
 }
 
 export interface ITripDetails {
+  id: number;
+  created_at: string;
   booking_number: string;
   status: TTripStatus;
+  final_price: number;
+  currency: string;
   picked_up_at: string | null;
   completed_at: string | null;
   cancelled_at: string | null;
@@ -167,7 +171,7 @@ const useTripsStore = create<TripsState>((set, get) => ({
   },
 
   fetchTripDetails: async (id) => {
-    set({ tripDetailsLoading: true, error: null, tripDetailsId: id });
+    set({ tripDetailsLoading: true, error: null, tripDetailsId: id, tripDetails: null });
     try {
       const response = await axiosNormalApiClient.get(`/dashboard/trips/${id}`);
       set({

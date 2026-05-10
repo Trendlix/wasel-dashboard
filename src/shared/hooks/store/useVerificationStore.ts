@@ -53,6 +53,31 @@ export interface IVerificationCounts {
   suspended: number;
 }
 
+export interface IDriverDocumentHistoryItem {
+  archived_at: string;
+  s3_key: string;
+  file_name: string;
+  expiry_date: string | null;
+  status: string;
+  rejected_reason: string | null;
+  archived_reason?: string;
+  link: string;
+}
+
+export interface IVerificationDriverDocument {
+  id: number;
+  name: string;
+  type: "personal_document" | "vehicle_document";
+  status: string;
+  file_name: string;
+  expiry_date: string | null;
+  created_at: string;
+  updated_at: string;
+  rejected_reason: string | null;
+  link: string;
+  history: IDriverDocumentHistoryItem[];
+}
+
 export interface IVerificationDetails {
   driver: {
     id: number;
@@ -82,6 +107,7 @@ export interface IVerificationDetails {
     address: string | null;
     additional_phone: string | null;
   };
+  driver_documents?: IVerificationDriverDocument[];
   trucks: Array<{
     id: number;
     brand: string;

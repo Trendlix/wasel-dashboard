@@ -48,6 +48,7 @@
     opacity: 0;
     transform: translate3d(0, 12px, 0);
   }
+
   to {
     opacity: 1;
     transform: translate3d(0, 0, 0);
@@ -59,6 +60,7 @@
     from {
       opacity: 0.92;
     }
+
     to {
       opacity: 1;
     }
@@ -70,6 +72,7 @@
     opacity: 0;
     transform: translate3d(0, 6px, 0);
   }
+
   to {
     opacity: 1;
     transform: translate3d(0, 0, 0);
@@ -97,6 +100,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+
     .animate-wasel-header-title,
     .animate-wasel-header-desc {
       animation: none;
@@ -237,31 +241,50 @@
 /* ─── reactjs-tiptap-editor theme override ────────────────────────────────── */
 /* Map --richtext-* variables to the wasel design system (HSL format)         */
 :root {
-  --richtext-background:           0 0% 100%;          /* white — editor content bg */
-  --richtext-foreground:           217 43% 11%;        /* #101828 mirage */
-  --richtext-muted:                220 14% 96%;        /* #f3f4f6 titaniumWhite */
-  --richtext-muted-foreground:     220 10% 46%;        /* #6A7282 sharkGray */
-  --richtext-popover:              0 0% 100%;          /* white */
-  --richtext-popover-foreground:   217 43% 11%;        /* #101828 mirage */
-  --richtext-card:                 210 20% 98%;        /* #F9FAFB luxuryWhite */
-  --richtext-card-foreground:      217 43% 11%;        /* #101828 mirage */
-  --richtext-border:               220 13% 91%;        /* #E5E7EB whiteMarble */
-  --richtext-input:                220 13% 91%;        /* #E5E7EB whiteMarble */
-  --richtext-primary:              214 100% 34%;       /* #004aad main-primary */
-  --richtext-primary-foreground:   0 0% 100%;          /* white */
-  --richtext-secondary:            220 14% 96%;        /* #f3f4f6 titaniumWhite */
-  --richtext-secondary-foreground: 215 16% 34%;        /* #4A5565 hydrocarbon */
-  --richtext-accent:               220 14% 96%;        /* #f3f4f6 titaniumWhite */
-  --richtext-accent-foreground:    215 16% 34%;        /* #4A5565 hydrocarbon */
-  --richtext-destructive:          0 100% 65%;         /* #ff4c4c main-remove */
-  --richtext-destructive-foreground: 0 0% 100%;        /* white */
-  --richtext-radius:               10px;               /* common-rounded */
+  --richtext-background: 0 0% 100%;
+  /* white — editor content bg */
+  --richtext-foreground: 217 43% 11%;
+  /* #101828 mirage */
+  --richtext-muted: 220 14% 96%;
+  /* #f3f4f6 titaniumWhite */
+  --richtext-muted-foreground: 220 10% 46%;
+  /* #6A7282 sharkGray */
+  --richtext-popover: 0 0% 100%;
+  /* white */
+  --richtext-popover-foreground: 217 43% 11%;
+  /* #101828 mirage */
+  --richtext-card: 210 20% 98%;
+  /* #F9FAFB luxuryWhite */
+  --richtext-card-foreground: 217 43% 11%;
+  /* #101828 mirage */
+  --richtext-border: 220 13% 91%;
+  /* #E5E7EB whiteMarble */
+  --richtext-input: 220 13% 91%;
+  /* #E5E7EB whiteMarble */
+  --richtext-primary: 214 100% 34%;
+  /* #004aad main-primary */
+  --richtext-primary-foreground: 0 0% 100%;
+  /* white */
+  --richtext-secondary: 220 14% 96%;
+  /* #f3f4f6 titaniumWhite */
+  --richtext-secondary-foreground: 215 16% 34%;
+  /* #4A5565 hydrocarbon */
+  --richtext-accent: 220 14% 96%;
+  /* #f3f4f6 titaniumWhite */
+  --richtext-accent-foreground: 215 16% 34%;
+  /* #4A5565 hydrocarbon */
+  --richtext-destructive: 0 100% 65%;
+  /* #ff4c4c main-remove */
+  --richtext-destructive-foreground: 0 0% 100%;
+  /* white */
+  --richtext-radius: 10px;
+  /* common-rounded */
 }
 
 /* ─── wasel-richtext wrapper — scoped structural overrides ──────────────────── */
 
 /* Outer container: solid border, wasel radius, no extra shadows             */
-.wasel-richtext > div {
+.wasel-richtext>div {
   border: 1px solid #E5E7EB !important;
   border-radius: 10px !important;
   overflow: hidden;
@@ -282,10 +305,12 @@
   border-radius: 6px !important;
   transition: background-color 0.15s, color 0.15s;
 }
+
 .wasel-richtext button[class*="richtext"]:hover {
   background-color: #E5E7EB !important;
   color: #101828 !important;
 }
+
 .wasel-richtext button[class*="richtext"][data-state="on"],
 .wasel-richtext button[class*="richtext"][aria-pressed="true"] {
   background-color: #004aad1a !important;
@@ -303,6 +328,7 @@
   font-family: inherit !important;
   outline: none !important;
 }
+
 .wasel-richtext .ProseMirror p.is-editor-empty::before {
   color: #99A1AF !important;
   font-style: normal !important;
@@ -311,7 +337,7 @@
 /* Dropdowns / popovers: white bg, wasel border, tight radius                */
 .wasel-richtext [role="dialog"],
 .wasel-richtext [role="menu"],
-.wasel-richtext [data-radix-popper-content-wrapper] > div,
+.wasel-richtext [data-radix-popper-content-wrapper]>div,
 .wasel-richtext .richtext-bg-popover {
   background-color: #fff !important;
   border: 1px solid #E5E7EB !important;
@@ -363,6 +389,7 @@
   font-family: inherit !important;
   padding: 6px 10px !important;
 }
+
 .wasel-richtext input:focus {
   outline: none !important;
   border-color: #004aad !important;
@@ -508,8 +535,16 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .wasel-toast,
   .wasel-toast__dismiss {
     transition: none !important;
   }
 }
+
+
+/* .wasel-card-animation-on-hover:hover {
+  transition: transform 0.3s ease-in-out;
+  transform: scale(0.99);
+  box-shadow: 0 1px 28px rgba(0, 85, 255, 0.07);
+} */

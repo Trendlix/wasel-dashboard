@@ -89,6 +89,20 @@
       "licenseBack": "الرخصة (الخلف)",
       "criminalRecord": "السجل الجنائي"
     },
+    "driverUploads": {
+      "title": "مرفوعات تطبيق السائق",
+      "description": "ملفات من تطبيق السائق (بما في ذلك المستندات المجددة). وسّع كل بطاقة لعرض الإصدارات السابقة.",
+      "current": "المرفوع الحالي",
+      "previousVersions": "إصدارات سابقة",
+      "archivedOn": "أرشفة في {{date}}",
+      "expiry": "انتهاء",
+      "status": "الحالة",
+      "fileName": "الملف",
+      "type": {
+        "personal_document": "مستند شخصي",
+        "vehicle_document": "مستند مركبة"
+      }
+    },
     "expiries": {
       "title": "التحكم في تواريخ الانتهاء",
       "description": "افتح القسم لتعديل تاريخ ووقت انتهاء الهوية الوطنية والرخصة.",

@@ -90,6 +90,7 @@ const NotificationsAdminTabContent = ({ type, store }: Props) => {
         setPage,
         setViewItem,
         resetFilters,
+        fetchNotifications,
         markAsRead,
         handleMarkAllAsRead,
     } = store;
@@ -189,13 +190,17 @@ const NotificationsAdminTabContent = ({ type, store }: Props) => {
 
                         <Button
                             variant="outline"
+                            type="button"
                             onClick={() => {
                                 resetFilters();
                                 setDriverCategoryFilter("all");
+                                void fetchNotifications();
                             }}
+                            disabled={loading}
+                            aria-label={t("common:refresh")}
                             className="h-11 px-4 border-main-whiteMarble text-main-hydrocarbon"
                         >
-                            <RotateCcw size={16} />
+                            <RotateCcw size={16} className={clsx(loading && "animate-spin")} />
                         </Button>
                     </div>
                 </div>
@@ -290,6 +295,18 @@ const NotificationsAdminTabContent = ({ type, store }: Props) => {
                                                         onClick={() => navigate(`/drivers/${row.driver_id}`)}
                                                     >
                                                         <span className="inline-flex items-center gap-1">{t("notifications:goToDriver")}</span>
+                                                    </button>
+                                                )}
+                                                {type === "trip" && row.trip_id != null && (
+                                                    <button
+                                                        type="button"
+                                                        className="h-8 px-2.5 common-rounded text-main-secondary hover:bg-main-secondary/10 text-xs font-semibold"
+                                                        onClick={() => navigate(`/trips/${row.trip_id}`)}
+                                                    >
+                                                        <span className="inline-flex items-center gap-1">
+                                                            <ExternalLink size={13} />
+                                                            {t("notifications:openTrip")}
+                                                        </span>
                                                     </button>
                                                 )}
                                                 {!row.is_read && (

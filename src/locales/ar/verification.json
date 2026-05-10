@@ -87,7 +87,10 @@
     "rejecting": "جاري الرفض…",
     "approving": "جاري القبول…",
     "viewerZoom": "عدسة وتكبير",
-    "viewerCrop": "قص"
+    "viewerCrop": "قص",
+    "driverAppDocumentsTitle": "مستندات تطبيق السائق",
+    "olderVersionsOnDriverPage": "الإصدارات الأقدم من الملفات مدرجة في صفحة العرض الكامل للسائق.",
+    "viewDriverPageLink": "فتح العرض الكامل للسائق"
   },
   "documents": {
     "profileImage": "صورة الملف",
@@ -95,6 +98,10 @@
     "nationalIdBack": "الهوية (الخلف)",
     "licenseFront": "الرخصة (الوجه)",
     "licenseBack": "الرخصة (الخلف)",
-    "criminalRecord": "الفيش الجنائي"
+    "criminalRecord": "الفيش الجنائي",
+    "driverDocTypes": {
+      "personal_document": "مستند شخصي",
+      "vehicle_document": "مستند مركبة"
+    }
   }
 }

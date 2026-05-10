@@ -87,7 +87,10 @@
     "rejecting": "Rejecting…",
     "approving": "Approving…",
     "viewerZoom": "Lens & Zoom",
-    "viewerCrop": "Crop"
+    "viewerCrop": "Crop",
+    "driverAppDocumentsTitle": "Driver app documents",
+    "olderVersionsOnDriverPage": "Older file versions are listed on the driver full view page.",
+    "viewDriverPageLink": "Open driver full view"
   },
   "documents": {
     "profileImage": "Profile image",
@@ -95,6 +98,10 @@
     "nationalIdBack": "National ID (back)",
     "licenseFront": "License (front)",
     "licenseBack": "License (back)",
-    "criminalRecord": "Criminal record"
+    "criminalRecord": "Criminal record",
+    "driverDocTypes": {
+      "personal_document": "Personal document",
+      "vehicle_document": "Vehicle document"
+    }
   }
 }

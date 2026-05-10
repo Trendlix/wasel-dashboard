@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import InnerImageZoomModule from "react-inner-image-zoom";
 import "react-inner-image-zoom/lib/styles.min.css";
 import { Button } from "@/components/ui/button";
@@ -341,6 +342,70 @@ const VerificationDetailsModal = ({
                   </div>
                 )}
               </div>
+
+              {details.driver_documents && details.driver_documents.length > 0 ? (
+                <div className="space-y-3">
+                  <p className="text-main-mirage text-sm font-semibold">
+                    {t("verification:details.driverAppDocumentsTitle")}
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {details.driver_documents.map((doc) => {
+                      const value = doc.link;
+                      const typeLabel = t(`verification:documents.driverDocTypes.${doc.type}`);
+                      return (
+                        <div key={doc.id} className="rounded-2xl border border-main-whiteMarble p-4 bg-main-white">
+                          <div className="flex items-center justify-between mb-3 gap-2">
+                            <div className="min-w-0">
+                              <p className="text-main-mirage font-semibold truncate">{doc.name}</p>
+                              <p className="text-main-sharkGray text-xs mt-0.5">
+                                {typeLabel} · {doc.status}
+                                {doc.expiry_date ? ` · ${fmt(doc.expiry_date)}` : ""}
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenDocument(doc.name, value)}
+                              className="text-main-primary text-xs font-semibold inline-flex items-center gap-1 hover:underline shrink-0"
+                            >
+                              {t("verification:details.openInModal")}
+                            </button>
+                          </div>
+                          {detectDocumentPreviewType(value) === "image" ? (
+                            <div className="h-48 rounded-xl border border-main-whiteMarble overflow-hidden">
+                              <InnerImageZoom
+                                src={value}
+                                zoomSrc={value}
+                                zoomType="hover"
+                                zoomPreload={true}
+                                className="h-full w-full object-cover"
+                              />
+                            </div>
+                          ) : detectDocumentPreviewType(value) === "pdf" ? (
+                            <div className="h-48 rounded-xl border border-main-whiteMarble bg-main-luxuryWhite flex items-center justify-center text-main-sharkGray text-sm">
+                              {t("verification:details.pdfPreviewLabel")}
+                            </div>
+                          ) : (
+                            <div className="h-48 rounded-xl border border-dashed border-main-whiteMarble bg-main-luxuryWhite flex items-center justify-center text-main-sharkGray text-sm">
+                              {t("verification:details.previewUnavailable")}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {details.driver_documents.some((d) => (d.history?.length ?? 0) > 0) ? (
+                    <p className="text-main-sharkGray text-xs">
+                      {t("verification:details.olderVersionsOnDriverPage")}{" "}
+                      <Link
+                        to={`/drivers/${details.driver.id}`}
+                        className="text-main-primary font-semibold underline"
+                      >
+                        {t("verification:details.viewDriverPageLink")}
+                      </Link>
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 *:h-fit">
                 <div className="rounded-2xl border border-main-whiteMarble p-4 space-y-2">

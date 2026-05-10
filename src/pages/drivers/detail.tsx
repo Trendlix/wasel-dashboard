@@ -127,6 +127,7 @@ const DriverFullViewPage = () => {
   } = useVerificationStore();
 
   const [documentsExpanded, setDocumentsExpanded] = useState(true);
+  const [driverUploadsExpanded, setDriverUploadsExpanded] = useState(true);
   const [expiriesExpanded, setExpiriesExpanded] = useState(true);
   const [nationalIdNumber, setNationalIdNumber] = useState("");
   const [licenseNumber, setLicenseNumber] = useState("");
@@ -565,6 +566,128 @@ const DriverFullViewPage = () => {
               </div>
             ) : null}
           </section>
+
+          {(details.driver_documents?.length ?? 0) > 0 ? (
+            <section className="rounded-2xl border border-main-whiteMarble bg-main-white overflow-hidden">
+              <ToggleHeader
+                title={t("fullView.driverUploads.title")}
+                description={t("fullView.driverUploads.description")}
+                expanded={driverUploadsExpanded}
+                onToggle={() => setDriverUploadsExpanded((prev) => !prev)}
+              />
+
+              {driverUploadsExpanded ? (
+                <div className="p-5 pt-0 space-y-6">
+                  {(details.driver_documents ?? []).map((doc) => {
+                    const currentUrl = doc.link;
+                    const currentPreview = detectDocumentPreviewType(currentUrl);
+                    return (
+                      <div
+                        key={doc.id}
+                        className="rounded-xl border border-main-whiteMarble bg-main-luxuryWhite p-4 space-y-4"
+                      >
+                        <div>
+                          <p className="text-main-mirage font-semibold">{doc.name}</p>
+                          <p className="text-main-sharkGray text-xs mt-0.5">
+                            {t(`fullView.driverUploads.type.${doc.type}`)} · {doc.status}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="text-xs text-main-sharkGray mb-2 font-medium">
+                            {t("fullView.driverUploads.current")}
+                          </p>
+                          <div className="flex items-center justify-end mb-2">
+                            <button
+                              type="button"
+                              onClick={() => handleOpenDocument(doc.name, currentUrl)}
+                              className="text-main-primary text-xs font-semibold inline-flex items-center gap-1 hover:underline"
+                            >
+                              {t("fullView.documents.openInModal")}
+                              <ExternalLink size={13} />
+                            </button>
+                          </div>
+                          {currentPreview === "image" ? (
+                            <img
+                              src={currentUrl}
+                              alt={doc.name}
+                              className="w-full h-48 rounded-xl object-cover border border-main-whiteMarble"
+                            />
+                          ) : currentPreview === "pdf" ? (
+                            <div className="h-48 rounded-xl border border-main-whiteMarble bg-main-white flex items-center justify-center text-main-sharkGray text-sm">
+                              {t("fullView.documents.pdfPreviewLabel")}
+                            </div>
+                          ) : (
+                            <div className="h-48 rounded-xl border border-dashed border-main-whiteMarble bg-main-white flex items-center justify-center text-main-sharkGray text-sm">
+                              {t("fullView.documents.previewUnavailable")}
+                            </div>
+                          )}
+                          <div className="mt-2 text-xs text-main-sharkGray space-y-1">
+                            {doc.expiry_date ? (
+                              <p>
+                                {t("fullView.driverUploads.expiry")}:{" "}
+                                {formatAppDateLong(doc.expiry_date, i18n.language)}
+                              </p>
+                            ) : null}
+                            <p>
+                              {t("fullView.driverUploads.fileName")}: {doc.file_name}
+                            </p>
+                          </div>
+                        </div>
+
+                        {(doc.history?.length ?? 0) > 0 ? (
+                          <div>
+                            <p className="text-xs text-main-sharkGray mb-2 font-medium">
+                              {t("fullView.driverUploads.previousVersions")}
+                            </p>
+                            <ul className="space-y-3">
+                              {doc.history.map((h, idx) => (
+                                <li
+                                  key={`${h.archived_at}-${idx}`}
+                                  className="rounded-lg border border-main-whiteMarble bg-main-white p-3"
+                                >
+                                  <p className="text-main-sharkGray text-xs">
+                                    {t("fullView.driverUploads.archivedOn", {
+                                      date: formatAppDateLong(h.archived_at, i18n.language),
+                                    })}
+                                  </p>
+                                  <p className="text-main-sharkGray text-xs mt-1">
+                                    {t("fullView.driverUploads.fileName")}: {h.file_name}
+                                  </p>
+                                  <p className="text-main-sharkGray text-xs mt-1">
+                                    {t("fullView.driverUploads.status")}: {h.status}
+                                  </p>
+                                  {h.expiry_date ? (
+                                    <p className="text-main-sharkGray text-xs mt-1">
+                                      {t("fullView.driverUploads.expiry")}:{" "}
+                                      {formatAppDateLong(h.expiry_date, i18n.language)}
+                                    </p>
+                                  ) : null}
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      handleOpenDocument(
+                                        `${doc.name} — ${h.file_name}`,
+                                        h.link,
+                                      )
+                                    }
+                                    className="mt-2 text-main-primary text-xs font-semibold inline-flex items-center gap-1 hover:underline"
+                                  >
+                                    {t("fullView.documents.openInModal")}
+                                    <ExternalLink size={13} />
+                                  </button>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ) : null}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : null}
+            </section>
+          ) : null}
 
           <section className="rounded-2xl border border-main-whiteMarble bg-main-white overflow-hidden">
             <ToggleHeader

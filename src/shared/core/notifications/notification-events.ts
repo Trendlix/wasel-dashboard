@@ -11,7 +11,20 @@ export type UnifiedDashboardNotificationBucket =
   | "offer"
   | "update"
   | "support"
+  | "trip"
   | "general";
+
+/** Toast / banner fallback when title/body are empty (socket + FCM unified events). */
+export const unifiedDashboardBucketToastLabel: Record<
+  UnifiedDashboardNotificationBucket,
+  string
+> = {
+  offer: "Offer update",
+  update: "System update",
+  support: "Support update",
+  trip: "Trip cancelled",
+  general: "New notification",
+};
 
 const offerEventKeys = new Set<string>([
   "offer.campaign.by_admin",
@@ -38,6 +51,12 @@ const supportEventKeys = new Set<string>([
   "chat.message.new",
 ]);
 
+/** Legacy taxonomy-derived wire type before orchestrator set explicit `event_type`. */
+const tripAdminEventKeys = new Set<string>([
+  "admin.trip.cancelled",
+  "updates.trip.cancelled",
+]);
+
 export const mapUnifiedEventToDashboardBucket = (
   eventKey: string | undefined,
 ): UnifiedDashboardNotificationBucket => {
@@ -45,6 +64,7 @@ export const mapUnifiedEventToDashboardBucket = (
   if (offerEventKeys.has(eventKey)) return "offer";
   if (updateEventKeys.has(eventKey)) return "update";
   if (supportEventKeys.has(eventKey)) return "support";
+  if (tripAdminEventKeys.has(eventKey)) return "trip";
   return "general";
 };
 

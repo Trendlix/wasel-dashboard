@@ -1,7 +1,8 @@
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { formatAppDateTime } from "@/lib/formatLocaleDate";
 import { Calendar, Mail, Phone, User, Hash } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import PageHeader from "@/shared/components/common/PageHeader";
 import NoDataFound from "@/shared/components/common/NoDataFound";
 import BackButton from "@/shared/components/common/BackButton";
@@ -128,6 +129,9 @@ const NotificationDetailPage = ({ type, loading, error, notification }: Props) =
             return (
                 <>
                     <Section title={t("notifications:sectionTripDetails")}>
+                        {trip?.id != null && (
+                            <Field label={t("notifications:fieldTripId")} value={String(trip.id)} />
+                        )}
                         <Field label={t("notifications:fieldBookingNumber")} value={<span className="inline-flex items-center gap-1.5"><Hash size={13} />{trip?.booking_number}</span>} />
                         <Field label={t("common:status")} value={<span className="capitalize font-medium">{trip?.status}</span>} />
                         <Field label={t("common:createdAt")} value={<span className="inline-flex items-center gap-1.5"><Calendar size={13} />{formatDate(trip?.created_at)}</span>} />
@@ -147,6 +151,24 @@ const NotificationDetailPage = ({ type, loading, error, notification }: Props) =
                             />
                         )}
 
+                        {trip?.id != null && (
+                            <div className="col-span-2 flex flex-wrap items-center gap-3 pt-2">
+                                <Button
+                                    asChild
+                                    className="h-11 px-6 bg-main-primary text-main-white hover:bg-main-primary/90 common-rounded font-semibold"
+                                >
+                                    <Link to={`/trips/${trip.id}`} state={{ from: "notification" }}>
+                                        {t("notifications:viewTrip")}
+                                    </Link>
+                                </Button>
+                                <Link
+                                    to="/trips"
+                                    className="inline-flex text-sm font-medium text-main-hydrocarbon underline underline-offset-2 hover:opacity-90"
+                                >
+                                    {t("notifications:viewAllTrips")}
+                                </Link>
+                            </div>
+                        )}
                     </Section>
 
                     <Section title={t("notifications:sectionUserDetails")}>

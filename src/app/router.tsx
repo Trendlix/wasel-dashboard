@@ -10,7 +10,9 @@ import SettingsPage from "../pages/settings";
 import NotFoundPage from "../pages/not-found";
 import VerificationPage from "../pages/verification";
 import VerificationListRoute from "../pages/verification/list-route";
+import TripsLayout from "../pages/trips/layout";
 import TripsPage from "../pages/trips";
+import TripDetailPage from "../pages/trips/detail";
 import NotificationsPage from "../pages/notifications";
 const AnalyticsPage = lazy(() => import("../pages/analytics"));
 import UsersPage from "../pages/users";
@@ -126,7 +128,14 @@ export const router = createBrowserRouter([
                 ],
             },
             { path: "verification/:id", element: <DriverFullViewPage /> },
-            { path: "trips", element: <TripsPage /> },
+            {
+                path: "trips",
+                element: <TripsLayout />,
+                children: [
+                    { index: true, element: <TripsPage /> },
+                    { path: ":tripId", element: <TripDetailPage /> },
+                ],
+            },
             { path: "analytics", element: <Suspense fallback={lazyRouteFallback}><AnalyticsPage /></Suspense> },
             { path: "users", element: <UsersPage /> },
             { path: "users/:id", element: <UserFullViewPage /> },

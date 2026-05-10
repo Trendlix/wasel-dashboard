@@ -9,6 +9,7 @@ import {
   type IUnifiedDashboardNotificationEvent,
   getUnifiedEventDisplayTitle,
   mapUnifiedEventToDashboardBucket,
+  unifiedDashboardBucketToastLabel,
 } from "@/shared/core/notifications/notification-events";
 import { shouldUseFcmRealtime } from "@/shared/core/notifications/fcm/fcm-env";
 import { fcmEventBus } from "@/shared/core/notifications/fcm/fcm-event-bus";
@@ -265,8 +266,17 @@ const useDashboardNotificationsStore = create<DashboardNotificationsState>((set)
         { categories: ["OFFERS", "UPDATES", "ADMIN_EVENT"] },
         (p) => {
           if (p.silent) return;
-          // Keep FCM banner-only UX; play sound without toast noise.
           playDashboardNotificationSound();
+          const bucket = mapUnifiedEventToDashboardBucket(p.event_type);
+          const line = getUnifiedEventDisplayTitle({
+            title: p.title,
+            body: p.body,
+          });
+          const message =
+            line !== unifiedDashboardBucketToastLabel.general
+              ? line
+              : unifiedDashboardBucketToastLabel[bucket];
+          showToast(message, "info");
         },
       );
       dashboardFcmUnsubs.push(unsubToast);
@@ -354,16 +364,14 @@ const useDashboardNotificationsStore = create<DashboardNotificationsState>((set)
           pushRecentUnifiedKey(dedupeKey);
 
           const bucket = mapUnifiedEventToDashboardBucket(payload.event_key);
-          const fallbackTitle = getUnifiedEventDisplayTitle(payload);
-          const bucketLabelByType = {
-            offer: "Offer update",
-            update: "System update",
-            support: "Support update",
-            general: "New notification",
-          } as const;
+          const line = getUnifiedEventDisplayTitle(payload);
+          const message =
+            line !== unifiedDashboardBucketToastLabel.general
+              ? line
+              : unifiedDashboardBucketToastLabel[bucket];
 
           playDashboardNotificationSound();
-          showToast(fallbackTitle || bucketLabelByType[bucket], "info");
+          showToast(message, "info");
           void refreshData();
         },
       );

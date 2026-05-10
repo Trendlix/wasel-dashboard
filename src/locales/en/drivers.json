@@ -89,6 +89,20 @@
       "licenseBack": "License (back)",
       "criminalRecord": "Criminal record"
     },
+    "driverUploads": {
+      "title": "Driver app uploads",
+      "description": "Files from the driver app (including renewed documents). Expand each card to see previous versions.",
+      "current": "Current upload",
+      "previousVersions": "Previous versions",
+      "archivedOn": "Archived on {{date}}",
+      "expiry": "Expiry",
+      "status": "Status",
+      "fileName": "File",
+      "type": {
+        "personal_document": "Personal document",
+        "vehicle_document": "Vehicle document"
+      }
+    },
     "expiries": {
       "title": "Expiration Control",
       "description": "Expand to edit National ID and License expiry date and time.",

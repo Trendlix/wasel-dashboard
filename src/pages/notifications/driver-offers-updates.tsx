@@ -148,13 +148,17 @@ const NotificationsDriverOffersUpdatesTab = () => {
 
                         <Button
                             variant="outline"
+                            type="button"
                             onClick={() => {
                                 resetFilters();
                                 setTypeFilter("all");
+                                void fetchNotifications();
                             }}
+                            disabled={loading}
+                            aria-label={t("common:refresh")}
                             className="h-11 px-4 border-main-whiteMarble text-main-hydrocarbon"
                         >
-                            <RotateCcw size={16} />
+                            <RotateCcw size={16} className={clsx(loading && "animate-spin")} />
                         </Button>
                     </div>
                 </div>

@@ -29,6 +29,9 @@
     "driverShare": "حصة السائق % ({{currency}} {{amount}})"
   },
   "viewDetails": "عرض التفاصيل",
+  "detailPageDescription": "رحلة #{{id}}",
+  "detailNotFoundTitle": "الرحلة غير موجودة",
+  "detailNotFoundDescription": "رابط الرحلة غير صالح أو لم تعد الرحلة موجودة.",
   "emptyTitle": "لا توجد رحلات",
   "emptyDescription": "جرّب تعديل البحث أو عوامل التصفية.",
   "analytics": {
@@ -79,8 +82,10 @@
     "commission": "العمولة (١٠٪)",
     "paymentMethod": "طريقة الدفع",
     "close": "إغلاق",
+    "openFullPage": "عرض كامل",
     "cancelTrip": "إلغاء الرحلة",
     "cancelling": "جاري الإلغاء…",
-    "trackTrip": "تتبع الرحلة"
+    "trackTrip": "تتبع الرحلة",
+    "noActionsForTerminalStatus": "هذه الرحلة منتهية — لا يمكن إلغاؤها."
   }
 }
