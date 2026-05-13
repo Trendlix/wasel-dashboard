@@ -24,7 +24,7 @@ const stripeClasses: Record<CommonModalVariant, string> = {
     default: "from-main-primary/40 via-main-primary to-main-primary/40",
     danger: "from-main-remove/40 via-main-remove to-main-remove/40",
     success: "from-main-vividMint/40 via-main-vividMint to-main-vividMint/40",
-    warning: "from-main-gunmetalBlue/40 via-main-gunmetalBlue to-main-gunmetalBlue/40",
+    warning: "from-main-mustardGold/40 via-main-mustardGold to-main-mustardGold/40",
 };
 
 export const CommonModal = ({

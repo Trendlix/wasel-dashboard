@@ -5,6 +5,8 @@ import { useTranslation } from "react-i18next";
 import { Bell, MessageSquare, CheckCircle, XCircle, Ticket, Check } from "lucide-react";
 import useTicketStore, { type ISupportNotification } from "@/shared/hooks/store/useTicketStore";
 import NoDataFound from "@/shared/components/common/NoDataFound";
+import useAuthStore from "@/shared/hooks/store/useAuthStore";
+import { showToast } from "@/shared/utils/toast";
 
 const formatRelativeTime = (value: string) => {
     const date = new Date(value);
@@ -72,7 +74,7 @@ const getNotificationColor = (color: string) => {
 interface NotificationItemProps {
     notification: ISupportNotification;
     onMarkAsRead: (id: number) => void;
-    onNavigateToTicket: (ticketId: number) => void;
+    onNavigateToTicket: (notification: ISupportNotification) => void;
     markingId: number | null;
 }
 
@@ -95,7 +97,7 @@ const NotificationItem = ({
                     ? "bg-main-luxuryWhite/50 hover:bg-main-luxuryWhite"
                     : "bg-main-luxuryWhite hover:bg-main-whiteMarble"
             )}
-            onClick={() => onNavigateToTicket(notification.ticket_id)}
+            onClick={() => onNavigateToTicket(notification)}
         >
             <div className="flex items-start gap-3">
                 <div
@@ -142,7 +144,7 @@ const NotificationItem = ({
                             className="inline-flex items-center gap-1 text-[10px] font-medium text-main-primary hover:underline"
                             onClick={(e) => {
                                 e.stopPropagation();
-                                onNavigateToTicket(notification.ticket_id);
+                                onNavigateToTicket(notification);
                             }}
                         >
                             <Ticket className="w-3 h-3" />
@@ -205,6 +207,7 @@ const SupportNotificationsPanel = ({ className, listClassName }: SupportNotifica
         markAllSupportNotificationsAsRead,
     } = useTicketStore();
 
+    const { userProfile } = useAuthStore();
     const [markingId, setMarkingId] = useState<number | null>(null);
     const [markingAll, setMarkingAll] = useState(false);
 
@@ -226,8 +229,18 @@ const SupportNotificationsPanel = ({ className, listClassName }: SupportNotifica
         setMarkingAll(false);
     };
 
-    const handleNavigateToTicket = (ticketId: number) => {
-        navigate(`/support-tickets/${ticketId}/reply`);
+    const handleNavigateToTicket = (notification: ISupportNotification) => {
+        const currentAdminId = userProfile?.id ?? null;
+        const isLocked =
+            notification.assigned_admin_id !== null &&
+            notification.assigned_admin_id !== currentAdminId;
+
+        if (isLocked) {
+            showToast(t("support:lock.onlyOwnerCanReply"), "alert");
+            return;
+        }
+
+        navigate(`/support-tickets/${notification.ticket_id}/reply`);
     };
 
     return (

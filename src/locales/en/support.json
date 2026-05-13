@@ -30,7 +30,8 @@
     "allStatus": "All statuses",
     "allPriority": "All priorities",
     "newestFirst": "Newest first",
-    "oldestFirst": "Oldest first"
+    "oldestFirst": "Oldest first",
+    "allActors": "All actors"
   },
   "statuses": {
     "pending": "Pending",
@@ -143,5 +144,31 @@
     "newReply": "New reply",
     "ticketClosed": "Ticket closed",
     "ticketSolved": "Ticket solved"
+  },
+  "tabs": {
+    "all": "All Tickets",
+    "sessions": "Support Sessions"
+  },
+  "sessions": {
+    "pageTitle": "Support Sessions",
+    "pageDescription": "High-priority tickets from blocked or suspended users and drivers",
+    "actorPanel": {
+      "title": "Account Holder",
+      "openPanel": "Open account holder details",
+      "closePanel": "Close account holder details",
+      "statusLabel": "Account Status",
+      "changeStatus": "Change Status",
+      "confirmTitle": "Change account status?",
+      "confirmDescription": "This will immediately affect the account holder's ability to log in.",
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "statusUpdated": "Status updated successfully",
+      "user": "User",
+      "driver": "Driver",
+      "phone": "Phone",
+      "email": "Email",
+      "joinedAt": "Joined",
+      "noEmail": "No email"
+    }
   }
 }

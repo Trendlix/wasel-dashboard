@@ -4,13 +4,12 @@ import clsx from "clsx";
 import { Bell, PanelRightClose, PanelRightOpen } from "lucide-react";
 import PageHeader from "@/shared/components/common/PageHeader";
 import PageTransition from "@/shared/components/common/PageTransition";
-import TicketAnalytics from "@/shared/components/pages/support-tickets/TicketAnalytics";
-import TicketsTable from "@/shared/components/pages/support-tickets/TicketsTable";
+import SessionTicketsTable from "@/shared/components/pages/support-tickets/SessionTicketsTable";
 import SupportTicketsTabs from "@/shared/components/pages/support-tickets/SupportTicketsTabs";
 import SupportNotificationsPanel from "@/shared/components/pages/support-tickets/SupportNotificationsPanel";
 import useTicketStore from "@/shared/hooks/store/useTicketStore";
 
-const SupportTicketsPage = () => {
+const SessionTicketsPage = () => {
     const { t } = useTranslation("support");
     const [isActivityOpen, setIsActivityOpen] = useState(false);
     const { supportUnreadCount, fetchSupportNotifications } = useTicketStore();
@@ -22,17 +21,19 @@ const SupportTicketsPage = () => {
     return (
         <PageTransition>
             <div className="flex items-start justify-between gap-4 flex-wrap">
-                <PageHeader title={t("pageTitle")} description={t("pageDescription")} />
+                <PageHeader
+                    title={t("sessions.pageTitle")}
+                    description={t("sessions.pageDescription")}
+                />
                 <button
                     type="button"
                     onClick={() => setIsActivityOpen((prev) => !prev)}
                     className={clsx(
                         "inline-flex items-center gap-2.5 h-10 px-4 rounded-full border text-sm font-semibold transition-all",
                         "bg-linear-to-r from-main-primary/10 via-main-vividMint/10 to-main-mustardGold/15 border-main-primary/30 text-main-mirage",
-                        "hover:shadow-sm hover:border-main-primary/40 "
+                        "hover:shadow-sm hover:border-main-primary/40"
                     )}
                     aria-label={t(isActivityOpen ? "notifications.closeDrawer" : "notifications.openDrawer")}
-                    title={t(isActivityOpen ? "notifications.closeDrawer" : "notifications.openDrawer")}
                 >
                     <Bell className="w-4 h-4 text-main-primary" />
                     <span>{t("notifications.title")}</span>
@@ -48,25 +49,26 @@ const SupportTicketsPage = () => {
                     )}
                 </button>
             </div>
+
             <SupportTicketsTabs />
-            <div className="mt-6 flex flex-col xl:flex-row items-start gap-6">
+
+            <div className="flex flex-col xl:flex-row items-start gap-6">
                 <div className="min-w-0 flex-1 space-y-6">
-                    <TicketAnalytics />
-                    <TicketsTable />
+                    <SessionTicketsTable />
                 </div>
                 <aside
                     className={clsx(
-                        "shrink-0 transition-all duration-300 ease-out",
+                        "shrink-0 transition-all duration-300 ease-out overflow-hidden",
                         isActivityOpen
-                            ? "w-full max-w-full xl:w-[380px] xl:max-w-[42vw] opacity-100 translate-x-0 sticky top-7 h-fit self-start"
-                            : "w-0 max-w-0 opacity-0 translate-x-8 pointer-events-none overflow-hidden"
+                            ? "w-full max-w-full xl:w-[380px] xl:max-w-[42vw] opacity-100 translate-x-0"
+                            : "w-0 max-w-0 opacity-0 translate-x-8 pointer-events-none"
                     )}
                 >
-                    <SupportNotificationsPanel />
+                    <SupportNotificationsPanel className="sticky top-7" />
                 </aside>
             </div>
         </PageTransition>
     );
 };
 
-export default SupportTicketsPage;
+export default SessionTicketsPage;

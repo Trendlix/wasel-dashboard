@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useMatch, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import clsx from "clsx";
-import { CheckCircle, Download, FileText, Image as ImageIcon, Send, XCircle } from "lucide-react";
+import { CheckCircle, Download, FileText, Image as ImageIcon, Send, XCircle, UserCircle, PanelRightOpen, PanelRightClose } from "lucide-react";
 import { isAxiosError } from "axios";
 import { Button } from "@/components/ui/button";
 import PageTransition from "@/shared/components/common/PageTransition";
@@ -24,6 +24,7 @@ import {
     type TTicketStatus,
 } from "@/shared/core/pages/supportTickets";
 import { formatAppDateTime } from "@/lib/formatLocaleDate";
+import ActorProfilePanel from "@/shared/components/pages/support-tickets/ActorProfilePanel";
 
 const MAX_CHARS = 500;
 
@@ -31,6 +32,10 @@ const TicketReplyPage = () => {
     const { t, i18n } = useTranslation(["support", "common"]);
     const { ticketId } = useParams<{ ticketId: string }>();
     const navigate = useNavigate();
+    const isSessionRoute = !!useMatch("/support-tickets/sessions/:ticketId/reply");
+    const [searchParams] = useSearchParams();
+    const actorType = searchParams.get("actor") as "user" | "driver" | null;
+    const actorId = searchParams.get("actor_id") ? Number(searchParams.get("actor_id")) : null;
 
     const {
         selectedTicket,
@@ -50,6 +55,7 @@ const TicketReplyPage = () => {
     const [sending, setSending] = useState(false);
     const [confirmAction, setConfirmAction] = useState<"close" | "solve" | null>(null);
     const [acting, setActing] = useState(false);
+    const [isProfileOpen, setIsProfileOpen] = useState(true);
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const chatRef = useRef<HTMLDivElement>(null);
@@ -235,8 +241,8 @@ const TicketReplyPage = () => {
     return (
         <>
             <PageTransition>
-                <div className="flex flex-col gap-4">
-                    <div className="flex items-center gap-3 shrink-0">
+                <div className="flex items-center justify-between gap-4 shrink-0 mb-6">
+                    <div className="flex items-center gap-3">
                         <BackButton
                             label={t("common:back")}
                             onClick={() => navigate("/support-tickets")}
@@ -256,6 +262,31 @@ const TicketReplyPage = () => {
                             </div>
                         )}
                     </div>
+
+                    {isSessionRoute && actorType && actorId && (
+                        <button
+                            type="button"
+                            onClick={() => setIsProfileOpen((prev) => !prev)}
+                            className={clsx(
+                                "inline-flex items-center gap-2.5 h-10 px-4 rounded-full border text-sm font-semibold transition-all",
+                                "bg-linear-to-r from-main-primary/10 via-main-vividMint/10 to-main-mustardGold/15 border-main-primary/30 text-main-mirage",
+                                "hover:shadow-sm hover:border-main-primary/40"
+                            )}
+                            aria-label={t(isProfileOpen ? "support:sessions.actorPanel.closePanel" : "support:sessions.actorPanel.openPanel")}
+                        >
+                            <UserCircle className="w-4 h-4 text-main-primary" />
+                            <span>{t("support:sessions.actorPanel.title")}</span>
+                            {isProfileOpen ? (
+                                <PanelRightClose className="w-4 h-4 text-main-sharkGray" />
+                            ) : (
+                                <PanelRightOpen className="w-4 h-4 text-main-sharkGray" />
+                            )}
+                        </button>
+                    )}
+                </div>
+
+                <div className={clsx("flex gap-6", isSessionRoute ? "flex-col xl:flex-row items-start" : "flex-col")}>
+                    <div className="flex flex-col gap-4 flex-1 min-w-0">
 
                     {ticket && !detailLoading && (
                         <div className="bg-main-primary common-rounded px-6 py-5 text-main-white shrink-0">
@@ -429,6 +460,19 @@ const TicketReplyPage = () => {
                             </div>
                         )}
                     </div>
+                    </div>
+                {isSessionRoute && actorType && actorId && (
+                    <aside
+                        className={clsx(
+                            "shrink-0 transition-all duration-300 ease-out",
+                            isProfileOpen
+                                ? "w-full max-w-full xl:w-80 xl:max-w-80 opacity-100 translate-x-0 sticky top-7 h-fit self-start"
+                                : "w-0 max-w-0 opacity-0 translate-x-8 pointer-events-none overflow-hidden"
+                        )}
+                    >
+                        <ActorProfilePanel actor={actorType} actorId={actorId} />
+                    </aside>
+                )}
                 </div>
             </PageTransition>
 

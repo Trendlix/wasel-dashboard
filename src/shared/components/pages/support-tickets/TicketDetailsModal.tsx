@@ -18,6 +18,7 @@ import {
     getOwnerDisplayName,
     type TTicketStatus,
     type TTicketPriority,
+    type ITicket,
 } from "@/shared/core/pages/supportTickets";
 import { formatAppDateShort } from "@/lib/formatLocaleDate";
 import { showToast } from "@/shared/utils/toast";
@@ -25,11 +26,12 @@ import { showToast } from "@/shared/utils/toast";
 interface TicketDetailsModalProps {
     open: boolean;
     onOpenChange: (v: boolean) => void;
+    replyPathBuilder?: (ticket: ITicket) => string;
 }
 
 type TConfirmAction = "close" | "solve" | null;
 
-const TicketDetailsModal = ({ open, onOpenChange }: TicketDetailsModalProps) => {
+const TicketDetailsModal = ({ open, onOpenChange, replyPathBuilder }: TicketDetailsModalProps) => {
     const { t, i18n } = useTranslation(["support", "common"]);
     const navigate = useNavigate();
     const { selectedTicket, detailLoading, closeTicket, solveTicket, fetchTicketDetail } = useTicketStore();
@@ -84,7 +86,7 @@ const TicketDetailsModal = ({ open, onOpenChange }: TicketDetailsModalProps) => 
     const handleReply = () => {
         if (!ticket) return;
         onOpenChange(false);
-        navigate(`/support-tickets/${ticket.id}/reply`);
+        navigate(replyPathBuilder ? replyPathBuilder(ticket) : `/support-tickets/${ticket.id}/reply`);
     };
 
     const replyCount = ticket?.supports?.length ?? 0;

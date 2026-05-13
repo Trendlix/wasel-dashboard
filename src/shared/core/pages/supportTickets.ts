@@ -138,4 +138,6 @@ export interface ITicketQuery {
     category_id?: number;
     partial_matching?: string;
     sorting?: "asc" | "desc";
+    has_session?: boolean;
+    actor_type?: "user" | "driver";
 }

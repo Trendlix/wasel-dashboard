@@ -36,6 +36,7 @@ import CommissionAndPricingPage from "@/pages/commission-and-pricing";
 import VoucherAndPromoPage from "@/pages/voucher-and-promo";
 import AcceptInvitationPage from "@/pages/accept-invitation";
 import SupportTicketsPage from "@/pages/support-tickets";
+import SessionTicketsPage from "@/pages/support-tickets/SessionTicketsPage";
 import ContactMessagesPage from "@/pages/contact-messages";
 import TicketReplyPage from "@/pages/support-tickets/TicketReplyPage";
 import TestCenterPage from "@/pages/test-center";
@@ -298,6 +299,8 @@ export const router = createBrowserRouter([
             },
 
             { path: "support-tickets", element: <SupportTicketsPage /> },
+            { path: "support-tickets/sessions", element: <SessionTicketsPage /> },
+            { path: "support-tickets/sessions/:ticketId/reply", element: <TicketReplyPage /> },
             { path: "support-tickets/:ticketId/reply", element: <TicketReplyPage /> },
             { path: "commission-and-pricing", element: <CommissionAndPricingPage /> },
             { path: "voucher-and-promo", element: <VoucherAndPromoPage /> },

@@ -24,11 +24,13 @@ import {
     ticketPriorityStyles,
     ticketStatusStyles,
     type ITicket,
+    type ITicketQuery,
     type TTicketPriority,
     type TTicketStatus,
 } from "@/shared/core/pages/supportTickets";
 import { formatAppDateShort } from "@/lib/formatLocaleDate";
 import useAuthStore from "@/shared/hooks/store/useAuthStore";
+import { showToast } from "@/shared/utils/toast";
 
 const SkeletonRow = () => (
     <TableRow className="border-b border-main-whiteMarble animate-pulse">
@@ -40,14 +42,18 @@ const SkeletonRow = () => (
     </TableRow>
 );
 
-const TicketsTable = () => {
+interface TicketsTableProps {
+    baseFilter?: Partial<ITicketQuery>;
+    replyPathBuilder?: (ticket: ITicket) => string;
+}
+
+const TicketsTable = ({ baseFilter, replyPathBuilder }: TicketsTableProps = {}) => {
     const { t, i18n } = useTranslation(["support", "common"]);
     const { userProfile } = useAuthStore();
     const {
         tickets,
         meta,
         loading,
-        fetchTickets,
         fetchCategories,
         setQuery,
         setPage,
@@ -64,6 +70,15 @@ const TicketsTable = () => {
             { value: "solved", label: t("support:statuses.solved") },
         ],
         [t],
+    );
+
+    const actorOptions = useMemo(
+        () => [
+            { value: "all", label: t("support:filters.allActors") },
+            { value: "user", label: t("support:owner.user") },
+            { value: "driver", label: t("support:owner.driver") },
+        ],
+        [t]
     );
 
     const priorityOptions = useMemo(
@@ -127,49 +142,68 @@ const TicketsTable = () => {
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
     const [priorityFilter, setPriorityFilter] = useState("all");
+    const [actorFilter, setActorFilter] = useState("all");
     const [orderFilter, setOrderFilter] = useState<"asc" | "desc">("desc");
     const [categoriesModalOpen, setCategoriesModalOpen] = useState(false);
     const [detailModalOpen, setDetailModalOpen] = useState(false);
 
     const inputRef = useRef<HTMLInputElement>(null);
 
+    const baseFilterKey = JSON.stringify(baseFilter ?? null);
+
     useEffect(() => {
-        fetchTickets();
+        resetQuery(baseFilter);
         fetchCategories();
-    }, [fetchTickets, fetchCategories]);
+    }, [baseFilterKey]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            setQuery({ partial_matching: search.trim() || undefined });
+            setQuery({ partial_matching: search.trim() || undefined, ...baseFilter });
         }, 400);
         return () => clearTimeout(timer);
-    }, [search, setQuery]);
+    }, [search, setQuery, baseFilterKey]);
 
     const handleStatusFilter = (value: string) => {
         setStatusFilter(value);
-        setQuery({ status: value === "all" ? undefined : (value as TTicketStatus) });
+        setQuery({ status: value === "all" ? undefined : (value as TTicketStatus), ...baseFilter });
     };
 
     const handlePriorityFilter = (value: string) => {
         setPriorityFilter(value);
-        setQuery({ priority: value === "all" ? undefined : (value as TTicketPriority) });
+        setQuery({ priority: value === "all" ? undefined : (value as TTicketPriority), ...baseFilter });
+    };
+
+    const handleActorFilter = (value: string) => {
+        setActorFilter(value);
+        setQuery({ actor_type: value === "all" ? undefined : (value as "user" | "driver"), ...baseFilter });
     };
 
     const handleOrderFilter = (value: string) => {
         const order = value as "asc" | "desc";
         setOrderFilter(order);
-        setQuery({ sorting: order });
+        setQuery({ sorting: order, ...baseFilter });
     };
 
     const handleReset = () => {
         setSearch("");
         setStatusFilter("all");
         setPriorityFilter("all");
+        setActorFilter("all");
         setOrderFilter("desc");
-        resetQuery();
+        resetQuery(baseFilter);
     };
 
     const handleViewDetails = async (ticket: ITicket) => {
+        const currentAdminId = userProfile?.id ?? null;
+        const isLockedForCurrentAdmin =
+            ticket.assigned_admin_id !== null &&
+            ticket.assigned_admin_id !== currentAdminId;
+
+        if (isLockedForCurrentAdmin) {
+            showToast(t("support:lock.onlyOwnerCanReply"), "alert");
+            return;
+        }
+
         await fetchTicketDetail(ticket.id);
         setDetailModalOpen(true);
     };
@@ -213,6 +247,13 @@ const TicketsTable = () => {
                     options={priorityOptions}
                     statusStyles={priorityStylesForSelect}
                     placeholder={t("support:filters.allPriority")}
+                />
+
+                <StatusSelect
+                    value={actorFilter}
+                    onChange={handleActorFilter}
+                    options={actorOptions}
+                    placeholder={t("support:filters.allActors")}
                 />
 
                 <StatusSelect
@@ -301,6 +342,7 @@ const TicketsTable = () => {
             <TicketDetailsModal
                 open={detailModalOpen}
                 onOpenChange={setDetailModalOpen}
+                replyPathBuilder={replyPathBuilder}
             />
         </div>
     );
@@ -322,8 +364,8 @@ const TicketRow = ({
     const ownerType = ticket.user
         ? t("owner.user")
         : ticket.driver
-          ? t("owner.driver")
-          : "—";
+            ? t("owner.driver")
+            : "—";
 
     const rawName = owner ? getOwnerDisplayName(owner) : "";
     const displayName = owner ? (rawName || t("owner.noName")) : "—";
@@ -373,8 +415,8 @@ const TicketRow = ({
                         ticket.user
                             ? "bg-main-primary/10 text-main-primary"
                             : ticket.driver
-                              ? "bg-main-vividSubmarine/15 text-main-vividSubmarine"
-                              : "bg-main-sharkGray/15 text-main-sharkGray"
+                                ? "bg-main-vividSubmarine/15 text-main-vividSubmarine"
+                                : "bg-main-sharkGray/15 text-main-sharkGray"
                     )}
                 >
                     {ownerType}

@@ -40,6 +40,7 @@ export interface ISupportNotification {
     ticket_id: number;
     ticket_subject: string | null;
     ticket_status: string | null;
+    assigned_admin_id: number | null;
     triggered_by_user_id: number | null;
     triggered_by_user_name: string | null;
     triggered_by_driver_id: number | null;
@@ -107,7 +108,7 @@ interface TicketState {
     fetchStats: () => Promise<void>;
     setPage: (page: number) => void;
     setQuery: (partial: Partial<ITicketQuery>) => void;
-    resetQuery: () => void;
+    resetQuery: (base?: Partial<ITicketQuery>) => void;
 
     fetchCategories: () => Promise<void>;
     createCategory: (name: string) => Promise<void>;
@@ -455,9 +456,10 @@ const useTicketStore = create<TicketState>((set, get) => ({
         get().fetchTickets(next);
     },
 
-    resetQuery: () => {
-        set({ query: defaultQuery });
-        get().fetchTickets(defaultQuery);
+    resetQuery: (base) => {
+        const next = { ...defaultQuery, ...base };
+        set({ query: next });
+        get().fetchTickets(next);
     },
 
     // ── Categories ──────────────────────────────────────────────────────────
@@ -665,6 +667,7 @@ const useTicketStore = create<TicketState>((set, get) => ({
                 color: notification.color ?? "blue",
                 title: notification.title ?? "",
                 description: notification.description ?? "",
+                assigned_admin_id: notification.assigned_admin_id ?? null,
                 created_at: notification.created_at ?? new Date().toISOString(),
                 is_read: false,
                 read_at: null,

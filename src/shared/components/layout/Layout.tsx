@@ -23,12 +23,12 @@ const Layout = () => {
             <NetworkStatusBanner />
             <div className={`flex gap-7 flex-1 min-h-0 flex-row`}>
                 <Sidebar />
-                <main className="flex-1 overflow-x-auto min-w-0">
+                <main className="flex-1 min-w-0">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={transitionKey}
                             initial={initial}
-                            animate={animate}
+                            animate={{ ...animate, transitionEnd: { transform: "none" } }}
                             exit={exit}
                             transition={transition}
                             className="flex flex-col gap-8"

@@ -30,7 +30,8 @@
     "allStatus": "كل الحالات",
     "allPriority": "كل الأولويات",
     "newestFirst": "الأحدث أولاً",
-    "oldestFirst": "الأقدم أولاً"
+    "oldestFirst": "الأقدم أولاً",
+    "allActors": "كل الأطراف"
   },
   "statuses": {
     "pending": "قيد الانتظار",
@@ -143,5 +144,31 @@
     "newReply": "رد جديد",
     "ticketClosed": "تم إغلاق التذكرة",
     "ticketSolved": "تم حل التذكرة"
+  },
+  "tabs": {
+    "all": "جميع التذاكر",
+    "sessions": "جلسات الدعم"
+  },
+  "sessions": {
+    "pageTitle": "جلسات الدعم",
+    "pageDescription": "تذاكر ذات أولوية عالية من المستخدمين والسائقين المحظورين أو الموقوفين",
+    "actorPanel": {
+      "title": "صاحب الحساب",
+      "openPanel": "فتح تفاصيل صاحب الحساب",
+      "closePanel": "إغلاق تفاصيل صاحب الحساب",
+      "statusLabel": "حالة الحساب",
+      "changeStatus": "تغيير الحالة",
+      "confirmTitle": "تغيير حالة الحساب؟",
+      "confirmDescription": "سيؤثر هذا فوراً على قدرة صاحب الحساب على تسجيل الدخول.",
+      "confirm": "تأكيد",
+      "cancel": "إلغاء",
+      "statusUpdated": "تم تحديث الحالة بنجاح",
+      "user": "مستخدم",
+      "driver": "سائق",
+      "phone": "الهاتف",
+      "email": "البريد الإلكتروني",
+      "joinedAt": "تاريخ الانضمام",
+      "noEmail": "لا يوجد بريد إلكتروني"
+    }
   }
 }
