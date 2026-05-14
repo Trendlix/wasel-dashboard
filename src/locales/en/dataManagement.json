@@ -21,7 +21,7 @@
     "table": {
       "nameEn": "Name (English)",
       "nameAr": "Name (Arabic)",
-      "capacity": "Capacity",
+      "capacity": "Capacity range",
       "pricePerKm": "Price / km",
       "status": "Status",
       "actions": "Actions"
@@ -83,8 +83,10 @@
     "nameEnPlaceholder": "e.g. Pickup",
     "nameAr": "Name (Arabic)",
     "nameArPlaceholder": "e.g. بيك آب",
-    "capacity": "Capacity",
-    "capacityPlaceholder": "e.g. 5000",
+    "capacityMin": "Min capacity",
+    "capacityMinPlaceholder": "e.g. 1000",
+    "capacityMax": "Max capacity",
+    "capacityMaxPlaceholder": "e.g. 5000",
     "unit": "Unit",
     "unitPlaceholder": "e.g. kg",
     "pricePerKm": "Price per km",

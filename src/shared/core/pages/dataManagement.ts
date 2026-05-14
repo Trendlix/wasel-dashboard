@@ -49,17 +49,18 @@ export interface ITruckType {
     id: number;
     nameEn: string;
     nameAr: string;
-    capacity: string;
+    capacity_min: number | null;
+    capacity_max: number | null;
     priceKm: string; // Updated from basePrice to priceKm per screenshot
     status: TItemStatus;
 }
 
 export const truckTypes: ITruckType[] = [
-    { id: 1, nameEn: "Pickup Truck", nameAr: "بيك آب", capacity: "1-2 tons", priceKm: "120 EGP", status: "active" },
-    { id: 2, nameEn: "Small Van", nameAr: "فان صغير", capacity: "2-3 tons", priceKm: "220 EGP", status: "active" },
-    { id: 3, nameEn: "Medium Truck", nameAr: "شاحنة متوسطة", capacity: "5-7 tons", priceKm: "320 EGP", status: "active" },
-    { id: 4, nameEn: "Large Truck", nameAr: "شاحنة كبيرة", capacity: "10-15 tons", priceKm: "420 EGP", status: "active" },
-    { id: 5, nameEn: "Refrigerated Truck", nameAr: "شاحنة مبردة", capacity: "5-10 tons", priceKm: "520 EGP", status: "active" },
+    { id: 1, nameEn: "Pickup Truck", nameAr: "بيك آب", capacity_min: 1, capacity_max: 2, priceKm: "120 EGP", status: "active" },
+    { id: 2, nameEn: "Small Van", nameAr: "فان صغير", capacity_min: 2, capacity_max: 3, priceKm: "220 EGP", status: "active" },
+    { id: 3, nameEn: "Medium Truck", nameAr: "شاحنة متوسطة", capacity_min: 5, capacity_max: 7, priceKm: "320 EGP", status: "active" },
+    { id: 4, nameEn: "Large Truck", nameAr: "شاحنة كبيرة", capacity_min: 10, capacity_max: 15, priceKm: "420 EGP", status: "active" },
+    { id: 5, nameEn: "Refrigerated Truck", nameAr: "شاحنة مبردة", capacity_min: 5, capacity_max: 10, priceKm: "520 EGP", status: "active" },
 ];
 
 // ─── Storage types ────────────────────────────────────────────────────────────

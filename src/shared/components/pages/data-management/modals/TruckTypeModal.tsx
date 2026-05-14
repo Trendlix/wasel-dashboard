@@ -20,7 +20,8 @@ type TruckTypeFormValues = {
     name: string;
     name_ar: string;
     description: string;
-    capacity: number;
+    capacity_min: number;
+    capacity_max: number;
     capacity_unit: string;
     price_per_km: number;
     length_in_cm?: number;
@@ -53,7 +54,8 @@ const TruckTypeModal = ({ open, onOpenChange, truckType }: TruckTypeModalProps) 
                 name: z.string().min(1, t("dataManagement:validation.nameRequired")),
                 name_ar: z.string().min(1, t("dataManagement:validation.nameArRequired")),
                 description: z.string().min(1, t("dataManagement:validation.descriptionRequired")),
-                capacity: z.coerce.number().min(1, t("dataManagement:validation.capacityRequired")),
+                capacity_min: z.coerce.number().min(0, t("dataManagement:validation.capacityRequired")),
+                capacity_max: z.coerce.number().min(1, t("dataManagement:validation.capacityRequired")),
                 capacity_unit: z.string().min(1, t("dataManagement:validation.unitRequired")),
                 price_per_km: z.coerce.number().min(1, t("dataManagement:validation.priceRequired")),
                 length_in_cm: optionalPositiveNumber(t("dataManagement:validation.capacityRequired")),
@@ -70,7 +72,8 @@ const TruckTypeModal = ({ open, onOpenChange, truckType }: TruckTypeModalProps) 
             name: "",
             name_ar: "",
             description: "",
-            capacity: 0,
+            capacity_min: 0,
+            capacity_max: 0,
             capacity_unit: "kg",
             price_per_km: 0,
             is_active: true,
@@ -84,7 +87,8 @@ const TruckTypeModal = ({ open, onOpenChange, truckType }: TruckTypeModalProps) 
                 name: truckType.name,
                 name_ar: truckType.name_ar || "",
                 description: truckType.description || "",
-                capacity: truckType.capacity || 0,
+                capacity_min: truckType.capacity_min || 0,
+                capacity_max: truckType.capacity_max || 0,
                 capacity_unit: truckType.capacity_unit || "kg",
                 price_per_km: Number(truckType.price_per_km) || 0,
                 length_in_cm: truckType.length_in_cm ?? undefined,
@@ -97,7 +101,8 @@ const TruckTypeModal = ({ open, onOpenChange, truckType }: TruckTypeModalProps) 
                 name: "",
                 name_ar: "",
                 description: "",
-                capacity: 0,
+                capacity_min: 0,
+                capacity_max: 0,
                 capacity_unit: "kg",
                 price_per_km: 0,
                 is_active: true,
@@ -189,28 +194,40 @@ const TruckTypeModal = ({ open, onOpenChange, truckType }: TruckTypeModalProps) 
 
                     <div className="grid grid-cols-2 gap-4">
                         <Controller
-                            name="capacity"
+                            name="capacity_min"
                             control={control}
                             render={({ field }) => (
                                 <CommonInput
-                                    label={t("dataManagement:truckModal.capacity")}
-                                    placeholder={t("dataManagement:truckModal.capacityPlaceholder")}
+                                    label={t("dataManagement:truckModal.capacityMin")}
+                                    placeholder={t("dataManagement:truckModal.capacityMinPlaceholder")}
                                     field={field}
                                 />
                             )}
                         />
                         <Controller
-                            name="capacity_unit"
+                            name="capacity_max"
                             control={control}
                             render={({ field }) => (
                                 <CommonInput
-                                    label={t("dataManagement:truckModal.unit")}
-                                    placeholder={t("dataManagement:truckModal.unitPlaceholder")}
+                                    label={t("dataManagement:truckModal.capacityMax")}
+                                    placeholder={t("dataManagement:truckModal.capacityMaxPlaceholder")}
                                     field={field}
                                 />
                             )}
                         />
                     </div>
+
+                    <Controller
+                        name="capacity_unit"
+                        control={control}
+                        render={({ field }) => (
+                            <CommonInput
+                                label={t("dataManagement:truckModal.unit")}
+                                placeholder={t("dataManagement:truckModal.unitPlaceholder")}
+                                field={field}
+                            />
+                        )}
+                    />
 
                     <Controller
                         name="price_per_km"
@@ -290,8 +307,8 @@ const TruckTypeModal = ({ open, onOpenChange, truckType }: TruckTypeModalProps) 
                         {submitting
                             ? t("dataManagement:truckModal.saving")
                             : truckType
-                              ? t("dataManagement:truckModal.saveUpdate")
-                              : t("dataManagement:truckModal.saveAdd")}
+                                ? t("dataManagement:truckModal.saveUpdate")
+                                : t("dataManagement:truckModal.saveAdd")}
                     </Button>
                 </CommonModalFooter>
             </form>

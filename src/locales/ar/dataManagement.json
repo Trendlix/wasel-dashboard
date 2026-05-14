@@ -21,7 +21,7 @@
     "table": {
       "nameEn": "الاسم (إنجليزي)",
       "nameAr": "الاسم (عربي)",
-      "capacity": "السعة",
+      "capacity": "نطاق السعة",
       "pricePerKm": "السعر لكل كم",
       "status": "الحالة",
       "actions": "إجراءات"
@@ -83,8 +83,10 @@
     "nameEnPlaceholder": "مثال: Pickup",
     "nameAr": "الاسم (عربي)",
     "nameArPlaceholder": "مثال: بيك آب",
-    "capacity": "السعة",
-    "capacityPlaceholder": "مثال: 5000",
+    "capacityMin": "الحد الأدنى للسعة",
+    "capacityMinPlaceholder": "مثال: 1000",
+    "capacityMax": "الحد الأقصى للسعة",
+    "capacityMaxPlaceholder": "مثال: 5000",
     "unit": "الوحدة",
     "unitPlaceholder": "مثال: kg",
     "pricePerKm": "السعر لكل كيلومتر",

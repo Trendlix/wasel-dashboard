@@ -122,7 +122,7 @@ const TruckTypesTable = () => {
                                         {truck.name_ar}
                                     </td>
                                     <td className="py-5 px-6 text-main-sharkGray text-sm">
-                                        {truck.capacity} {truck.capacity_unit}
+                                        {truck.capacity_min ?? "—"}–{truck.capacity_max ?? "—"} {truck.capacity_unit}
                                     </td>
                                     <td className="py-5 px-6 text-main-mirage font-bold text-sm">
                                         {truck.price_per_km} {t("currencySuffix")}

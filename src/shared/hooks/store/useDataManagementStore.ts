@@ -12,7 +12,8 @@ export interface ITruckType {
     length_in_cm: number | null;
     width_in_cm: number | null;
     height_in_cm: number | null;
-    capacity: number | null;
+    capacity_min: number | null;
+    capacity_max: number | null;
     capacity_unit: string | null;
     description: string | null;
     is_active: boolean;
