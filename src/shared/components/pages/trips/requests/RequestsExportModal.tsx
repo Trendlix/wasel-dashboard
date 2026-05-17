@@ -11,7 +11,7 @@ import {
 import ExportActiveFiltersSummary from "@/shared/components/common/ExportActiveFiltersSummary";
 import type { ExportActiveFilters } from "@/shared/utils/export-query";
 
-interface TripsExportModalProps {
+interface RequestsExportModalProps {
   open: boolean;
   loading: boolean;
   initialDateFrom?: string;
@@ -21,7 +21,7 @@ interface TripsExportModalProps {
   onConfirm: (payload: { date_from?: string; date_to?: string }) => Promise<void>;
 }
 
-const TripsExportModal = ({
+const RequestsExportModal = ({
   open,
   loading,
   initialDateFrom,
@@ -29,7 +29,7 @@ const TripsExportModal = ({
   activeFilters,
   onOpenChange,
   onConfirm,
-}: TripsExportModalProps) => {
+}: RequestsExportModalProps) => {
   const { t } = useTranslation(["trips", "common"]);
   const [dateFrom, setDateFrom] = useState(initialDateFrom ?? "");
   const [dateTo, setDateTo] = useState(initialDateTo ?? "");
@@ -60,15 +60,15 @@ const TripsExportModal = ({
   return (
     <CommonModal open={open} onOpenChange={onOpenChange} loading={loading} maxWidth="sm:max-w-[520px]">
       <CommonModalHeader
-        title={t("trips:export.title")}
-        description={t("trips:export.description")}
+        title={t("trips:requestsExport.title")}
+        description={t("trips:requestsExport.description")}
       />
 
       <CommonModalBody className="space-y-4">
         <div className="flex items-center gap-3 px-4 py-3 bg-main-primary/5 border border-main-primary/15 rounded-xl">
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold text-main-mirage">{t("common:exportDateRange.title")}</p>
-            <p className="text-xs text-main-sharkGray">{t("trips:export.dateHint")}</p>
+            <p className="text-xs text-main-sharkGray">{t("trips:requestsExport.dateHint")}</p>
             <ExportActiveFiltersSummary activeFilters={activeFilters} />
           </div>
         </div>
@@ -127,4 +127,4 @@ const TripsExportModal = ({
   );
 };
 
-export default TripsExportModal;
+export default RequestsExportModal;

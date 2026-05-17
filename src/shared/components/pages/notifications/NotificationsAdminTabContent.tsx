@@ -301,7 +301,7 @@ const NotificationsAdminTabContent = ({ type, store }: Props) => {
                                                     <button
                                                         type="button"
                                                         className="h-8 px-2.5 common-rounded text-main-secondary hover:bg-main-secondary/10 text-xs font-semibold"
-                                                        onClick={() => navigate(`/trips/${row.trip_id}`)}
+                                                        onClick={() => navigate(`/trips/view/${row.trip_id}`)}
                                                     >
                                                         <span className="inline-flex items-center gap-1">
                                                             <ExternalLink size={13} />

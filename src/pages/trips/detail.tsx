@@ -45,7 +45,7 @@ const TripDetailPage = () => {
       navigate(-1);
       return;
     }
-    navigate("/trips");
+    navigate("/trips/all");
   };
 
   if (!validId) {

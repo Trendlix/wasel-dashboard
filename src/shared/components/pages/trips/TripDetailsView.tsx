@@ -6,6 +6,7 @@ import { CommonModalBody, CommonModalFooter } from "@/shared/components/common/C
 import type { IAppTrip, ITripDetails } from "@/shared/hooks/store/useTripsStore";
 import { formatAppDateShort, formatAppTime } from "@/lib/formatLocaleDate";
 import { ExternalLink } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export type TripDetailsViewVariant = "modal" | "page";
 
@@ -43,6 +44,7 @@ const TripDetailsView = ({
   onClose,
   onOpenFullPage,
 }: TripDetailsViewProps) => {
+  const navigate = useNavigate();
   const { t, i18n } = useTranslation("trips");
 
   const numLocale = i18n.language?.startsWith("ar") ? "ar-SA" : "en-US";
@@ -289,6 +291,50 @@ const TripDetailsView = ({
           </div>
         </div>
 
+        {tripDetails?.request.goods_images && tripDetails.request.goods_images.length > 0 ? (
+          <div className="rounded-2xl border border-main-whiteMarble bg-main-luxuryWhite p-5">
+            <p className="text-main-mirage font-bold mb-3">{t("trips:details.goodsImages")}</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {tripDetails.request.goods_images.map((img) => (
+                <a key={img.key} href={img.url} target="_blank" rel="noopener noreferrer" className="block aspect-square rounded-xl overflow-hidden border border-main-whiteMarble">
+                  <img src={img.url} alt="" className="w-full h-full object-cover" />
+                </a>
+              ))}
+            </div>
+          </div>
+        ) : null}
+        {displayStatus === "cancelled" ? (
+          <div className="rounded-2xl border border-main-remove/40 bg-main-remove/5 p-5 space-y-4">
+            <p className="text-main-mirage font-bold text-lg">{t("trips:cancellation.title")}</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="text-main-sharkGray">{t("trips:cancellation.cancelledAt")}</p>
+                <p className="font-semibold">{formatAppDateShort(tripDetails?.cancelled_at, i18n.language, "—")}</p>
+              </div>
+              <div>
+                <p className="text-main-sharkGray">{t("trips:cancellation.cancelledBy")}</p>
+                <p className="font-semibold">{tripDetails?.cancelled_by ? t(`trips:cancellation.by_${tripDetails.cancelled_by}`) : "—"}</p>
+              </div>
+            </div>
+            {(tripDetails?.admin_cancellation_notifications?.length ?? 0) > 0 ? (
+              <div className="space-y-2 pt-2 border-t border-main-remove/20">
+                <p className="text-sm font-semibold text-main-sharkGray">{t("trips:cancellation.adminLog")}</p>
+                {tripDetails!.admin_cancellation_notifications!.map((n) => (
+                  <div key={n.id} className="rounded-xl border border-main-whiteMarble bg-main-white p-3 text-sm">
+                    <p className="font-semibold">{n.title}</p>
+                    <p className="text-main-hydrocarbon">{n.description}</p>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+        {tripDetails?.request.id && tripDetails.request.request_number ? (
+          <div className="rounded-2xl border border-main-whiteMarble bg-main-luxuryWhite p-4 flex justify-between items-center gap-2">
+            <p className="text-sm">{t("trips:details.linkedRequest", { number: tripDetails.request.request_number })}</p>
+            <button type="button" className="text-main-primary font-semibold text-sm hover:underline" onClick={() => navigate(`/trips/requests/view/${tripDetails.request.id}`)}>{t("trips:details.viewRequest")}</button>
+          </div>
+        ) : null}
         <div className="rounded-2xl border border-main-mustardGold/45 bg-main-mustardGold/10 p-5">
           <p className="text-main-mirage font-bold">{t("trips:details.notes")}</p>
           <p className="text-main-hydrocarbon mt-2 whitespace-pre-wrap wrap-break-word">{specialNotes}</p>

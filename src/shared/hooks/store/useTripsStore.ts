@@ -2,6 +2,7 @@ import { create } from "zustand";
 import axiosNormalApiClient from "@/shared/utils/axios";
 import { isAxiosError } from "axios";
 import type { TTripStatus } from "@/shared/core/pages/trips";
+import { buildTripsExportBody, type TripsExportPayload } from "@/shared/utils/export-query";
 
 export interface IAppTrip {
   id: number;
@@ -22,8 +23,17 @@ export interface IAppTrip {
   currency: string;
 }
 
+export interface IAdminTripNotificationItem {
+  id: number;
+  type: string;
+  title: string;
+  description: string;
+  created_at: string;
+}
+
 export interface ITripDetails {
   id: number;
+  request_id: number;
   created_at: string;
   booking_number: string;
   status: TTripStatus;
@@ -32,15 +42,32 @@ export interface ITripDetails {
   picked_up_at: string | null;
   completed_at: string | null;
   cancelled_at: string | null;
+  cancelled_by: "user" | "driver" | "both" | null;
+  delivery_proof_url: string | null;
   driver: {
+    id?: number;
     name: string | null;
     phone: string | null;
   };
+  truck?: {
+    id: number;
+    license_plate: string;
+    brand: string;
+  } | null;
   user: {
+    id?: number;
     full_name: string;
     phone: string;
   };
+  admin_cancellation_notifications?: IAdminTripNotificationItem[];
   request: {
+    id?: number;
+    request_number?: string;
+    trip_at?: string;
+    expires_at?: string;
+    offered_price_by_user?: number;
+    wasel_suggested_price?: number | null;
+    goods_images?: Array<{ key: string; url: string }>;
     pickup_location: {
       name: string;
       lat: number;
@@ -82,6 +109,7 @@ export interface ITripsQuery {
   search?: string;
   order?: "asc" | "desc";
   status?: TTripStatus;
+  urgent?: boolean;
   sort_by?: "created_at" | "status" | "booking_number";
   date_from?: string;
   date_to?: string;
@@ -124,12 +152,21 @@ interface TripsState {
   setQuery: (query: Partial<ITripsQuery>) => void;
   resetQuery: () => void;
   updateStatus: (id: number, status: TTripStatus) => Promise<void>;
-  exportTrips: (payload?: Pick<ITripsQuery, "date_from" | "date_to">) => Promise<void>;
+  exportTrips: (overrides?: Partial<TripsExportPayload>) => Promise<void>;
 }
 
 const extractErrorMessage = (error: unknown, fallback: string): string => {
   if (isAxiosError(error) === false) return fallback;
   return error.response?.data?.message || fallback;
+};
+
+const parseEntityId = (id: unknown): number | null => {
+  if (typeof id === "number" && Number.isInteger(id) && id > 0) return id;
+  if (typeof id === "string" && /^\d+$/.test(id)) {
+    const parsed = Number.parseInt(id, 10);
+    return parsed > 0 ? parsed : null;
+  }
+  return null;
 };
 
 const defaultQuery: ITripsQuery = {
@@ -171,9 +208,14 @@ const useTripsStore = create<TripsState>((set, get) => ({
   },
 
   fetchTripDetails: async (id) => {
-    set({ tripDetailsLoading: true, error: null, tripDetailsId: id, tripDetails: null });
+    const entityId = parseEntityId(id);
+    if (entityId === null) {
+      set({ tripDetailsLoading: false, tripDetails: null, tripDetailsId: null });
+      return;
+    }
+    set({ tripDetailsLoading: true, error: null, tripDetailsId: entityId, tripDetails: null });
     try {
-      const response = await axiosNormalApiClient.get(`/dashboard/trips/${id}`);
+      const response = await axiosNormalApiClient.get(`/dashboard/trips/${entityId}`);
       set({
         tripDetails: response.data.data,
         tripDetailsLoading: false,
@@ -225,13 +267,15 @@ const useTripsStore = create<TripsState>((set, get) => ({
   },
 
   updateStatus: async (id, status) => {
+    const entityId = parseEntityId(id);
+    if (entityId === null) return;
     set({ updating: true, error: null });
     try {
-      await axiosNormalApiClient.patch(`/dashboard/trips/${id}/status`, { status });
+      await axiosNormalApiClient.patch(`/dashboard/trips/${entityId}/status`, { status });
       set((state) => ({
-        trips: state.trips.map((trip) => (trip.id === id ? { ...trip, status } : trip)),
+        trips: state.trips.map((trip) => (trip.id === entityId ? { ...trip, status } : trip)),
         tripDetails:
-          state.tripDetailsId === id && state.tripDetails
+          state.tripDetailsId === entityId && state.tripDetails
             ? {
                 ...state.tripDetails,
                 status,
@@ -252,14 +296,10 @@ const useTripsStore = create<TripsState>((set, get) => ({
     }
   },
 
-  exportTrips: async (payload) => {
+  exportTrips: async (overrides) => {
     set({ exporting: true, error: null });
     try {
-      const body = {
-        ...get().query,
-        ...(payload?.date_from ? { date_from: payload.date_from } : {}),
-        ...(payload?.date_to ? { date_to: payload.date_to } : {}),
-      };
+      const body = buildTripsExportBody(get().query, overrides);
       await axiosNormalApiClient.post("/dashboard/trips/export", body);
     } catch (error) {
       set({ error: extractErrorMessage(error, "Failed to export trips") });

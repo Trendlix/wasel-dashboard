@@ -29,6 +29,76 @@
     "driverShare": "Driver % ({{currency}} {{amount}})"
   },
   "viewDetails": "View details",
+  "fullView": "Full view",
+  "viewTrip": "View trip",
+  "parentTabs": {
+    "requests": "User requests",
+    "trips": "Trips"
+  },
+  "tripTabs": {
+    "all": "All",
+    "urgent": "Urgent"
+  },
+  "requestTabs": {
+    "all": "All"
+  },
+  "urgentEmptyDescription": "No urgent trips right now. Trips appear here when the scheduled trip time is within 1 hour of the request creation.",
+  "requestStatuses": {
+    "pending": "Pending",
+    "expired": "Expired",
+    "confirmed": "Confirmed",
+    "cancelled": "Cancelled"
+  },
+  "requestsAnalytics": {
+    "pending": "Pending requests",
+    "expired": "Expired requests",
+    "confirmed": "Confirmed requests",
+    "cancelled": "Cancelled requests"
+  },
+  "requestsSearchPlaceholder": "Search requests…",
+  "requestsEmptyTitle": "No requests found",
+  "requestsEmptyDescription": "Try adjusting your search.",
+  "requestsTable": {
+    "requestNumber": "Request #",
+    "user": "User",
+    "route": "Route",
+    "price": "Price",
+    "offers": "Offers",
+    "expires": "Expires",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "requestsDetails": {
+    "title": "Request details",
+    "requestLine": "#{{number}} — {{date}}",
+    "user": "User",
+    "tripAt": "Trip scheduled",
+    "expiresAt": "Expires",
+    "route": "Route",
+    "cargo": "Cargo",
+    "pricing": "Pricing",
+    "userOffer": "User offer",
+    "suggested": "Wasel suggested",
+    "final": "Final price",
+    "goodsImages": "Goods images",
+    "offers": "Driver offers",
+    "offerDriver": "Driver",
+    "offerPrice": "Price",
+    "offerStatus": "Status",
+    "linkedTrip": "Linked trip"
+  },
+  "requestDetailPageDescription": "Request #{{id}}",
+  "requestDetailNotFoundTitle": "Request not found",
+  "requestDetailNotFoundDescription": "This request link is invalid or no longer exists.",
+  "cancellation": {
+    "title": "Cancellation record",
+    "cancelledAt": "Cancelled at",
+    "cancelledBy": "Cancelled by",
+    "by_user": "User",
+    "by_driver": "Driver",
+    "by_both": "Both",
+    "adminLog": "Admin notifications"
+  },
   "detailPageDescription": "Trip #{{id}}",
   "detailNotFoundTitle": "Trip not found",
   "detailNotFoundDescription": "This trip link is invalid or the trip no longer exists.",
@@ -43,7 +113,16 @@
   "export": {
     "title": "Export trips",
     "description": "Choose a date range to export trips for that period, or leave empty for all.",
-    "dateHint": "Leave both fields empty to export all trips."
+    "dateHint": "Leave both fields empty to export all matching trips. Current tab, status, urgent filter, and search apply.",
+    "activeFilters": "Exporting:",
+    "filterStatus": "Status",
+    "filterUrgent": "Urgent trips",
+    "filterSearch": "Search"
+  },
+  "requestsExport": {
+    "title": "Export requests",
+    "description": "Choose a date range to export truck requests for that period, or leave empty for all.",
+    "dateHint": "Leave both fields empty to export all matching requests. Current tab, status, and search filters apply."
   },
   "statuses": {
     "pending": "Pending",
@@ -86,6 +165,9 @@
     "cancelTrip": "Cancel trip",
     "cancelling": "Cancelling…",
     "trackTrip": "Track trip",
-    "noActionsForTerminalStatus": "This trip is finished — cancel is not available."
+    "noActionsForTerminalStatus": "This trip is finished — cancel is not available.",
+    "goodsImages": "Goods images",
+    "linkedRequest": "Truck request {{number}}",
+    "viewRequest": "View request"
   }
 }

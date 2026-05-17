@@ -1,6 +1,7 @@
 import clsx from "clsx";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { Download, RotateCcw, Search } from "lucide-react";
 import {
   Table,
@@ -15,9 +16,14 @@ import NoDataFound from "../../common/NoDataFound";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { formInputWrapperClass } from "../../common/formStyles";
-import StatusSelect from "../../common/StatusSelect";
 import useTripsStore, { type IAppTrip } from "@/shared/hooks/store/useTripsStore";
-import { tripStatusStyles, type TTripStatus } from "@/shared/core/pages/trips";
+import {
+  TRIP_STATUSES,
+  tripStatusStyles,
+  type TTripListTab,
+  type TTripStatus,
+} from "@/shared/core/pages/trips";
+import StatusSelect from "../../common/StatusSelect";
 import TripsExportModal from "./TripsExportModal";
 import TripDetailsModal from "./TripDetailsModal";
 
@@ -31,23 +37,16 @@ const SkeletonRow = () => (
   </TableRow>
 );
 
-const TripsTable = () => {
+interface TripsTableProps {
+  statusTab: TTripListTab;
+}
+
+const TripsTable = ({ statusTab }: TripsTableProps) => {
+  const navigate = useNavigate();
   const { t } = useTranslation(["trips", "common"]);
-  const { trips, meta, loading, exporting, fetchTrips, setQuery, setPage, resetQuery, exportTrips } = useTripsStore();
-  const statusFilterOptions: { value: string; label: string }[] = [
-    { value: "all", label: t("trips:filters.allStatuses") },
-    { value: "pending", label: t("trips:filters.pending") },
-    { value: "accepted", label: t("trips:filters.accepted") },
-    { value: "scheduled", label: t("trips:filters.scheduled") },
-    { value: "on_the_way", label: t("trips:filters.on_the_way") },
-    { value: "arrived", label: t("trips:filters.arrived") },
-    { value: "picked_up", label: t("trips:filters.picked_up") },
-    { value: "delivered", label: t("trips:filters.delivered") },
-    { value: "completed", label: t("trips:filters.completed") },
-    { value: "cancelled", label: t("trips:filters.cancelled") },
-  ];
+  const { trips, meta, loading, exporting, setQuery, setPage, exportTrips } = useTripsStore();
   const [searchInput, setSearchInput] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | TTripStatus>("all");
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [tripDetailsOpen, setTripDetailsOpen] = useState(false);
   const [selectedTrip, setSelectedTrip] = useState<IAppTrip | null>(null);
@@ -55,34 +54,103 @@ const TripsTable = () => {
   const [exportDateTo, setExportDateTo] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const isUrgentTab = statusTab === "urgent";
+
+  const statusFilterOptions = useMemo(
+    () => [
+      { value: "all", label: t("trips:filters.allStatuses") },
+      ...TRIP_STATUSES.map((status) => ({
+        value: status,
+        label: t(`trips:filters.${status}`),
+      })),
+    ],
+    [t],
+  );
+
+  const resolveApiStatus = (): TTripStatus | undefined => {
+    if (isUrgentTab) {
+      return statusFilter === "all" ? undefined : statusFilter;
+    }
+    if (statusTab === "all") return undefined;
+    return statusTab as TTripStatus;
+  };
+
+  const buildListQuery = () => ({
+    status: resolveApiStatus(),
+    urgent: isUrgentTab ? true : undefined,
+    search: searchInput.trim() || undefined,
+  });
+
   useEffect(() => {
-    fetchTrips();
-  }, []);
+    if (!isUrgentTab) {
+      setStatusFilter("all");
+    }
+    setQuery(buildListQuery());
+  }, [statusTab]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setQuery({ search: searchInput.trim() || undefined });
+      setQuery(buildListQuery());
     }, 400);
     return () => clearTimeout(timer);
-  }, [searchInput]);
+  }, [searchInput, statusTab, statusFilter]);
 
   const handleStatusFilter = (value: string) => {
-    setStatusFilter(value);
-    setQuery({ status: value === "all" ? undefined : (value as TTripStatus) });
+    const next = value as "all" | TTripStatus;
+    setStatusFilter(next);
+    setQuery({
+      status: next === "all" ? undefined : next,
+      urgent: true,
+      search: searchInput.trim() || undefined,
+    });
   };
+
+  const exportActiveFilters = useMemo(() => {
+    const search = searchInput.trim();
+    if (isUrgentTab) {
+      return {
+        urgent: true,
+        statusLabel:
+          statusFilter === "all" ? undefined : t(`trips:filters.${statusFilter}`),
+        search: search || undefined,
+      };
+    }
+    if (statusTab === "all") {
+      return {
+        statusLabel: t("trips:tripTabs.all"),
+        search: search || undefined,
+      };
+    }
+    return {
+      statusLabel: t(`trips:statuses.${statusTab}`),
+      search: search || undefined,
+    };
+  }, [isUrgentTab, statusTab, statusFilter, searchInput, t]);
 
   const handleExportConfirm = async (payload: { date_from?: string; date_to?: string }) => {
     setExportDateFrom(payload.date_from || "");
     setExportDateTo(payload.date_to || "");
-    await exportTrips(payload);
+    await exportTrips({
+      ...payload,
+      status: resolveApiStatus(),
+      urgent: isUrgentTab ? true : undefined,
+      search: searchInput.trim() || undefined,
+    });
   };
 
   const handleResetFilters = () => {
     setSearchInput("");
-    setStatusFilter("all");
     setExportDateFrom("");
     setExportDateTo("");
-    resetQuery();
+    if (isUrgentTab) {
+      setStatusFilter("all");
+    }
+    setQuery({
+      status: isUrgentTab ? undefined : resolveApiStatus(),
+      urgent: isUrgentTab ? true : undefined,
+      search: undefined,
+      page: 1,
+    });
   };
 
   const handleViewDetails = (trip: IAppTrip) => {
@@ -90,11 +158,13 @@ const TripsTable = () => {
     setTripDetailsOpen(true);
   };
 
+  const handleFullView = (trip: IAppTrip) => {
+    navigate(`/trips/view/${trip.id}`, { state: { from: statusTab === "cancelled" ? "cancelled" : "list" } });
+  };
+
   const handleTripDetailsOpenChange = (value: boolean) => {
     setTripDetailsOpen(value);
-    if (value === false) {
-      setSelectedTrip(null);
-    }
+    if (value === false) setSelectedTrip(null);
   };
 
   const currentPage = meta?.current_page ?? 1;
@@ -120,13 +190,15 @@ const TripsTable = () => {
             />
           </div>
 
-          <StatusSelect
-            value={statusFilter}
-            onChange={handleStatusFilter}
-            options={statusFilterOptions}
-            statusStyles={tripStatusStyles}
-            placeholder={t("trips:filters.allStatuses")}
-          />
+          {isUrgentTab && (
+            <StatusSelect
+              value={statusFilter}
+              onChange={handleStatusFilter}
+              options={statusFilterOptions}
+              statusStyles={tripStatusStyles}
+              placeholder={t("trips:filters.allStatuses")}
+            />
+          )}
 
           <Button
             className="h-11 px-6 bg-main-primary text-main-white shrink-0 font-bold"
@@ -171,6 +243,7 @@ const TripsTable = () => {
                       key={trip.id}
                       trip={trip}
                       onViewDetails={handleViewDetails}
+                      onFullView={handleFullView}
                     />
                   ))
                 ) : (
@@ -178,7 +251,9 @@ const TripsTable = () => {
                     <TableCell colSpan={7} className="p-2">
                       <NoDataFound
                         title={t("trips:emptyTitle")}
-                        description={t("trips:emptyDescription")}
+                        description={
+                          isUrgentTab ? t("trips:urgentEmptyDescription") : t("trips:emptyDescription")
+                        }
                       />
                     </TableCell>
                   </TableRow>
@@ -188,11 +263,7 @@ const TripsTable = () => {
           </div>
 
           {showPagination && (
-            <TablePagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setPage}
-            />
+            <TablePagination currentPage={currentPage} totalPages={totalPages} onPageChange={setPage} />
           )}
         </div>
       </div>
@@ -202,15 +273,12 @@ const TripsTable = () => {
         loading={exporting}
         initialDateFrom={exportDateFrom}
         initialDateTo={exportDateTo}
+        activeFilters={exportActiveFilters}
         onOpenChange={setExportModalOpen}
         onConfirm={handleExportConfirm}
       />
 
-      <TripDetailsModal
-        open={tripDetailsOpen}
-        trip={selectedTrip}
-        onOpenChange={handleTripDetailsOpenChange}
-      />
+      <TripDetailsModal open={tripDetailsOpen} trip={selectedTrip} onOpenChange={handleTripDetailsOpenChange} />
     </>
   );
 };
@@ -218,9 +286,11 @@ const TripsTable = () => {
 const TripRow = ({
   trip,
   onViewDetails,
+  onFullView,
 }: {
   trip: IAppTrip;
   onViewDetails: (trip: IAppTrip) => void;
+  onFullView: (trip: IAppTrip) => void;
 }) => {
   const { t, i18n } = useTranslation("trips");
   const price = Number(trip.final_price || 0);
@@ -260,15 +330,26 @@ const TripRow = ({
           </p>
         </div>
       </TableCell>
-      <TableCell className="py-4 px-6"><StatusBadge status={trip.status} /></TableCell>
+      <TableCell className="py-4 px-6">
+        <StatusBadge status={trip.status} />
+      </TableCell>
       <TableCell className="py-4 px-6 text-end">
-        <button
-          type="button"
-          onClick={() => onViewDetails(trip)}
-          className="text-main-primary font-semibold text-sm hover:underline"
-        >
-          {t("trips:viewDetails")}
-        </button>
+        <div className="flex flex-col items-end gap-1">
+          <button
+            type="button"
+            onClick={() => onViewDetails(trip)}
+            className="text-main-primary font-semibold text-sm hover:underline"
+          >
+            {t("trips:viewDetails")}
+          </button>
+          <button
+            type="button"
+            onClick={() => onFullView(trip)}
+            className="text-main-sharkGray font-semibold text-xs hover:text-main-primary hover:underline"
+          >
+            {t("trips:fullView")}
+          </button>
+        </div>
       </TableCell>
     </TableRow>
   );

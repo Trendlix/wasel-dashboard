@@ -29,6 +29,76 @@
     "driverShare": "حصة السائق % ({{currency}} {{amount}})"
   },
   "viewDetails": "عرض التفاصيل",
+  "fullView": "عرض كامل",
+  "viewTrip": "عرض الرحلة",
+  "parentTabs": {
+    "requests": "طلبات المستخدمين",
+    "trips": "الرحلات"
+  },
+  "tripTabs": {
+    "all": "الكل",
+    "urgent": "عاجل"
+  },
+  "requestTabs": {
+    "all": "الكل"
+  },
+  "urgentEmptyDescription": "لا توجد رحلات عاجلة حالياً. تظهر الرحلات هنا عندما يكون موعد الرحلة المجدول خلال ساعة واحدة من إنشاء الطلب.",
+  "requestStatuses": {
+    "pending": "قيد الانتظار",
+    "expired": "منتهية",
+    "confirmed": "مؤكدة",
+    "cancelled": "ملغاة"
+  },
+  "requestsAnalytics": {
+    "pending": "طلبات قيد الانتظار",
+    "expired": "طلبات منتهية",
+    "confirmed": "طلبات مؤكدة",
+    "cancelled": "طلبات ملغاة"
+  },
+  "requestsSearchPlaceholder": "ابحث في الطلبات…",
+  "requestsEmptyTitle": "لا توجد طلبات",
+  "requestsEmptyDescription": "جرّب تعديل البحث.",
+  "requestsTable": {
+    "requestNumber": "رقم الطلب",
+    "user": "المستخدم",
+    "route": "المسار",
+    "price": "السعر",
+    "offers": "العروض",
+    "expires": "ينتهي",
+    "status": "الحالة",
+    "actions": "إجراءات"
+  },
+  "requestsDetails": {
+    "title": "تفاصيل الطلب",
+    "requestLine": "#{{number}} — {{date}}",
+    "user": "المستخدم",
+    "tripAt": "موعد الرحلة",
+    "expiresAt": "ينتهي في",
+    "route": "المسار",
+    "cargo": "البضاعة",
+    "pricing": "التسعير",
+    "userOffer": "عرض المستخدم",
+    "suggested": "سعر واصل المقترح",
+    "final": "السعر النهائي",
+    "goodsImages": "صور البضاعة",
+    "offers": "عروض السائقين",
+    "offerDriver": "السائق",
+    "offerPrice": "السعر",
+    "offerStatus": "الحالة",
+    "linkedTrip": "الرحلة المرتبطة"
+  },
+  "requestDetailPageDescription": "طلب #{{id}}",
+  "requestDetailNotFoundTitle": "الطلب غير موجود",
+  "requestDetailNotFoundDescription": "رابط الطلب غير صالح أو لم يعد موجوداً.",
+  "cancellation": {
+    "title": "سجل الإلغاء",
+    "cancelledAt": "تاريخ الإلغاء",
+    "cancelledBy": "ألغى بواسطة",
+    "by_user": "المستخدم",
+    "by_driver": "السائق",
+    "by_both": "كلاهما",
+    "adminLog": "إشعارات الأدمين"
+  },
   "detailPageDescription": "رحلة #{{id}}",
   "detailNotFoundTitle": "الرحلة غير موجودة",
   "detailNotFoundDescription": "رابط الرحلة غير صالح أو لم تعد الرحلة موجودة.",
@@ -43,7 +113,16 @@
   "export": {
     "title": "تصدير الرحلات",
     "description": "اختر نطاق تاريخ لتصدير الرحلات خلاله، أو اترك الحقول فارغة للكل.",
-    "dateHint": "اترك الحقلين فارغين لتصدير كل الرحلات."
+    "dateHint": "اترك الحقلين فارغين لتصدير كل الرحلات المطابقة. يُطبَّق التبويب الحالي والحالة وفلتر العاجل والبحث.",
+    "activeFilters": "التصدير:",
+    "filterStatus": "الحالة",
+    "filterUrgent": "رحلات عاجلة",
+    "filterSearch": "بحث"
+  },
+  "requestsExport": {
+    "title": "تصدير الطلبات",
+    "description": "اختر نطاق تاريخ لتصدير طلبات الشاحنات خلاله، أو اترك الحقول فارغة للكل.",
+    "dateHint": "اترك الحقلين فارغين لتصدير كل الطلبات المطابقة. يُطبَّق التبويب الحالي والحالة وفلاتر البحث."
   },
   "statuses": {
     "pending": "قيد الانتظار",
@@ -86,6 +165,9 @@
     "cancelTrip": "إلغاء الرحلة",
     "cancelling": "جاري الإلغاء…",
     "trackTrip": "تتبع الرحلة",
-    "noActionsForTerminalStatus": "هذه الرحلة منتهية — لا يمكن إلغاؤها."
+    "noActionsForTerminalStatus": "هذه الرحلة منتهية — لا يمكن إلغاؤها.",
+    "goodsImages": "صور البضاعة",
+    "linkedRequest": "طلب شاحنة {{number}}",
+    "viewRequest": "عرض الطلب"
   }
 }

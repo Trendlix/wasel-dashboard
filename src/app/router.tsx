@@ -11,8 +11,10 @@ import NotFoundPage from "../pages/not-found";
 import VerificationPage from "../pages/verification";
 import VerificationListRoute from "../pages/verification/list-route";
 import TripsLayout from "../pages/trips/layout";
-import TripsPage from "../pages/trips";
 import TripDetailPage from "../pages/trips/detail";
+import RequestDetailPage from "../pages/trips/request-detail";
+import RequestsListRoute from "../pages/trips/requests-list-route";
+import TripsSegmentRoute from "../pages/trips/trips-segment-route";
 import NotificationsPage from "../pages/notifications";
 const AnalyticsPage = lazy(() => import("../pages/analytics"));
 import UsersPage from "../pages/users";
@@ -133,8 +135,11 @@ export const router = createBrowserRouter([
                 path: "trips",
                 element: <TripsLayout />,
                 children: [
-                    { index: true, element: <TripsPage /> },
-                    { path: ":tripId", element: <TripDetailPage /> },
+                    { index: true, element: <Navigate to="requests/all" replace /> },
+                    { path: "requests/view/:requestId", element: <RequestDetailPage /> },
+                    { path: "requests/:status", element: <RequestsListRoute /> },
+                    { path: "view/:tripId", element: <TripDetailPage /> },
+                    { path: ":segment", element: <TripsSegmentRoute /> },
                 ],
             },
             { path: "analytics", element: <Suspense fallback={lazyRouteFallback}><AnalyticsPage /></Suspense> },

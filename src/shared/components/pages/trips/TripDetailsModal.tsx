@@ -49,7 +49,7 @@ export const TripDetailsModal = ({ open, onOpenChange, trip }: TripDetailsModalP
           onClose={() => onOpenChange(false)}
           onOpenFullPage={() => {
             onOpenChange(false);
-            navigate(`/trips/${trip.id}`);
+            navigate(`/trips/view/${trip.id}`);
           }}
         />
       )}

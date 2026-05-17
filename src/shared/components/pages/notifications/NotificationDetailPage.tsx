@@ -157,7 +157,7 @@ const NotificationDetailPage = ({ type, loading, error, notification }: Props) =
                                     asChild
                                     className="h-11 px-6 bg-main-primary text-main-white hover:bg-main-primary/90 common-rounded font-semibold"
                                 >
-                                    <Link to={`/trips/${trip.id}`} state={{ from: "notification" }}>
+                                    <Link to={`/trips/view/${trip.id}`} state={{ from: "notification" }}>
                                         {t("notifications:viewTrip")}
                                     </Link>
                                 </Button>
