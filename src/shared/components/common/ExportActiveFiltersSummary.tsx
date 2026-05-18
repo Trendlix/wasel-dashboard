@@ -14,6 +14,9 @@ const ExportActiveFiltersSummary = ({ activeFilters }: ExportActiveFiltersSummar
   if (activeFilters.urgent) {
     parts.push(t("export.filterUrgent"));
   }
+  if (activeFilters.expired) {
+    parts.push(t("export.filterExpired"));
+  }
   if (activeFilters.statusLabel) {
     parts.push(`${t("export.filterStatus")}: ${activeFilters.statusLabel}`);
   }

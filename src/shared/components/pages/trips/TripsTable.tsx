@@ -55,6 +55,7 @@ const TripsTable = ({ statusTab }: TripsTableProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const isUrgentTab = statusTab === "urgent";
+  const isExpiredTab = statusTab === "expired";
 
   const statusFilterOptions = useMemo(
     () => [
@@ -68,7 +69,7 @@ const TripsTable = ({ statusTab }: TripsTableProps) => {
   );
 
   const resolveApiStatus = (): TTripStatus | undefined => {
-    if (isUrgentTab) {
+    if (isUrgentTab || isExpiredTab) {
       return statusFilter === "all" ? undefined : statusFilter;
     }
     if (statusTab === "all") return undefined;
@@ -78,11 +79,12 @@ const TripsTable = ({ statusTab }: TripsTableProps) => {
   const buildListQuery = () => ({
     status: resolveApiStatus(),
     urgent: isUrgentTab ? true : undefined,
+    expired: isExpiredTab ? true : undefined,
     search: searchInput.trim() || undefined,
   });
 
   useEffect(() => {
-    if (!isUrgentTab) {
+    if (!isUrgentTab && !isExpiredTab) {
       setStatusFilter("all");
     }
     setQuery(buildListQuery());
@@ -100,7 +102,8 @@ const TripsTable = ({ statusTab }: TripsTableProps) => {
     setStatusFilter(next);
     setQuery({
       status: next === "all" ? undefined : next,
-      urgent: true,
+      urgent: isUrgentTab ? true : undefined,
+      expired: isExpiredTab ? true : undefined,
       search: searchInput.trim() || undefined,
     });
   };
@@ -110,6 +113,14 @@ const TripsTable = ({ statusTab }: TripsTableProps) => {
     if (isUrgentTab) {
       return {
         urgent: true,
+        statusLabel:
+          statusFilter === "all" ? undefined : t(`trips:filters.${statusFilter}`),
+        search: search || undefined,
+      };
+    }
+    if (isExpiredTab) {
+      return {
+        expired: true,
         statusLabel:
           statusFilter === "all" ? undefined : t(`trips:filters.${statusFilter}`),
         search: search || undefined,
@@ -125,7 +136,7 @@ const TripsTable = ({ statusTab }: TripsTableProps) => {
       statusLabel: t(`trips:statuses.${statusTab}`),
       search: search || undefined,
     };
-  }, [isUrgentTab, statusTab, statusFilter, searchInput, t]);
+  }, [isUrgentTab, isExpiredTab, statusTab, statusFilter, searchInput, t]);
 
   const handleExportConfirm = async (payload: { date_from?: string; date_to?: string }) => {
     setExportDateFrom(payload.date_from || "");
@@ -134,6 +145,7 @@ const TripsTable = ({ statusTab }: TripsTableProps) => {
       ...payload,
       status: resolveApiStatus(),
       urgent: isUrgentTab ? true : undefined,
+      expired: isExpiredTab ? true : undefined,
       search: searchInput.trim() || undefined,
     });
   };
@@ -142,12 +154,13 @@ const TripsTable = ({ statusTab }: TripsTableProps) => {
     setSearchInput("");
     setExportDateFrom("");
     setExportDateTo("");
-    if (isUrgentTab) {
+    if (isUrgentTab || isExpiredTab) {
       setStatusFilter("all");
     }
     setQuery({
-      status: isUrgentTab ? undefined : resolveApiStatus(),
+      status: (isUrgentTab || isExpiredTab) ? undefined : resolveApiStatus(),
       urgent: isUrgentTab ? true : undefined,
+      expired: isExpiredTab ? true : undefined,
       search: undefined,
       page: 1,
     });
@@ -190,7 +203,7 @@ const TripsTable = ({ statusTab }: TripsTableProps) => {
             />
           </div>
 
-          {isUrgentTab && (
+          {(isUrgentTab || isExpiredTab) && (
             <StatusSelect
               value={statusFilter}
               onChange={handleStatusFilter}
@@ -252,7 +265,11 @@ const TripsTable = ({ statusTab }: TripsTableProps) => {
                       <NoDataFound
                         title={t("trips:emptyTitle")}
                         description={
-                          isUrgentTab ? t("trips:urgentEmptyDescription") : t("trips:emptyDescription")
+                          isUrgentTab
+                            ? t("trips:urgentEmptyDescription")
+                            : isExpiredTab
+                              ? t("trips:expiredEmptyDescription")
+                              : t("trips:emptyDescription")
                         }
                       />
                     </TableCell>

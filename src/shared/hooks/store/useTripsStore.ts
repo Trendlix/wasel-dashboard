@@ -110,6 +110,7 @@ export interface ITripsQuery {
   order?: "asc" | "desc";
   status?: TTripStatus;
   urgent?: boolean;
+  expired?: boolean;
   sort_by?: "created_at" | "status" | "booking_number";
   date_from?: string;
   date_to?: string;

@@ -24,5 +24,6 @@ export const buildTruckRequestsExportBody = (
 export type ExportActiveFilters = {
   statusLabel?: string;
   urgent?: boolean;
+  expired?: boolean;
   search?: string;
 };

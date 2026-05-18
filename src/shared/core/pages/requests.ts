@@ -9,7 +9,7 @@ export const REQUEST_LIST_TABS: TRequestListTab[] = [
   "all",
   "pending",
   "expired",
-  "confirmed",
+  // "confirmed",
   "cancelled",
 ];
 
@@ -17,7 +17,7 @@ export const REQUEST_LIST_TABS: TRequestListTab[] = [
 export const REQUEST_STATUS_TABS: TRequestStatus[] = [
   "pending",
   "expired",
-  "confirmed",
+  // "confirmed",
   "cancelled",
 ];
 
@@ -60,11 +60,11 @@ export const requestsAnalyticsConfig: Array<
     titleKey: "pending" | "expired" | "confirmed" | "cancelled";
   }
 > = [
-  { id: 1, titleKey: "pending", icon: CircleDashed, classname: "bg-main-white border border-main-whiteMarble" },
-  { id: 2, titleKey: "expired", icon: Clock, classname: "bg-main-white border border-main-whiteMarble" },
-  { id: 3, titleKey: "confirmed", icon: BadgeCheck, classname: "bg-main-white border border-main-whiteMarble" },
-  { id: 4, titleKey: "cancelled", icon: XCircle, classname: "bg-main-white border border-main-whiteMarble" },
-];
+    { id: 1, titleKey: "pending", icon: CircleDashed, classname: "bg-main-white border border-main-whiteMarble" },
+    { id: 2, titleKey: "expired", icon: Clock, classname: "bg-main-white border border-main-whiteMarble" },
+    { id: 3, titleKey: "confirmed", icon: BadgeCheck, classname: "bg-main-white border border-main-whiteMarble" },
+    { id: 4, titleKey: "cancelled", icon: XCircle, classname: "bg-main-white border border-main-whiteMarble" },
+  ];
 
 export const REQUEST_LIST_TAB_ICONS: Record<TRequestListTab, LucideIcon> = {
   all: List,

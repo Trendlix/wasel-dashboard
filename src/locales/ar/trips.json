@@ -5,13 +5,12 @@
   "filters": {
     "allStatuses": "كل الحالات",
     "pending": "قيد الانتظار",
-    "accepted": "مقبولة",
-    "scheduled": "مجدولة",
-    "on_the_way": "في الطريق",
-    "arrived": "وصلت",
+    "scheduled": "تمت الجدولة",
+    "on_the_way": "السائق في الطريق",
     "picked_up": "تم الاستلام",
-    "delivered": "تم التسليم",
+    "in_transit": "قيد النقل",
     "completed": "مكتملة",
+    "expired": "منتهية",
     "cancelled": "ملغاة"
   },
   "table": {
@@ -37,16 +36,17 @@
   },
   "tripTabs": {
     "all": "الكل",
-    "urgent": "عاجل"
+    "urgent": "عاجل",
+    "expired": "منتهية الصلاحية"
   },
   "requestTabs": {
     "all": "الكل"
   },
   "urgentEmptyDescription": "لا توجد رحلات عاجلة حالياً. تظهر الرحلات هنا عندما يكون موعد الرحلة المجدول خلال ساعة واحدة من إنشاء الطلب.",
+  "expiredEmptyDescription": "لا توجد رحلات بطلبات منتهية الصلاحية حالياً. تظهر الرحلات هنا عندما يتجاوز وقت انتهاء صلاحية طلب الشاحنة المرتبط.",
   "requestStatuses": {
     "pending": "قيد الانتظار",
     "expired": "منتهية",
-    "confirmed": "مؤكدة",
     "cancelled": "ملغاة"
   },
   "requestsAnalytics": {
@@ -117,6 +117,7 @@
     "activeFilters": "التصدير:",
     "filterStatus": "الحالة",
     "filterUrgent": "رحلات عاجلة",
+    "filterExpired": "طلبات منتهية الصلاحية",
     "filterSearch": "بحث"
   },
   "requestsExport": {
@@ -126,13 +127,12 @@
   },
   "statuses": {
     "pending": "قيد الانتظار",
-    "accepted": "مقبولة",
-    "scheduled": "مجدولة",
-    "on_the_way": "في الطريق",
-    "arrived": "وصلت",
+    "scheduled": "تمت الجدولة",
+    "on_the_way": "السائق في الطريق",
     "picked_up": "تم الاستلام",
-    "delivered": "تم التسليم",
+    "in_transit": "قيد النقل",
     "completed": "مكتملة",
+    "expired": "منتهية",
     "cancelled": "ملغاة"
   },
   "details": {
